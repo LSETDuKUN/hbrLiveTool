@@ -1,0 +1,2853 @@
+[
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 1,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "コマンド選択",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8380",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 1,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 1,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 0,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 1,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 2,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 2,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 357506,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 357506,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 0,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 2,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 3,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 357506,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 2,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "アディショナル",
+      "phase_count": 1,
+      "state_address": "0x2077f389e00",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 1,
+      "command_visit": 2,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "アディショナル",
+      "phase_count": 1,
+      "state_address": "0x2077f389e00",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 2,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "PostCommandState",
+      "phase_count": 2,
+      "state_address": "0x2077f389f50",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 1,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 2,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      },
+      {
+        "event_id": 5,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 5,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1087728,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1961619,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1961619,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 1,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 5,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 2,
+        "skill": "点数援助",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 6,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1961619,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 4,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 2,
+      "command_visit": 3,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "アディショナル",
+      "phase_count": 2,
+      "state_address": "0x2077f389e00",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 3,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 2,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 3,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 195283,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 372052,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 545365,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 735105,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 932476,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 1128825,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 1325185,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 3340713,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 2,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 7,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "三枪狂袭",
+        "value": 3340713,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 6,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの開始",
+      "phase_count": 0,
+      "state_address": "0x2077f756150",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの開始",
+      "phase_count": 1,
+      "state_address": "0x2077f756150",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの行動を実行",
+      "phase_count": 1,
+      "state_address": "0x2077f6a8000",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターン終了時",
+      "phase_count": 0,
+      "state_address": "0x2077f389c40",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "Preturn",
+      "phase_count": 2,
+      "state_address": "0x2077f6a83f0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 3,
+      "command_visit": 4,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "Preturn",
+      "phase_count": 2,
+      "state_address": "0x2077f6a83f0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 4,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "PostCommandState",
+      "phase_count": 4,
+      "state_address": "0x2077f389f50",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 3,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 4,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 1,
+        "skill": "指挥行动",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 1,
+        "skill": "指挥行动",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 9,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "未知技能",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 9,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "未知技能",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 10,
+        "actor": "白虎",
+        "actor_id": 2231225664288,
+        "actor_position": 2,
+        "skill": "通常攻击",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 10,
+        "actor": "白虎",
+        "actor_id": 2231225664288,
+        "actor_position": 2,
+        "skill": "通常攻击",
+        "value": 1858,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 3,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 1,
+        "skill": "指挥行动",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 9,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 0,
+        "skill": "未知技能",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 10,
+        "actor": "白虎",
+        "actor_id": 2231225664288,
+        "actor_position": 2,
+        "skill": "通常攻击",
+        "value": 1858,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 9,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの開始",
+      "phase_count": 1,
+      "state_address": "0x2077f756150",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの開始",
+      "phase_count": 2,
+      "state_address": "0x2077f756150",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの行動判定",
+      "phase_count": 1,
+      "state_address": "0x2077f756620",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターンの行動を実行",
+      "phase_count": 2,
+      "state_address": "0x2077f6a8000",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "敵ターン終了時",
+      "phase_count": 1,
+      "state_address": "0x2077f389c40",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 2,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "Preturn",
+      "phase_count": 3,
+      "state_address": "0x2077f6a83f0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 4,
+      "command_visit": 5,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "Preturn",
+      "phase_count": 3,
+      "state_address": "0x2077f6a83f0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 5,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "PostCommandState",
+      "phase_count": 5,
+      "state_address": "0x2077f389f50",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 4,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 5,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 11,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 11,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 2,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 2,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 2,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1831922,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1831922,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 4,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 11,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "深藏的心意",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 12,
+        "actor": "苍井 绘里香",
+        "actor_id": 2231224815616,
+        "actor_position": 2,
+        "skill": "天使之翼",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 13,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 1831922,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "アディショナル",
+      "phase_count": 3,
+      "state_address": "0x2077f389e00",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 5,
+      "command_visit": 6,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "アディショナル",
+      "phase_count": 3,
+      "state_address": "0x2077f389e00",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": null,
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "オート",
+      "phase_count": 6,
+      "state_address": "0x2077f756930",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "次の行動を判定",
+      "phase_count": 13,
+      "state_address": "0x2077f7569a0",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 5,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターン開始",
+      "phase_count": 6,
+      "state_address": "0x2077f756310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を事前演算",
+      "phase_count": 6,
+      "state_address": "0x2077f756770",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "祈祷之花，托付于风",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "祈祷之花，托付于风",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 0,
+        "settled": false
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 5229890,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "state_address": "0x2077f6a8310",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 5229890,
+        "settled": true
+      }
+    ]
+  },
+  {
+    "context": {
+      "command_count": 6,
+      "command_visit": 7,
+      "turn": 3,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": true,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": false,
+      "phase": "味方ターンの終了痔",
+      "phase_count": 5,
+      "state_address": "0x2077f756230",
+      "fsm_address": "0x2077f6218c0"
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "七濑 七海",
+        "actor_id": 2231225665888,
+        "actor_position": 0,
+        "skill": "祈祷之花，托付于风",
+        "value": 0,
+        "settled": true
+      },
+      {
+        "event_id": 15,
+        "actor": "手冢 咲",
+        "actor_id": 2231225665088,
+        "actor_position": 1,
+        "skill": "凌空铁锤",
+        "value": 5229890,
+        "settled": true
+      }
+    ]
+  }
+]

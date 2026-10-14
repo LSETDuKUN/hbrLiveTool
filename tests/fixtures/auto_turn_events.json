@@ -1,0 +1,2039 @@
+[
+  {
+    "context": {
+      "phase": "コマンド選択",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 0,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "PostCommandState",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 0,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 2,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 2,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 575090,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 3,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 575090,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 0,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 1,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 2,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 3,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 575090,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "アディショナル",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "アディショナル",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "PostCommandState",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を事前演算",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      },
+      {
+        "event_id": 5,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 5,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 2220744,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 6,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 2220744,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 4,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 5,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 6,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 2220744,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "アディショナル",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "次の行動を判定",
+      "phase_count": 5,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を事前演算",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 184594,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 381836,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 556889,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 739653,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 948688,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1151988,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1341552,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 3,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 3391937,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 8,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 3391937,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "敵ターンの開始",
+      "phase_count": 0,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターンの開始",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターンの行動を実行",
+      "phase_count": 1,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターン終了時",
+      "phase_count": 0,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "Preturn",
+      "phase_count": 2,
+      "turn": 1,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "Preturn",
+      "phase_count": 2,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "PostCommandState",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 3,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を事前演算",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 9,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 9,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 10,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 10,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1832,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 11,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 4,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 11,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 2009,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 3,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 9,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 10,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1832,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 11,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 2009,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "敵ターンの開始",
+      "phase_count": 1,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターンの開始",
+      "phase_count": 2,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターンの行動判定",
+      "phase_count": 2,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターンの行動を実行",
+      "phase_count": 2,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "敵ターン終了時",
+      "phase_count": 1,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "Preturn",
+      "phase_count": 3,
+      "turn": 2,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "Preturn",
+      "phase_count": 3,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 4,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 4,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 13,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1799245,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 14,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1799245,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 4,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 12,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 13,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 14,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 1799245,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "アディショナル",
+      "phase_count": 3,
+      "turn": 3,
+      "additional": false,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "アディショナル",
+      "phase_count": 3,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "オート",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "次の行動を判定",
+      "phase_count": 13,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターン開始",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を事前演算",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": []
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 18,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 18,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": false,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 18,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 5323474,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの行動を実行",
+      "phase_count": 6,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 18,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 5323474,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  },
+  {
+    "context": {
+      "phase": "味方ターンの終了痔",
+      "phase_count": 5,
+      "turn": 3,
+      "additional": true,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "command_count": 1
+    },
+    "events": [
+      {
+        "event_id": 15,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 0,
+        "settled": true,
+        "hits": []
+      },
+      {
+        "event_id": 18,
+        "actor": "角色",
+        "skill": "技能",
+        "value": 5323474,
+        "settled": true,
+        "hits": []
+      }
+    ]
+  }
+]

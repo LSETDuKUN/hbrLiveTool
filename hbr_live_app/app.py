@@ -11,6 +11,9 @@ from tkinter import ttk, filedialog, messagebox
 from .components import RoundedCard, RoundedButton
 from .model import BattleModel
 from .enemy_cards import EnemyCard
+from .turns import context_label
+from .history import table_rows
+from .battle_table import BattleTable
 
 ROOT = Path(__file__).resolve().parent.parent
 BG, CARD, FG, DIM = '#201d32', '#302b46', '#f7f0ff', '#bdb1d4'
@@ -30,6 +33,8 @@ class App:
         self.closing = False
         self.library = None
         self.enemy_keys = []
+        self.history_rows = {}
+        self.details_open = False
         self.log_lines = []
         self.last_packet = None
         self.last_sample = None
@@ -57,14 +62,14 @@ class App:
             return {}
 
     def _restore_geometry(self):
-        default = (420, 740) if self.compact.get() else (900, 790)
+        default = (420, 740) if self.compact.get() else (1280, 790)
         values = self.settings.get('bounds', [*default, 80, 60])
         try:
             w, h, x, y = map(int, values)
         except (TypeError, ValueError):
             w, h, x, y = *default, 80, 60
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        w, h = min(max(390, w), sw-30), min(max(650, h), sh-70)
+        w, h = min(max(390 if self.compact.get() else 1050, w), sw-30), min(max(650, h), sh-70)
         x, y = max(0, min(x, sw-w-16)), max(0, min(y, sh-h-60))
         self.root.geometry(f'{w}x{h}+{x}+{y}')
 
@@ -73,7 +78,7 @@ class App:
         if style.theme_use() not in ('clam', 'quest'):
             style.theme_use('clam')
         style.configure('Live.Treeview', background=CARD, fieldbackground=CARD,
-                        foreground=FG, rowheight=42, borderwidth=0, font=FONT)
+                        foreground=FG, rowheight=68, borderwidth=0, font=FONT, indent=14)
         style.configure('Live.Treeview.Heading', background='#493752', foreground=PINK,
                         font=(*FONT, 'bold'), relief='flat')
         style.map('Live.Treeview', background=[('selected', '#605077')], foreground=[('selected', '#ffffff')])
@@ -145,18 +150,16 @@ class App:
         self.label(self.history, '行动记录', PINK, 13).pack(anchor='w', pady=(2, 10))
         tree_wrap = tk.Frame(self.history, bg=CARD)
         tree_wrap.pack(fill='both', expand=True)
-        self.tree = ttk.Treeview(tree_wrap, columns=('actor', 'skill', 'target', 'damage'), show='headings',
-                                 selectmode='browse', style='Live.Treeview', height=4)
-        for key, title, width in [('actor', '行动者', 100), ('skill', '技能', 135), ('target', '目标', 95), ('damage', '显示伤害', 125)]:
-            self.tree.heading(key, text=title)
-            self.tree.column(key, width=width, minwidth=65, anchor='e' if key == 'damage' else 'w')
+        self.tree = BattleTable(tree_wrap)
         scrollbar = ttk.Scrollbar(tree_wrap, command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scrollbar.set)
+        horizontal = ttk.Scrollbar(tree_wrap, orient='horizontal', command=self.tree.xview)
+        self.tree.configure(yscrollcommand=scrollbar.set, xscrollcommand=horizontal.set)
+        horizontal.pack(side='bottom', fill='x')
         scrollbar.pack(side='right', fill='y')
         self.tree.pack(fill='both', expand=True)
         self.tree.bind('<<TreeviewSelect>>', lambda _: self.render_details())
-        self.tree.bind('<Double-1>', lambda _: self.show_details())
-        self.detail_caption = self.label(self.history, '选择一笔行动查看命中明细；双击可单独展开。', DIM, 9, anchor='w', wraplength=420, justify='left')
+        self.tree.bind('<<RowDetails>>', lambda _: self.show_details())
+        self.detail_caption = self.label(self.history, '一行一次行动 · / 表示未观测到行动 · 双击查看本行全部详情。', DIM, 9, anchor='w', wraplength=420, justify='left')
         self.detail_caption.pack(fill='x', pady=8)
         self.detail_wrap = tk.Frame(self.history, bg=CARD)
         self.detail = tk.Text(self.detail_wrap, height=6, bg=CARD, fg=FG, relief='flat', font=FONT,
@@ -165,7 +168,8 @@ class App:
         self.detail.configure(yscrollcommand=detail_scroll.set)
         detail_scroll.pack(side='right', fill='y')
         self.detail.pack(fill='both', expand=True)
-        self.detail_wrap.pack(fill='x')
+        self.detail_button = RoundedButton(self.history, '展开本行详情', self.toggle_details, '#4b4163', FG, FONT)
+        self.detail_button.pack(fill='x', pady=(0, 6))
         self.history.bind('<Configure>', lambda e: self.detail_caption.configure(wraplength=max(200,e.width-10)))
         self.footer = self.label(self.root, '本地记录  ·  只读内存  ·  无需截图', DIM, 9, anchor='w')
         self.footer.pack(side='bottom', fill='x', padx=24, pady=(10, 14), before=self.body)
@@ -180,9 +184,6 @@ class App:
         self.resources.grid_forget()
         self.history.grid_forget()
         if self.compact.get():
-            self.tree.configure(displaycolumns=('actor', 'skill', 'damage'))
-            for key, width in (('actor', 75), ('skill', 120), ('damage', 135)):
-                self.tree.column(key, width=width, stretch=key != 'damage')
             self.root.minsize(390, 820)
             self.body.columnconfigure(0, weight=1)
             self.body.columnconfigure(1, weight=0)
@@ -192,16 +193,12 @@ class App:
             self.subtitle.pack_forget()
             self.resources.grid(row=0, column=0, sticky='ew')
             self.history.grid(row=1, column=0, sticky='nsew', pady=(8, 0))
-            self.detail_wrap.pack_forget()
             self.detail_caption.pack_forget()
             self.resource_note.pack_forget()
             self.enemy_view.configure(height=min(220, max(110, len(self.enemy_cards)*110)))
             self.root.geometry(f'420x{min(850, self.root.winfo_screenheight()-90)}')
         else:
-            self.tree.configure(displaycolumns=('actor', 'skill', 'target', 'damage'))
-            for key, width in (('actor', 100), ('skill', 155), ('damage', 145)):
-                self.tree.column(key, width=width, stretch=key != 'damage')
-            self.root.minsize(780, 730)
+            self.root.minsize(1050, 730)
             self.body.columnconfigure(0, weight=0, minsize=295)
             self.body.columnconfigure(1, weight=1)
             self.body.rowconfigure(0, weight=1)
@@ -212,9 +209,22 @@ class App:
             self.resources.grid(row=0, column=0, sticky='nsew', padx=(0, 16))
             self.history.grid(row=0, column=1, sticky='nsew')
             self.detail_caption.pack(fill='x', pady=8)
-            self.detail_wrap.pack(fill='x')
             self.resource_note.pack(fill='x', padx=8, pady=8)
-            self.root.geometry('900x790')
+            self.root.geometry('1280x790')
+
+        self.update_detail_visibility()
+
+    def update_detail_visibility(self):
+        if self.details_open:
+            self.detail_wrap.pack(fill='x', after=self.detail_button)
+        else:
+            self.detail_wrap.pack_forget()
+        self.detail_button.configure(text='收起本行详情' if self.details_open else '展开本行详情')
+
+    def toggle_details(self):
+        self.details_open = not self.details_open
+        self.update_detail_visibility()
+        self.render_details()
 
     def start_or_stop(self):
         if self.thread and self.thread.is_alive():
@@ -259,6 +269,7 @@ class App:
                     self.model.run_id = data['run_id']
                     self.session_path = data['path']
                     self.tree.delete(*self.tree.get_children())
+                    self.history_rows = {}
                     self.enemy_keys = []
                     for card in self.enemy_cards.values():
                         card.destroy()
@@ -290,21 +301,15 @@ class App:
     def render(self, events=()):
         self.total_label.configure(text=f'{self.model.total:,}')
         biggest = max((e['value'] for e in self.model.actions.values()), default=0)
-        self.summary.configure(text=f'{len(self.model.actions)} 次行动  ·  单次最高 {biggest:,}')
+        batches = {e['command']['id'] for e in self.model.actions.values() if e.get('command')}
+        current = self.model.turn_context
+        prefix = f'Turn {current["turn"]}  ·  ' if current else ''
+        self.summary.configure(text=f'{prefix}{len(batches)} 组指令 · {len(self.model.actions)} 次角色行动 · 单次最高 {biggest:,}')
         self.enemy_keys = list(self.model.enemies)
         self.render_enemy()
-        for event in events:
-            iid = str(event['event_id'])
-            targets = self.target_summary(event)
-            amount = f'{event["value"]:,}' if event['value'] else ('未见伤害' if event['settled'] else '已发动')
-            values = (event['actor'], event['skill'], targets, amount + (' …' if not event['settled'] else ''))
-            if self.tree.exists(iid):
-                self.tree.item(iid, values=values)
-            else:
-                self.tree.insert('', 'end', iid=iid, values=values)
-                self.tree.see(iid)
-            if not self.tree.selection():
-                self.tree.selection_set(iid)
+        if events:
+            self.history_rows = table_rows(self.model.actions.values())
+            self.tree.set_rows(self.history_rows)
         self.render_details()
 
     def render_enemy(self):
@@ -327,11 +332,22 @@ class App:
 
     def detail_text(self):
         selected = self.tree.selection()
-        if not selected:
-            return '行动后可在这里查看本体、连击珠、暴击与目标。'
-        event = self.model.actions.get(int(selected[0]))
-        if event is None:
-            return ''
+        if not selected or selected[0] not in self.history_rows:
+            return '选择一行，展开查看所有角色的伤害、作用目标和逐 Hit 明细。'
+        row = self.history_rows[selected[0]]
+        events = row['events']
+        text = context_label(row['group']) + f' · 合计 {sum(e["value"] for e in events):,}\n'
+        if row['position_unknown']:
+            text += '部分事件位置未确认，未填入前排行动位。\n'
+        frontline = (row['group'] or {}).get('frontline')
+        if frontline:
+            text += '本批前排：' + ' / '.join(f"{p['position']+1} {p['actor']}" for p in frontline) + '\n'
+        else:
+            text += '完整前排名单未确认；仅使用事件中实际读到的位置。\n'
+        text += '角色行动顺序：' + ' → '.join(e['actor'] for e in events) + '\n\n'
+        return text + '\n'.join(self.event_detail_text(event) for event in events)
+
+    def event_detail_text(self, event):
         text = f'{event["actor"]} · {event["skill"]}\n显示伤害 {event["value"]:,}  ·  {"已结算" if event["settled"] else "命中进行中"}\n\n'
         totals = {}
         for hit in event['hits']:

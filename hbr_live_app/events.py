@@ -24,7 +24,7 @@ class ActionLedger:
                     events.append(self.event(old, True))
                 self.serial += 1
                 old = self.active[key] = dict(signature=signature, id=self.serial,
-                    actor=entry['actor_name'], skill=entry['skill_name'], hits={}, targets={}, observed=False, done=False)
+                    actor=entry['actor_name'], actor_id=entry['actor'], actor_position=entry.get('actor_position'), skill=entry['skill_name'], hits={}, targets={}, observed=False, done=False)
             changed = False
             if entry.get('executing') and not old['observed']:
                 old['observed'] = True
@@ -52,6 +52,6 @@ class ActionLedger:
     @staticmethod
     def event(old, done):
         hits = list(old['hits'].values())
-        return dict(event_id=old['id'], actor=old['actor'], skill=old['skill'], skill_label=old['signature'][0],
+        return dict(event_id=old['id'], actor=old['actor'], actor_id=old['actor_id'], actor_position=old['actor_position'], skill=old['skill'], skill_label=old['signature'][0],
                     value=sum(h['damage'] for h in hits), hits=hits, settled=done,
                     targets=[dict(address=k, name=v) for k,v in old['targets'].items()])

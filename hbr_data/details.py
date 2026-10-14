@@ -88,8 +88,10 @@ class DetailService:
         translations = self.translations() if region == "jp" else {}
         skills = [skill_detail(value,pointer,translations.get("name"),translations.get("info"))
                   for pointer,value in walk(data) if "hit_count" in value and isinstance(value.get("parts"),list)]
+        owners = self.catalog.skill_owners(region, entity_id) if dataset == "skills" else []
         return {"region":region,"dataset":dataset,"id":entity_id,"name":name or (data.get("name") if isinstance(data,dict) else "资料"),
-                "source":source,"raw":data,"skills":skills,"portrait":self.assets.get(region,dataset,entity_id)}
+                "source":source,"raw":data,"skills":skills,"owners":owners,
+                "portrait":self.assets.get(region,dataset,entity_id)}
 
     def skills(self, region, skill_id):
         translations = self.translations() if region == "jp" else {}

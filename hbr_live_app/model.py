@@ -7,8 +7,11 @@ class BattleModel:
         self.actions = OrderedDict()
         self.enemies = OrderedDict()
         self.run_id = None
+        self.turn_context = None
 
     def update(self, packet):
+        if 'turn_context' in packet:
+            self.turn_context = packet['turn_context']
         present = {s['address'] for s in packet['enemies']}
         for key, old in self.enemies.items():
             old['active'] = key in present
@@ -30,5 +33,6 @@ class BattleModel:
         return sum(e['value'] for e in self.actions.values())
 
     def export(self):
-        return {'schema': 1, 'run_id': self.run_id, 'display_damage': self.total,
+        return {'schema': 2, 'run_id': self.run_id, 'display_damage': self.total,
+                'turn_context': self.turn_context,
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}

@@ -36,6 +36,32 @@ def friendly(value):
     return WORDS.get(str(value),number(value))
 
 
+# Explicit source types only: unfamiliar effects remain in "其他", never guessed.
+DAMAGE_TYPES = {"AttackSkill", "PenetrationCriticalAttack", "DamageRateChangeAttackSkill",
+                "TokenAttack", "AttackByOwnDpRate", "AttackBySp", "FixedHpDamageRate",
+                "SelfDamage"}
+BUFF_TYPES = {"AttackUp", "AttackUpIncludeNormal", "DefenseUp", "CriticalRateUp",
+              "CriticalDamageUp", "MindEye", "BuffCharge", "Morale",
+              "Funnel", "DamageRateUp", "ToughnessUpValue", "AllStatusUpValue",
+              "GiveAttackBuffUp", "FightingSpirit", "OverDrivePointUp", "TokenSet"}
+DEBUFF_TYPES = {"DefenseDown", "AttackDown", "Fragile", "ResistDown",
+                "ResistDownOverwrite", "HealDown", "GiveDebuffUp",
+                "OverDrivePointDown", "Provoke", "StunRandom",
+                "ConfusionRandom", "ImprisonRandom", "Misfortune"}
+EFFECT_GROUPS = (("伤害", DAMAGE_TYPES), ("增益", BUFF_TYPES), ("减益", DEBUFF_TYPES))
+
+
+def effect_category(effect):
+    return next((label for label, kinds in EFFECT_GROUPS if effect.kind in kinds), "其他")
+
+
+def group_effects(effects):
+    """Group for display only; retain each part's source index and payload."""
+    return [(category, [effect for effect in effects if effect_category(effect) == category])
+            for category in ("伤害", "增益", "减益", "其他")
+            if any(effect_category(effect) == category for effect in effects)]
+
+
 class DetailCards(tk.Frame):
     def __init__(self,parent):
         super().__init__(parent,bg=BG)
@@ -101,7 +127,7 @@ class DetailCards(tk.Frame):
             for hit in hits:
                 self.row(frame,f"第 {hit.index} Hit",f"×{number(hit.ratio)} · {WORDS.get(hit.kind,hit.kind) or '未标类型'}")
         if len(hits)>6:
-            self.fold(parent,f"{title} · {len(hits)} 段",fill)
+            self.fold(parent,f"{title} · {len(hits)} 段 · {text}",fill)
         else:
             self.row(parent,title,text)
             if any(hit.kind != "Main" for hit in hits):
@@ -110,16 +136,37 @@ class DetailCards(tk.Frame):
     def render_skill(self,skill,index):
         self.card_count += 1
         frame = self.card(f"✦  {index}  {skill.name}")
-        self.label(frame,skill.description,10)
-        self.row(frame,"Hit 数",number(skill.hit_count) if skill.hit_count is not None and skill.hit_count>=0 else "不适用 / 来源未定义")
+        if skill.description:
+            self.label(frame,skill.description,10)
+        if any(effect_category(effect) == "伤害" for effect in skill.effects):
+            self.row(frame,"技能 Hit 数",number(skill.hit_count) if skill.hit_count is not None and skill.hit_count>=0 else "来源未定义")
         self.row(frame,"SP 消耗",number(skill.sp_cost))
-        self.hit_rows(frame,skill.hits)
-        for effect in skill.effects:
-            area = tk.Frame(frame,bg="#39324f",padx=10,pady=8)
-            area.pack(fill="x",pady=7)
-            self.label(area,f"效果 {effect.index+1} · {WORDS.get(effect.kind,effect.kind) or '未标类型'}",10,"#9ee4ef",True)
-            self.row(area,"基础威力" if (effect.kind or "").startswith("Attack") else "效果数值",
-                     " ～ ".join(number(v) for v in effect.power) or "未提供")
+        if skill.hits and any(effect_category(effect) == "伤害" for effect in skill.effects):
+            self.hit_rows(frame,skill.hits,"技能伤害逐 Hit")
+        elif any(effect_category(effect) == "伤害" for effect in skill.effects) and (skill.hit_count or 0) > 0:
+            self.row(frame,"技能伤害逐 Hit","来源未提供分配，不能按 Hit 数推算")
+        elif skill.hits:
+            self.row(frame,"来源命中标记","、".join(f"{hit.index}: {WORDS.get(hit.kind,hit.kind) or '未标类型'}" for hit in skill.hits))
+        for category, effects in group_effects(skill.effects):
+            def fill(group, effects=effects, category=category):
+                for effect in effects:
+                    self.render_effect(group,effect,category)
+            if len(skill.effects) == 1:
+                self.label(frame,category,10,PINK,True)
+                fill(frame)
+            else:
+                self.fold(frame,f"{category} · {len(effects)} 项",fill)
+        def meta(panel):
+            for key,label in (("id","技能 ID"),("label","来源标签"),("max_level","等级上限"),("use_count","使用次数"),("cond","技能条件"),("overwrite_cond","替换条件")):
+                self.row(panel,label,friendly(skill.raw.get(key)))
+        self.fold(frame,"技能补充信息",meta)
+
+    def render_effect(self, parent, effect, category):
+        area = tk.Frame(parent,bg="#39324f",padx=10,pady=8)
+        area.pack(fill="x",pady=5)
+        self.label(area,f"来源效果 {effect.index+1} · {WORDS.get(effect.kind,effect.kind) or '未标类型'}",10,"#9ee4ef",True)
+        if category == "伤害":
+            self.row(area,"基础威力"," ～ ".join(number(v) for v in effect.power) or "未提供")
             self.row(area,"上限属性差",number(effect.stat_difference))
             weights = " + ".join(f"{WORDS.get(k,k)} × {number(v)}" for k,v in effect.weights if v)
             self.row(area,"属性权重",weights or "无属性权重")
@@ -128,19 +175,25 @@ class DetailCards(tk.Frame):
             self.row(area,"HP 倍率","×"+number(effect.hp_multiplier))
             self.row(area,"破坏倍率","×"+number(effect.destruction_multiplier))
             if effect.hits:
-                self.hit_rows(area,effect.hits,"该效果逐 Hit")
-            if effect.condition:
-                self.row(area,"生效条件",effect.condition)
-            def extra(panel,effect=effect):
-                self.row(panel,"等级成长",friendly(effect.growth))
-                for key in ("target_type","value","hit_condition","target_condition","effect"):
-                    if effect.raw.get(key):
-                        self.row(panel,{"target_type":"作用对象","value":"附加数值","effect":"特殊效果","hit_condition":"命中条件","target_condition":"目标条件"}[key],friendly(effect.raw[key]))
-            self.fold(area,"成长与其他效果",extra)
-        def meta(panel):
-            for key,label in (("id","技能 ID"),("label","来源标签"),("max_level","等级上限"),("use_count","使用次数"),("cond","技能条件"),("overwrite_cond","替换条件")):
-                self.row(panel,label,friendly(skill.raw.get(key)))
-        self.fold(frame,"技能补充信息",meta)
+                self.hit_rows(area,effect.hits,"该效果命中信息")
+        elif category in {"增益", "减益"}:
+            self.row(area,"效果数值"," ～ ".join(number(v) for v in effect.power) or "未提供")
+            if effect.hits:
+                self.row(area,"施加时机","、".join(f"{WORDS.get(hit.kind,hit.kind) or '未标类型'}（标记 {hit.index}）" for hit in effect.hits))
+        else:
+            self.row(area,"来源数值"," ～ ".join(number(v) for v in effect.power) or "未提供")
+            if effect.hits:
+                self.row(area,"触发时机","、".join(f"{WORDS.get(hit.kind,hit.kind) or '未标类型'}（标记 {hit.index}）" for hit in effect.hits))
+        if effect.condition:
+            self.row(area,"生效条件",effect.condition)
+        def extra(panel):
+            self.row(panel,"等级成长",friendly(effect.growth))
+            for key in ("target_type","value","hit_condition","target_condition","effect"):
+                if effect.raw.get(key):
+                    self.row(panel,{"target_type":"作用对象","value":"附加数值","effect":"特殊效果","hit_condition":"命中条件","target_condition":"目标条件"}[key],friendly(effect.raw[key]))
+            if category != "伤害" and effect.hits:
+                self.row(panel,"来源命中标记","、".join(f"{hit.index}: {number(hit.ratio)}" for hit in effect.hits))
+        self.fold(area,"原始参数与条件",extra)
 
     def render(self,record):
         for child in self.body.winfo_children():
@@ -170,7 +223,13 @@ class DetailCards(tk.Frame):
                 for key,label in (("chara","角色"),("tier","稀有度"),("role","定位"),("team","部队")):
                     if data.get(key):self.label(panel,f"{label}  {friendly(data[key])}",9,DIM)
             if record["dataset"] == "skills":
-                self.fold(info,"所属角色与风格",identity)
+                owners = record.get("owners", [])
+                if owners:
+                    self.label(info, "所属角色：" + "、".join(dict.fromkeys(owner[1] for owner in owners)), 9, DIM)
+                    self.label(info, "关联风格：" + "、".join(dict.fromkeys(owner[3] for owner in owners)), 9, DIM)
+                else:
+                    self.label(info, "未找到明确的角色—风格关联；不根据技能名称猜测。", 9, DIM)
+                self.fold(info,"来源标注",identity)
             else:
                 identity(info)
             if record["dataset"] == "enemies":
@@ -182,7 +241,7 @@ class DetailCards(tk.Frame):
         for index,skill in enumerate(record["skills"],1):
             self.render_skill(skill,index)
         extras = self.card("资料备注")
-        self.label(extras,"威力范围尚未代入等级、增益和敌人参数；缺失的逐 Hit 倍率不做推算。",9,DIM)
+        self.label(extras,"威力范围尚未代入等级、增益和敌人参数；逐 Hit 倍率只显示来源提供的 hits.power_ratio，空值不推算。",9,DIM)
         def more(panel):
             self.row(panel,"来源",record["source"])
             self.row(panel,"服务器",record["region"])

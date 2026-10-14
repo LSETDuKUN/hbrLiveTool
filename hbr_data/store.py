@@ -167,6 +167,31 @@ class Catalog:
                           "AND (name LIKE ? ESCAPE '\\' OR label LIKE ? ESCAPE '\\' OR id=? OR raw_json LIKE ? ESCAPE '\\') ORDER BY ordinal",
                           (region, dataset, pattern, pattern, keyword, pattern), limit)
 
+    def character_styles(self, region, character_label, keyword="", limit=500, offset=0):
+        """Find styles for a character using the source's chara_label link."""
+        pattern = "%" + keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+        return self.query(
+            "SELECT record_key,id,COALESCE(NULLIF(name_zh,''),name),label "
+            "FROM records WHERE region=? AND dataset='styles' "
+            "AND json_extract(raw_json,'$.chara_label')=? "
+            "AND (raw_json LIKE ? ESCAPE '\\' OR name_zh LIKE ? ESCAPE '\\') "
+            "ORDER BY ordinal LIMIT ? OFFSET ?",
+            (region, character_label, pattern, pattern, limit, offset))
+
+    def skill_owners(self, region, skill_id):
+        """Find verified character/style owners by an actual nested skill ID."""
+        _, rows, _ = self.query(
+            "SELECT DISTINCT c.record_key, "
+            "COALESCE(NULLIF(c.name_zh,''),NULLIF(c.name,''),c.label), "
+            "s.record_key,COALESCE(NULLIF(s.name_zh,''),NULLIF(s.name,''),s.label) "
+            "FROM style_skills ss JOIN records s ON s.region=ss.region "
+            "AND s.dataset='styles' AND s.id=ss.style_id "
+            "JOIN records c ON c.region=s.region AND c.dataset='characters' "
+            "AND c.label=json_extract(s.raw_json,'$.chara_label') "
+            "WHERE ss.region=? AND ss.skill_id=? ORDER BY c.ordinal,s.ordinal",
+            (region, str(skill_id)))
+        return rows
+
     def skill_variants(self, region, skill_id):
         """Return source-tagged variants, never pick an arbitrary region/version."""
         _, rows, _ = self.query("SELECT skill_key,json_pointer,raw_json FROM skill_catalog WHERE region=? AND id=?", (region,str(skill_id)))

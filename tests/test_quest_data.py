@@ -25,7 +25,9 @@ class QuestDataTest(unittest.TestCase):
         self.manifest = {"database": "test.sqlite3", "sources": {}}
         self.add_source("jp", "skills", [self.skill])
         self.add_source("cn", "skills", [dict(self.skill, name="测试", parts=[])])
-        self.add_source("jp", "styles", [{"id": 21, "label": "style", "skills": [dict(self.skill, name="Variant")]}])
+        self.add_source("jp", "characters", [{"id": 1, "label": "hero", "name": "Hero"}])
+        self.add_source("jp", "styles", [{"id": 21, "label": "style", "chara_label": "hero", "skills": [dict(self.skill, name="Variant")]},
+                                          {"id": 22, "label": "other", "chara_label": "other-hero"}])
         self.add_source("jp", "localization", {"skill":{"name":{"test":"測試"}}})
         build_database(self.root, self.manifest, self.root / "test.sqlite3")
         (self.root / "current.json").write_text(json.dumps(self.manifest), encoding="utf-8")
@@ -51,6 +53,22 @@ class QuestDataTest(unittest.TestCase):
         self.assertEqual(self.catalog.query("SELECT count(*) FROM skills")[1][0][0], 3)
         self.assertEqual(self.catalog.query("SELECT count(*) FROM skill_catalog")[1][0][0], 2)
         self.assertEqual(self.catalog.query("SELECT name_zh FROM records WHERE dataset='skills' AND region='jp'")[1][0][0], "測試")
+
+    def test_character_styles_filters_by_source_label_and_keyword(self):
+        _, rows, _ = self.catalog.character_styles("jp", "hero")
+        self.assertEqual([row[1] for row in rows], ["21"])
+        self.assertEqual(self.catalog.character_styles("jp", "other-hero")[1][0][1], "22")
+        self.assertEqual(self.catalog.character_styles("jp", "hero", "missing")[1], [])
+        self.assertEqual(self.catalog.character_styles("cn", "hero")[1], [])
+        self.assertEqual(self.catalog.character_styles("jp", "hero", limit=1, offset=1)[1], [])
+
+    def test_skill_owners_follow_nested_style_and_character_links(self):
+        owners = self.catalog.skill_owners("jp", 12)
+        self.assertEqual(len(owners), 1)
+        self.assertEqual(owners[0][1], "Hero")
+        self.assertEqual(owners[0][3], "style")
+        self.assertEqual(self.catalog.skill_owners("cn", 12), [])
+        self.assertEqual(self.catalog.skill_owners("jp", 999), [])
 
     def test_readonly_sql_rejects_mutation_attach_and_pragma(self):
         for sql in ["DELETE FROM skills", "DROP TABLE skills", "ATTACH DATABASE ':memory:' AS other", "PRAGMA user_version=6", "SELECT load_extension('x')"]:

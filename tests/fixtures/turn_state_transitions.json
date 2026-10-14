@@ -1,0 +1,432 @@
+[
+  {
+    "phase": "コマンド選択",
+    "count": 2,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 1,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 2,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターンの行動を実行",
+    "count": 2,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターンの終了痔",
+    "count": 1,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "アディショナル",
+    "count": 2,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "コマンド選択",
+    "count": 3,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "PostCommandState",
+    "count": 3,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 3,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "味方ターンの行動を実行",
+    "count": 3,
+    "turn": 1,
+    "additional": true,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "次の行動を判定",
+    "count": 6,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "オーバードライブ発動レベル選択",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "オーバードライブ開始",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 0
+  },
+  {
+    "phase": "オーバードライブ開始",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 0,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "オーバードライブターン開始",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 0,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "コマンド選択",
+    "count": 4,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "PostCommandState",
+    "count": 4,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 3,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 4,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの行動を実行",
+    "count": 4,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの終了痔",
+    "count": 3,
+    "turn": 1,
+    "additional": false,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "アディショナル",
+    "count": 3,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "コマンド選択",
+    "count": 4,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "コマンド選択",
+    "count": 5,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "次の行動を判定",
+    "count": 9,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 5,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの行動を実行",
+    "count": 5,
+    "turn": 1,
+    "additional": true,
+    "od": true,
+    "bonus": 1,
+    "maximum": 1,
+    "activation": 1
+  },
+  {
+    "phase": "敵ターン前オーバードライブの終了",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "敵ターンの開始前の処理",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "敵ターンの開始",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "敵ターンの行動を実行",
+    "count": 1,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "敵ターン終了時",
+    "count": 0,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "Preturn",
+    "count": 2,
+    "turn": 1,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "Preturn",
+    "count": 2,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "コマンド選択",
+    "count": 6,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 5,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターン開始",
+    "count": 6,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの行動を事前演算",
+    "count": 5,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの行動を実行",
+    "count": 6,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "味方ターンの終了痔",
+    "count": 5,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "PreResult",
+    "count": 1,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "BattleClear",
+    "count": 0,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  },
+  {
+    "phase": "Result",
+    "count": 1,
+    "turn": 2,
+    "additional": false,
+    "od": false,
+    "bonus": 0,
+    "maximum": 0,
+    "activation": 1
+  }
+]

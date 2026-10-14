@@ -151,8 +151,14 @@ class ReadFailures(unittest.TestCase):
                  patch.object(runtime, 'open_process'), patch.object(runtime, 'h', 1), \
                  patch.object(runtime, 'close') as close, \
                  patch('hbr_live_app.source.locate', return_value=100), \
+                 patch('hbr_live_app.source.TurnReader') as turn_reader, \
                  patch('hbr_live_app.source.snapshot', side_effect=snapshots), \
                  patch('hbr_live_app.names.Names.actor', side_effect=lambda label: label):
+                context = dict(command_count=5, turn=1, od=True, bonus=1, bonus_max=1,
+                    od_activation=1, od_before_enemy=True, additional=True, extra=False,
+                    extra_turn=0, selecting=True)
+                turn_reader.return_value.sample.side_effect = [context, dict(context, selecting=False),
+                    dict(context, command_count=6, turn=2, od=False, additional=False)]
                 run(threading.Event(), threading.Event(), messages.append, directory)
                 close.assert_called_once_with(1)
             records = [json.loads(line) for line in next(Path(directory).glob('*.jsonl')).read_text(encoding='utf-8').splitlines()]
@@ -164,6 +170,11 @@ class ReadFailures(unittest.TestCase):
                 model.update(record)
         self.assertEqual(model.total, 7250520)
         self.assertEqual(model.enemies[4]['hp'], 0)
+        self.assertEqual(records[0]['schema'], 2)
+        recorded = model.export()['actions'][0]['command']
+        self.assertEqual(recorded['turn'], 1)
+        self.assertEqual(recorded['command_count'], 5)
+        self.assertTrue(recorded['od'] and recorded['additional'])
 
     def test_failed_resource_read_is_not_reported_as_zero(self):
         from unittest.mock import Mock, patch

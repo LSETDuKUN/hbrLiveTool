@@ -5,6 +5,8 @@ import time
 from pathlib import Path
 
 from .events import ActionLedger
+from .turns import TurnReader, CommandLedger
+from .formation import FormationReader
 
 
 def members(r, address):
@@ -95,7 +97,7 @@ def snapshot(r, module):
                     raw_damage=r.i(content + 32), result_type=r.i(content + 28),
                     index=r.i(hit + 20), funnel=r.read(content + 174, 1) == b'\1',
                     critical=r.read(content + 171, 1) == b'\1'))
-        actions.append(dict(address=entry, actor=actor, actor_is_player=r.cls(actor) == 'BattlePlayerData', executing=entry == preserved, actor_name=r.string(r.q(card + 24)) or r.cls(actor),
+        actions.append(dict(address=entry, actor=actor, actor_position=r.i(actor + 36), actor_is_player=r.cls(actor) == 'BattlePlayerData', executing=entry == preserved, actor_name=r.string(r.q(card + 24)) or r.cls(actor),
             skill=r.string(r.q(master + 24)), skill_name=r.string(r.q(master + 32)) or '未知技能',
             hit_set=hit_set, hits=hits))
     return states, actions
@@ -109,6 +111,7 @@ def run(stop, paused, emit, outdir):
     r.STOP = stop
     run_id = time.strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6]
     ledger = ActionLedger()
+    commands = CommandLedger()
     names = Names()
     try:
         r.open_process(game_pid())
@@ -117,20 +120,50 @@ def run(stop, paused, emit, outdir):
         states, actions = snapshot(r, module)
         if actions:
             raise RuntimeError('正在行动中，请等指令选择阶段再连接。')
+        turn_reader = None
+        formation_reader = FormationReader(r, module)
+        last_formation = None
+        formation_visit = None
+        turn_warning = None
+        try:
+            turn_reader = TurnReader(r, module)
+        except (RuntimeError, ValueError) as exc:
+            turn_warning = f'回合分组不可用，继续记录角色行动：{exc}'
         path = Path(outdir) / (run_id + '.jsonl')
         path.parent.mkdir(parents=True, exist_ok=True)
         previous = None
         known_enemies = {s['address'] for s in states}
         heartbeat = 0.0
         with path.open('x', encoding='utf-8') as log:
-            log.write(json.dumps({'schema': 1, 'run_id': run_id, 'kind': 'start', 'time': time.time()})+'\n')
+            log.write(json.dumps({'schema': 2, 'run_id': run_id, 'kind': 'start', 'time': time.time()})+'\n')
             log.flush()
             emit(('connected', {'run_id': run_id, 'path': str(path)}))
+            if turn_warning:
+                emit(('status', turn_warning))
+            previous_context = None
             while not stop.is_set():
                 if paused.is_set():
                     stop.wait(0.1)
                     continue
+                context = None
+                if turn_reader:
+                    try:
+                        context = turn_reader.sample()
+                    except (RuntimeError, ValueError) as exc:
+                        turn_reader = None
+                        emit(('status', f'回合分组已停止，继续记录角色行动：{exc}'))
                 states, actions = snapshot(r, module)
+                if context:
+                    visit = context.get('command_visit')
+                    if context['selecting'] or context.get('phase') == '味方ターン開始' or visit != formation_visit:
+                        try:
+                            last_formation = formation_reader.sample()
+                            for player in last_formation:
+                                player['actor'] = names.actor(player['actor'])
+                        except RuntimeError:
+                            last_formation = None
+                        formation_visit = visit
+                    context['frontline'] = last_formation
                 if not states:
                     break
                 known_enemies.update(s['address'] for s in states)
@@ -139,13 +172,14 @@ def run(stop, paused, emit, outdir):
                     for hit in action['hits']:
                         if hit.get('target_name'):
                             hit['target_name'] = names.actor(hit['target_name'])
-                events = ledger.update(actions, known_enemies)
-                if states != previous or events:
-                    packet = dict(time=time.time(), enemies=states, events=events)
+                events = commands.update(ledger.update(actions, known_enemies), context)
+                if states != previous or events or context != previous_context:
+                    packet = dict(time=time.time(), enemies=states, events=events, turn_context=context)
                     emit(('snapshot', packet))
                     log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     log.flush()
                     previous = states
+                    previous_context = context
                 if time.monotonic() - heartbeat >= 1:
                     emit(('heartbeat', time.time()))
                     heartbeat = time.monotonic()

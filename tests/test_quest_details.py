@@ -7,7 +7,7 @@ from unittest.mock import patch
 from PIL import Image
 from hbr_data.assets import AssetStore, asset_urls, sync_portraits, asset_lock
 from hbr_data.details import skill_detail
-from hbr_data.cards import ratios
+from hbr_data.cards import ratios, effect_category, group_effects
 
 
 class DetailTests(unittest.TestCase):
@@ -26,6 +26,25 @@ class DetailTests(unittest.TestCase):
         self.assertEqual(skill.effects[0].hits[0].kind,'Before')
         self.assertEqual(skill.effects[0].destruction_multiplier,1.5)
         self.assertEqual(value['hits'][0]['power_ratio'],.3)
+
+    def test_mixed_skill_effects_group_without_losing_source_parts(self):
+        parts = [
+            {"skill_type":"AttackSkill","power":[100,200],"hits":[]},
+            {"skill_type":"DefenseDown","power":[.2,.3],
+             "hits":[{"id":1,"type":"Before","power_ratio":0}]},
+            {"skill_type":"AttackUp","power":[.3,.4]},
+            {"skill_type":"AdditionalTurn","power":[1,0]},
+            {"skill_type":"UnfamiliarEffect","value":[7,0]},
+        ]
+        skill = skill_detail({"hit_count":3,"parts":parts})
+        grouped = group_effects(skill.effects)
+        self.assertEqual([(name,[effect.index for effect in effects]) for name,effects in grouped],
+                         [("伤害",[0]),("增益",[2]),("减益",[1]),("其他",[3,4])])
+        self.assertEqual([effect_category(effect) for effect in skill.effects],
+                         ["伤害","减益","增益","其他","其他"])
+        self.assertEqual(skill.effects[1].hits[0].ratio,0)
+        self.assertEqual(skill.effects[4].raw,parts[4])
+        self.assertEqual(skill.hits,())
 
     def test_portrait_paths_reject_traversal(self):
         for filename in ('../x.webp','a/b.webp','a\\b.webp',''):

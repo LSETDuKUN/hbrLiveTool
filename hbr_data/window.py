@@ -12,6 +12,9 @@ from .cards import DetailCards
 from .assets import sync_portraits
 
 BG, CARD, FG, DIM, PINK = "#201d32", "#302b46", "#f7f0ff", "#bdb1d4", "#f5aacb"
+# Browse only the main categories; other synced tables remain available via SQL.
+# Extend this mapping to expose another category in the browse menu later.
+BROWSE_DATASETS = {"characters": "角色", "styles": "风格", "skills": "技能", "enemies": "敌人"}
 LABELS = {"skills": "技能", "characters": "角色", "styles": "风格", "enemies": "敌人",
           "passives": "被动", "support_skills": "共鸣", "skill_types": "效果类型",
           "style_details": "风格详表", "enemy_details": "敌人详表", "master_skills": "大师技能",
@@ -34,6 +37,7 @@ class LibraryWindow:
         self.generation = 0
         self.selection_generation = 0
         self.offset = 0
+        self.character_filter = None  # (region, label, display name) for the current style list
         self.window = w = tk.Toplevel(master)
         w.title("星屑资料室 · HBR QUEST")
         w.configure(bg=BG)
@@ -78,15 +82,23 @@ class LibraryWindow:
         bar.pack(fill="x", pady=12)
         self.region = tk.StringVar(value="jp · 日服")
         ttk.Combobox(bar, textvariable=self.region, values=["jp · 日服", "cn · 国服", "en · 国际服"], state="readonly", width=13).pack(side="left", padx=5)
-        self.dataset = tk.StringVar(value="skills · 技能")
+        self.dataset = tk.StringVar(value="characters · 角色")
         self.dataset_box = ttk.Combobox(bar, textvariable=self.dataset, state="readonly", width=24)
         self.dataset_box.pack(side="left", padx=5)
+        self.dataset_box.bind("<<ComboboxSelected>>", self.change_dataset)
+        self.region.trace_add("write", self.change_region)
+        self.character_path = tk.StringVar(value="风格：全部角色")
+        self.back_button = tk.Button(bar, text="← 角色", command=self.back_to_characters, bg=CARD, fg=PINK, relief="flat")
+        self.back_button.pack(side="left", padx=5)
+        self.back_button.pack_forget()
         self.keyword = tk.StringVar()
         entry = tk.Entry(bar, textvariable=self.keyword, bg=CARD, fg=FG, insertbackground=FG, relief="flat")
+        self.keyword_entry = entry
         entry.pack(side="left", fill="x", expand=True, ipady=7, padx=5)
         entry.bind("<Return>", lambda e: self.search())
         tk.Button(bar, text="搜索", command=self.search, bg=PINK, relief="flat").pack(side="left", padx=5)
-        tk.Label(browse, text="按名称、ID、角色名或原文内容搜索；不同服务器独立保存。双击/选择记录查看所有字段。", bg=BG, fg=DIM, anchor="w").pack(fill="x", padx=6)
+        tk.Label(browse, text="按名称、ID、角色名或原文内容搜索；不同服务器独立保存。选择角色后可查看其风格。", bg=BG, fg=DIM, anchor="w").pack(fill="x", padx=6)
+        tk.Label(browse, textvariable=self.character_path, bg=BG, fg=PINK, anchor="w").pack(fill="x", padx=6)
         panes = tk.PanedWindow(browse, orient="horizontal", bg=BG, sashwidth=8)
         panes.pack(fill="both", expand=True, pady=8)
         left = tk.Frame(panes, bg=BG)
@@ -102,6 +114,9 @@ class LibraryWindow:
         self.tree.heading("name",text="名称")
         self.tree_photos = []
         self.tree.bind("<<TreeviewSelect>>", self.select)
+        self.tree.bind("<Double-1>", self.open_character_styles)
+        self.styles_button = tk.Button(left, text="查看该角色的风格 →", command=self.open_character_styles, bg=CARD, fg=PINK, relief="flat")
+        self.styles_button.pack(fill="x", pady=3)
         paging = tk.Frame(left, bg=BG)
         paging.pack(fill="x")
         tk.Button(paging, text="上一页", command=lambda: self.page(-1), relief="flat").pack(side="left")
@@ -181,14 +196,26 @@ class LibraryWindow:
         except FileNotFoundError:
             self.status.set("尚无本地资料，请点击「同步网站资料」")
             return
-        datasets = sorted({s["table"] for s in manifest["sources"].values()})
-        self.dataset_box.configure(values=[f"{name} · {LABELS.get(name,name)}" for name in datasets])
-        self.status.set(f"快照 {manifest['created'][:16]} UTC · {len(manifest['sources'])} 来源 · {len(manifest['errors'])} 不可用")
+        available = {s["table"] for s in manifest["sources"].values()}
+        datasets = [name for name in BROWSE_DATASETS if name in available]
+        self.dataset_box.configure(values=[f"{name} · {BROWSE_DATASETS[name]}" for name in datasets])
+        if datasets and self.dataset.get().split(" · ")[0] not in datasets:
+            self.dataset.set(f"{datasets[0]} · {BROWSE_DATASETS[datasets[0]]}")
+            self.character_filter = None
+            self.back_button.pack_forget()
+            self.character_path.set("选择角色，查看其风格" if datasets[0] == "characters" else "风格：全部角色" if datasets[0] == "styles" else "")
+            self.styles_button.configure(state="normal" if datasets[0] == "characters" else "disabled")
+        unavailable = len(manifest["errors"])
+        self.status.set(f"本地资料快照 {manifest['created'][:10]} · 查询无需联网" +
+                        (f" · {unavailable} 个来源缺失（详见「来源与覆盖」）" if unavailable else ""))
         counts = {}
         for source in manifest["sources"].values():
             key = source["region"] + "/" + source["table"]
             counts[key] = counts.get(key, 0) + 1
-        report = "来源与覆盖报告\n\nhttps://hbr.quest/\nhttps://master.hbr.quest/v1/\n\n" + self.status.get()
+        report = ("来源与覆盖报告\n\nhttps://hbr.quest/\nhttps://master.hbr.quest/v1/\n\n"
+                  + f"快照 {manifest['created']} · {len(manifest['sources'])} 个已获取来源 · {unavailable} 个未获取来源")
+        if unavailable and all("HTTP Error 404:" in error for error in manifest["errors"].values()):
+            report += "\n未获取来源均返回 404，表示对应路径未提供数据；不代表本地资料查询失败。"
         report += "\n\n范围：站点公开模块引用的 JSON 表及表中列出的详细资料。头像与敌人图标可通过「同步头像」独立缓存；不下载立绘、音视频。无法发现的服务器文件不声称已覆盖。\n原始 JSON、页面脚本、SHA256、下载时间与历史版本均保存在 data/quest。\n\n"
         report += "\n".join(f"{key}: {count} 文件" for key,count in sorted(counts.items()))
         report += "\n\n不可用来源（不隐瞒缺项）：\n" + "\n".join(f"{url}\n  {error}" for url,error in manifest["errors"].items())
@@ -228,6 +255,31 @@ class LibraryWindow:
             return sync(self.catalog.root, progress=progress, resume=resume)
         self.task(download, done)
 
+    def change_dataset(self, event=None):
+        self.character_filter = None
+        self.back_button.pack_forget()
+        self.character_path.set("风格：全部角色" if self.dataset.get().startswith("styles ·") else "选择角色，查看其风格" if self.dataset.get().startswith("characters ·") else "")
+        self.styles_button.configure(state="normal" if self.dataset.get().startswith("characters ·") else "disabled")
+        self.search()
+
+    def change_region(self, *args):
+        if self.character_filter:
+            self.character_filter = None
+            self.back_button.pack_forget()
+        if hasattr(self, "character_path"):
+            self.character_path.set("风格：全部角色" if self.dataset.get().startswith("styles ·") else "选择角色，查看其风格" if self.dataset.get().startswith("characters ·") else "")
+        if hasattr(self, "tree"):
+            self.search()
+
+    def back_to_characters(self):
+        self.character_filter = None
+        self.dataset.set("characters · 角色")
+        self.back_button.pack_forget()
+        self.character_path.set("选择角色，查看其风格")
+        self.styles_button.configure(state="normal")
+        self.keyword.set("")
+        self.search()
+
     def page(self, direction):
         self.offset = max(0, self.offset + direction * 250)
         self.search(reset=False)
@@ -242,6 +294,7 @@ class LibraryWindow:
         keyword = self.keyword.get()
         pattern = "%" + keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         offset = self.offset
+        character_filter = self.character_filter if dataset == "styles" and self.character_filter and self.character_filter[0] == region else None
         def done(result, error):
             if error or generation != self.generation:
                 return
@@ -258,7 +311,10 @@ class LibraryWindow:
             self.page_label.configure(text=f"第 {offset//250+1} 页 · {len(rows)} 条")
         def find():
             from PIL import Image
-            _, rows, _ = self.catalog.query("SELECT record_key,id,COALESCE(NULLIF(name_zh,''),name),label FROM records WHERE region=? AND dataset=? AND (raw_json LIKE ? ESCAPE '\\' OR name_zh LIKE ? ESCAPE '\\') ORDER BY ordinal LIMIT 250 OFFSET ?", (region,dataset,pattern,pattern,offset))
+            if character_filter:
+                _, rows, _ = self.catalog.character_styles(region, character_filter[1], keyword, limit=250, offset=offset)
+            else:
+                _, rows, _ = self.catalog.query("SELECT record_key,id,COALESCE(NULLIF(name_zh,''),name),label FROM records WHERE region=? AND dataset=? AND (raw_json LIKE ? ESCAPE '\\' OR name_zh LIKE ? ESCAPE '\\') ORDER BY ordinal LIMIT 250 OFFSET ?", (region,dataset,pattern,pattern,offset))
             paths = self.details.assets.paths(region,dataset,[row[1] for row in rows])
             pictures = {}
             for entity_id,path in paths.items():
@@ -285,6 +341,36 @@ class LibraryWindow:
             self.summary.render(record)
             self.set_text(self.raw, json.dumps(record["raw"], ensure_ascii=False, indent=2))
         self.task(lambda: self.details.record(key), done)
+
+    def open_character_styles(self, event=None):
+        if self.dataset.get().split(" · ")[0] != "characters":
+            return
+        selected = self.tree.selection()
+        if not selected:
+            return
+        key = self.keys.get(selected[0])
+        if not key:
+            return
+        region = self.region.get().split(" · ")[0]
+        self.selection_generation += 1
+        generation = self.selection_generation
+        def done(result, error):
+            if (error or generation != self.selection_generation or not result
+                    or self.dataset.get().split(" · ")[0] != "characters"
+                    or self.region.get().split(" · ")[0] != region):
+                return
+            label, name = result
+            self.character_filter = (region, label, name)
+            self.dataset.set("styles · 风格")
+            self.styles_button.configure(state="disabled")
+            self.keyword.set("")
+            self.character_path.set(f"角色：{name}  →  风格")
+            self.back_button.pack(side="left", padx=5, before=self.keyword_entry)
+            self.search()
+        def find_character():
+            _, rows, _ = self.catalog.query("SELECT label,COALESCE(NULLIF(name_zh,''),NULLIF(name,''),label) FROM records WHERE record_key=?", (key,))
+            return rows[0] if rows else None
+        self.task(find_character, done)
 
     def update_assets(self):
         if self.asset_busy:

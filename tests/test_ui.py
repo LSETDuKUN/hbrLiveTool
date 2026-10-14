@@ -61,3 +61,46 @@ class DashboardTests(unittest.TestCase):
         self.app.toggle_pause()
         self.assertFalse(self.app.paused.is_set())
         self.assertEqual(self.app.model.run_id, 'keep')
+
+    def test_command_table_positions_updates_and_folded_details(self):
+        from hbr_live_app.turns import CommandLedger
+        from test_turns import context, event
+        ledger = CommandLedger()
+        events = ledger.update([dict(event(1), actor_position=1)], context(5, additional=True, od=True))
+        self.app.model.update(dict(enemies=[], events=events))
+        self.app.render(events)
+        self.assertEqual(len(self.app.tree.get_children()), 1)
+        iid = self.app.tree.get_children()[0]
+        values = self.app.tree.item(iid, 'values')
+        self.assertEqual(values, ('Turn 1 / Bonus 1 / Extra', '/', '角色\n技能', '/'))
+        self.assertFalse(self.app.details_open)
+
+    def test_unknown_row_moves_after_recovery_and_text_is_centered(self):
+        from hbr_live_app.turns import CommandLedger
+        from test_turns import context, event
+        ledger = CommandLedger()
+        ledger.update([], context(2, turn=2))
+        unknown = ledger.update([dict(event(1), actor_position=1)], None)
+        self.app.model.update(dict(enemies=[], events=unknown))
+        self.app.render(unknown)
+        self.assertEqual(self.app.tree.get_children(), ('unknown:1',))
+        repaired = ledger.update([], context(2, turn=2))
+        self.app.model.update(dict(enemies=[], events=repaired))
+        self.app.render(repaired)
+        self.assertEqual(self.app.tree.get_children(), ('command:2',))
+        self.assertEqual(self.app.tree.selection(), ('command:2',))
+        canvas = self.app.tree.canvas
+        actor_items = [i for i in canvas.find_all() if canvas.type(i) == 'text' and canvas.itemcget(i, 'text') == '角色']
+        self.assertEqual(canvas.itemcget(actor_items[0], 'justify'), 'center')
+        self.assertEqual(canvas.itemcget(actor_items[0], 'fill'), '#ffe4af')
+        updated = ledger.update([event(1, 50)], context(6, turn=2))
+        # Positions normally arrive on every event from ActionLedger.
+        updated[0]['actor_position'] = 1
+        self.app.model.update(dict(enemies=[], events=updated))
+        self.app.render(updated)
+        self.assertEqual(len(self.app.tree.get_children()), 1)
+        self.assertIn('合计 50', self.app.detail_text())
+        self.app.toggle_details()
+        self.assertTrue(self.app.details_open)
+        self.app.toggle_details()
+        self.assertFalse(self.app.details_open)
