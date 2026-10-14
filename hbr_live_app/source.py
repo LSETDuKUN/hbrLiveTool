@@ -7,6 +7,7 @@ from pathlib import Path
 from .events import ActionLedger
 from .turns import TurnReader, CommandLedger
 from .formation import FormationReader
+from .enemy_reader import EnemyReader
 
 
 def members(r, address):
@@ -114,6 +115,7 @@ def run(stop, paused, emit, outdir):
     ledger = ActionLedger()
     commands = CommandLedger()
     names = Names()
+    enemy_reader = EnemyReader(r)
     try:
         r.open_process(game_pid())
         emit(('status', '正在定位战斗，请暂不行动…'))
@@ -167,6 +169,11 @@ def run(stop, paused, emit, outdir):
                     context['frontline'] = last_formation
                 if not states:
                     break
+                for state in states:
+                    try:
+                        state.update(enemy_reader.sample(state, context))
+                    except (RuntimeError, ValueError, TypeError, KeyError):
+                        state['forecast'] = dict(text='敌方行动信息暂不可读', blink=False)
                 known_enemies.update(s['address'] for s in states)
                 for action in actions:
                     action['style_name'] = names.style(action['style_label']) if action.get('style_label') else ''

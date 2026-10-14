@@ -1,0 +1,149 @@
+{
+  "enemy0": {
+    "address": "0x1ce5b373540",
+    "class": "BattleEnemyData",
+    "fields": [
+      {
+        "name": "domainEnemy",
+        "offset": 480,
+        "type": 18,
+        "declared": "BattleEnemyData",
+        "object": {
+          "address": "0x1c64a25a3f0",
+          "class": "DomainEnemy"
+        }
+      },
+      {
+        "name": "overrideEnemy",
+        "offset": 488,
+        "type": 18,
+        "declared": "BattleEnemyData"
+      },
+      {
+        "name": "<existsHpExtraGauge>k__BackingField",
+        "offset": 552,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": false
+      },
+      {
+        "name": "<existsDpExtraGauge>k__BackingField",
+        "offset": 568,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": false
+      },
+      {
+        "name": "isEnemyCharge",
+        "offset": 592,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": false
+      },
+      {
+        "name": "<mainCommandPatternOrder>k__BackingField",
+        "offset": 608,
+        "type": 8,
+        "declared": "BattleEnemyData",
+        "value": 0
+      },
+      {
+        "name": "<breakCommandPatternOrder>k__BackingField",
+        "offset": 612,
+        "type": 8,
+        "declared": "BattleEnemyData",
+        "value": 0
+      },
+      {
+        "name": "<breakDownTurn>k__BackingField",
+        "offset": 128,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      },
+      {
+        "name": "<mainCommandPatternOrder>k__BackingField",
+        "offset": 400,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      },
+      {
+        "name": "<breakCommandPatternOrder>k__BackingField",
+        "offset": 404,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      }
+    ]
+  },
+  "enemy0.domainEnemy": {
+    "address": "0x1c64a25a3f0",
+    "class": "DomainEnemy",
+    "fields": [
+      {
+        "name": "<master>k__BackingField",
+        "offset": 16,
+        "type": 18,
+        "declared": "DomainEnemy",
+        "object": {
+          "address": "0x1ce60f20200",
+          "class": "MasterEnemy"
+        }
+      },
+      {
+        "name": "<overrideMainCommandPattern>k__BackingField",
+        "offset": 112,
+        "type": 18,
+        "declared": "DomainEnemy"
+      },
+      {
+        "name": "<overrideBreakCommandPattern>k__BackingField",
+        "offset": 128,
+        "type": 18,
+        "declared": "DomainEnemy"
+      }
+    ]
+  },
+  "enemy0.domainEnemy.<master>k__BackingField": {
+    "address": "0x1ce60f20200",
+    "class": "MasterEnemy",
+    "fields": [
+      {
+        "name": "Id",
+        "offset": 16,
+        "type": 10,
+        "declared": "MasterEnemy",
+        "value": 13402704
+      },
+      {
+        "name": "Label",
+        "offset": 24,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "ExoWatcherDefault01_04"
+      },
+      {
+        "name": "Name",
+        "offset": 32,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "异度监测之眼Ω : 等级4"
+      },
+      {
+        "name": "MasterCommandPattern",
+        "offset": 80,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "ExoWatcherDefaultHard"
+      },
+      {
+        "name": "BreakMasterCommandPattern",
+        "offset": 88,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "ExoWatcherDefaultHard_break"
+      }
+    ]
+  }
+}

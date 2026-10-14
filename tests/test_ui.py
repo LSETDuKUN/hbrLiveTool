@@ -62,6 +62,31 @@ class DashboardTests(unittest.TestCase):
         self.assertFalse(self.app.paused.is_set())
         self.assertEqual(self.app.model.run_id, 'keep')
 
+    def test_enemy_card_names_forecast_lifecycle_and_details(self):
+        from types import SimpleNamespace
+        state = dict(address=4, dp=100, hp=500, name='Internal',
+                     names=[dict(kind='cn', name='中文敌人'), dict(kind='en', name='English Enemy'),
+                            dict(kind='internal', name='Internal')],
+                     forecast=dict(text='规则预告：Heavy Burst', blink=True), action_rules='DP 阶段规则')
+        self.app.model.update(dict(enemies=[state], events=[]))
+        self.app.render([])
+        card = self.app.enemy_cards[4]
+        card.set_monitoring(True)
+        self.assertIsNotNone(card.timer)
+        card.click(SimpleNamespace(y=16))
+        self.assertEqual(card.name_kind, 'en')
+        card.update_state(self.app.model.enemies[4])
+        self.assertEqual(card.name_kind, 'en')
+        with patch.object(self.app, 'text_window') as show:
+            card.click(SimpleNamespace(y=177))
+            self.assertIn('English Enemy', show.call_args.args[1])
+            self.assertIn('DP 阶段规则', show.call_args.args[1])
+        card.set_monitoring(False)
+        self.assertIsNone(card.timer)
+        card.set_monitoring(True)
+        card.update_state(dict(self.app.model.enemies[4], active=False))
+        self.assertIsNone(card.timer)
+
     def test_command_table_positions_updates_and_folded_details(self):
         from hbr_live_app.turns import CommandLedger
         from test_turns import context, event

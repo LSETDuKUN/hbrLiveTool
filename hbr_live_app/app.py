@@ -195,7 +195,7 @@ class App:
             self.history.grid(row=1, column=0, sticky='nsew', pady=(8, 0))
             self.detail_caption.pack_forget()
             self.resource_note.pack_forget()
-            self.enemy_view.configure(height=min(220, max(110, len(self.enemy_cards)*110)))
+            self.enemy_view.configure(height=min(270, max(196, len(self.enemy_cards)*196)))
             self.root.geometry(f'420x{min(850, self.root.winfo_screenheight()-90)}')
         else:
             self.root.minsize(1050, 730)
@@ -287,6 +287,8 @@ class App:
                     self.footer.configure(text=f'最近采样 {time.strftime("%H:%M:%S", time.localtime(data))}  ·  本场记录自动保存')
                 elif kind == 'stopped':
                     self.connected = False
+                    for card in self.enemy_cards.values():
+                        card.set_monitoring(False)
                     self.start_button.configure(text='连接新战斗')
                     self.pause_button.configure(text='暂停')
                 elif kind == 'error':
@@ -295,6 +297,9 @@ class App:
                     self.set_status(data)
         except queue.Empty:
             pass
+        fresh = self.connected and not self.paused.is_set() and self.last_sample is not None and time.time()-self.last_sample < 3
+        for card in self.enemy_cards.values():
+            card.set_monitoring(fresh)
         if not self.closing:
             self.root.after(60, self.pump)
 
@@ -315,16 +320,26 @@ class App:
     def render_enemy(self):
         for number, (key, state) in enumerate(self.model.enemies.items(), 1):
             if key not in self.enemy_cards:
-                card = self.enemy_cards[key] = EnemyCard(self.enemy_stack, number)
+                card = self.enemy_cards[key] = EnemyCard(self.enemy_stack, number, self.show_enemy_details)
                 card.pack(fill='x', pady=(0, 6))
             self.enemy_cards[key].update_state(state)
         if self.compact.get():
-            self.enemy_view.configure(height=min(220, max(110, len(self.enemy_cards)*110)))
+            self.enemy_view.configure(height=min(270, max(196, len(self.enemy_cards)*196)))
 
     def target_label(self, address, fallback='目标未确认'):
         if address in self.enemy_keys:
             return f'敌{self.enemy_keys.index(address)+1}'
         return fallback
+
+    def show_enemy_details(self, number, state):
+        aliases = state.get('names') or [dict(kind='internal', name=state['name'])]
+        text = '\n'.join(f"{ {'cn': '中文', 'en': '国际服', 'internal': '内部名称'}.get(n['kind'], n['kind'])}：{n['name']}" for n in aliases)
+        if state.get('enemy_label'):
+            text += f'\n资料标识：{state["enemy_label"]}'
+        preview = state.get('forecast', {})
+        text += '\n\n' + preview.get('text', '行动预告未取得') + '\n' + preview.get('note', '')
+        text += '\n\n' + (state.get('action_rules') or '本地资料尚未收录此敌人的行动规则。')
+        self.text_window(f'敌{number} · 名称与行动规则', text)
 
     def target_summary(self, event):
         targets = event.get('targets') or [dict(address=h['target']) for h in event['hits']]

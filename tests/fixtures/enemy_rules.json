@@ -1,0 +1,292 @@
+{
+  "label": "ExoWatcherDefault01_04",
+  "pattern": {
+    "dp": {
+      "l": "ExoWatcherDefaultHard",
+      "p": [
+        {
+          "id": 39425501,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425502,
+          "order": 2,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425503,
+          "order": 3,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425504,
+          "order": 4,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425505,
+          "order": 5,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501
+          ]
+        },
+        {
+          "id": 39425506,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425507,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425508,
+          "order": 8,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501
+          ]
+        },
+        {
+          "id": 39425509,
+          "order": 9,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425510,
+          "order": 10,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        }
+      ]
+    },
+    "hp": {
+      "l": "ExoWatcherDefaultHard_break",
+      "p": [
+        {
+          "id": 39425551,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425552,
+          "order": 2,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425553,
+          "order": 3,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425554,
+          "order": 4,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425555,
+          "order": 5,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125501,
+            46125502
+          ]
+        },
+        {
+          "id": 39425556,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46125503
+          ]
+        },
+        {
+          "id": 39425557,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125504
+          ]
+        }
+      ]
+    }
+  },
+  "skills": [
+    {
+      "id": 46125501,
+      "name": "",
+      "label": "ExoWatcherD_AttackSingle01"
+    },
+    {
+      "id": 46125502,
+      "name": "Power Pool",
+      "label": "ExoWatcherD_Charge"
+    },
+    {
+      "id": 46125503,
+      "name": "Heavy Burst",
+      "label": "ExoWatcherD_ChargeAttackAll01"
+    },
+    {
+      "id": 46125504,
+      "name": "Elemental Absorption",
+      "label": "ExoWatcherD_HealRate"
+    }
+  ],
+  "observations": [
+    {
+      "turn": 1,
+      "selecting": true,
+      "order": 0,
+      "executing": []
+    },
+    {
+      "turn": 1,
+      "selecting": false,
+      "order": 1,
+      "executing": [
+        "ExoWatcherD_AttackSingle01"
+      ]
+    },
+    {
+      "turn": 1,
+      "selecting": false,
+      "order": 1,
+      "executing": [
+        "ExoWatcherD_Charge"
+      ]
+    },
+    {
+      "turn": 2,
+      "selecting": true,
+      "order": 1,
+      "executing": []
+    },
+    {
+      "turn": 2,
+      "selecting": false,
+      "order": 2,
+      "executing": [
+        "ExoWatcherD_ChargeAttackAll01"
+      ]
+    },
+    {
+      "turn": 3,
+      "selecting": true,
+      "order": 2,
+      "executing": []
+    }
+  ]
+}
