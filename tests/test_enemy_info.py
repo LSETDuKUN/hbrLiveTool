@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import unittest
 from unittest.mock import patch
-from hbr_live_app.enemy_info import EnemyCatalog, forecast, rules_text
+from hbr_live_app.enemy_info import EnemyCatalog, forecast, rules_text, skill_title, skill_effects
 from hbr_live_app.enemy_reader import EnemyReader
 
 
@@ -11,6 +11,17 @@ DATA = json.loads((Path(__file__).parent / 'fixtures/enemy_rules.json').read_tex
 
 
 class EnemyInfoTests(unittest.TestCase):
+    def test_effects_come_from_parts_and_unnamed_attack_has_readable_title(self):
+        skill = dict(label='Boss_Internal_Attack', name='', target_type='All', hit_count=1,
+                     parts=[dict(skill_type='AttackSkill', target_type='All', type='Stab', elements=[])])
+        self.assertEqual(skill_title(skill), '全体攻击')
+        self.assertEqual(skill_effects(skill), '全体 · 攻击 · 突')
+        charge = dict(parts=[dict(skill_type='Charge', target_type='Self'),
+                             dict(skill_type='AttackUp', target_type='Self', power=[0.5, 0])])
+        self.assertIn('攻击提升', skill_effects(charge))
+        self.assertNotIn('50%', skill_effects(charge))
+        self.assertEqual(skill_effects({}), '')
+
     def setUp(self):
         self.info = dict(patterns=copy.deepcopy(DATA['pattern']), skills={s['id']: s for s in DATA['skills']})
         self.live = dict(dp=100, dp_pattern='ExoWatcherDefaultHard', hp_pattern='ExoWatcherDefaultHard_break',

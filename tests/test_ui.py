@@ -78,11 +78,17 @@ class DashboardTests(unittest.TestCase):
         card.update_state(self.app.model.enemies[4])
         self.assertEqual(card.name_kind, 'en')
         with patch.object(self.app, 'text_window') as show:
-            card.click(SimpleNamespace(y=177))
+            card.click(SimpleNamespace(y=219))
             self.assertIn('English Enemy', show.call_args.args[1])
             self.assertIn('DP 阶段规则', show.call_args.args[1])
         card.set_monitoring(False)
         self.assertIsNone(card.timer)
+        card.set_monitoring(True)
+        card.update_state(dict(self.app.model.enemies[4], dp=50))
+        self.assertIsNotNone(card.trail_timer)
+        self.assertEqual(card.state['dp'], 50)
+        card.set_monitoring(False)
+        self.assertIsNone(card.trail_timer)
         card.set_monitoring(True)
         card.update_state(dict(self.app.model.enemies[4], active=False))
         self.assertIsNone(card.timer)
@@ -133,7 +139,7 @@ class DashboardTests(unittest.TestCase):
         canvas = self.app.tree.canvas
         actor_items = [i for i in canvas.find_all() if canvas.type(i) == 'text' and canvas.itemcget(i, 'text') == '角色']
         self.assertEqual(canvas.itemcget(actor_items[0], 'justify'), 'center')
-        self.assertEqual(canvas.itemcget(actor_items[0], 'fill'), '#ffe4af')
+        self.assertEqual(canvas.itemcget(actor_items[0], 'fill'), '#bdb1d4')
         updated = ledger.update([event(1, 50)], context(6, turn=2))
         # Positions normally arrive on every event from ActionLedger.
         updated[0]['actor_position'] = 1

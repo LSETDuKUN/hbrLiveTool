@@ -32,3 +32,11 @@ BattleEnemyData：_selectedCommands +600、派生 main/breakCommandPatternOrder 
 探查工具：python -B -m hbr_live_app.probe_enemies；--watch 最多十分钟，只写 sessions。sessions/enemy-probe-stop 是持久停止标记，下次观察前需确认上一轮已结束后手动移除，避免重复采集。游戏以管理员运行时同样需要通过系统授权启动探查。
 
 此前通过实测的版本 6ea5891 已推送。此次 Boss 功能留在工作区，待用户验收后再提交。
+
+## 显示与动效调整
+
+用户验收后的 Boss 基础版本已本地提交为 688b256（未推送）。随后将角色／风格降为辅助文本，技能加大加粗；预告独立区域放大，背景闪烁、文本常亮，预告不重复 Boss 名称。
+
+大幅掉血动效按本场观测参考值触发：0.7 秒内累计下降 12% 或以上，实际数值立即更新，残影停留 0.35 秒后在 0.7 秒内收敛。回血、参考值变化和停止监测清理动效。
+
+本地敌方技能 parts 确实包含效果。例如 Power Pool 为 Charge 和 AttackUp，Heavy Burst 为 All / Stab / AttackSkill，Elemental Absorption 为 Self / HealDpRate。详情展示已有描述和效果；原始 power 数值另列，未验证的倍率／百分比不自行换算。

@@ -1,12 +1,14 @@
 """Separate compact gauges for every enemy, with stable session numbers."""
 import tkinter as tk
+import time
+from .gauge_trail import GaugeTrail
 from tkinter import font as tkfont
 from .components import rounded
 
 
 class EnemyCard(tk.Canvas):
     def __init__(self, parent, number, show_details=None):
-        super().__init__(parent, height=190, bg='#201d32', highlightthickness=0)
+        super().__init__(parent, height=232, bg='#201d32', highlightthickness=0)
         self.number = number
         self.state = None
         self.show_details = show_details
@@ -14,13 +16,22 @@ class EnemyCard(tk.Canvas):
         self.monitoring = False
         self.flash = True
         self.timer = None
+        self.trail_timer = None
+        self.trails = {p: GaugeTrail() for p in ('dp', 'hp')}
         self.bind('<Button-1>', self.click)
         self.bind('<Destroy>', self.on_destroy)
         self.font = tkfont.Font(family='Microsoft YaHei UI', size=-12)
         self.bind('<Configure>', lambda _: self.draw())
 
     def update_state(self, state):
+        now = time.monotonic()
+        for pool, trail in self.trails.items():
+            if self.monitoring and state.get('active', True):
+                trail.update(state[pool], state[pool+'_reference'], now)
+            else:
+                trail.reset(state[pool], state[pool+'_reference'], now)
         self.state = dict(state)
+        self.sync_trail()
         self.sync_flash()
         self.draw()
 
@@ -33,12 +44,16 @@ class EnemyCard(tk.Canvas):
             index = next((i for i, n in enumerate(options) if n['kind'] == self.name_kind), -1)
             self.name_kind = options[(index+1) % len(options)]['kind']
             self.draw()
-        elif event.y >= 164 and self.show_details and self.state:
+        elif event.y >= 208 and self.show_details and self.state:
             self.show_details(self.number, self.state)
 
     def set_monitoring(self, enabled):
         if self.monitoring != enabled:
             self.monitoring = enabled
+            if not enabled and self.state:
+                for pool, trail in self.trails.items():
+                    trail.reset(self.state[pool], self.state[pool+'_reference'], time.monotonic())
+            self.sync_trail()
             self.sync_flash()
             self.draw()
 
@@ -55,10 +70,26 @@ class EnemyCard(tk.Canvas):
     def tick(self):
         self.timer = None
         self.flash = not self.flash
-        self.draw()
         self.sync_flash()
+        self.draw()
+
+    def sync_trail(self):
+        active = self.monitoring and any(t.active(time.monotonic()) for t in self.trails.values())
+        if active and self.trail_timer is None:
+            self.trail_timer = self.after(33, self.animate_trail)
+        elif not active and self.trail_timer is not None:
+            self.after_cancel(self.trail_timer)
+            self.trail_timer = None
+
+    def animate_trail(self):
+        self.trail_timer = None
+        self.draw()
+        self.sync_trail()
 
     def on_destroy(self, event):
+        if event.widget is self and self.trail_timer is not None:
+            self.after_cancel(self.trail_timer)
+            self.trail_timer = None
         if event.widget is self and self.timer is not None:
             self.after_cancel(self.timer)
             self.timer = None
@@ -68,7 +99,7 @@ class EnemyCard(tk.Canvas):
         if not self.state:
             return
         s, w = self.state, max(100, self.winfo_width())
-        rounded(self, 1, 1, w-1, 189, 16, fill='#302b46', outline='#50415f')
+        rounded(self, 1, 1, w-1, 231, 16, fill='#302b46', outline='#50415f')
         departed = '（已离场）' if not s.get('active', True) else ''
         options = self.aliases()
         name = next((n for n in options if n['kind'] == self.name_kind), options[0])
@@ -87,6 +118,10 @@ class EnemyCard(tk.Canvas):
                              font=('Segoe UI', -14, 'bold italic'))
             rounded(self, 12, y+10, w-12, y+21, 5, fill='#201d32', outline='')
             fraction = min(1, s[pool]/max(1, s[pool+'_reference']))
+            trail = self.trails[pool]
+            delayed = min(1, trail.display(time.monotonic()) / max(1, s[pool+'_reference']))
+            if delayed > fraction:
+                rounded(self, 12, y+10, 12+(w-24)*delayed, y+21, 5, fill='#e8a5ae', outline='')
             if fraction:
                 rounded(self, 12, y+10, 12+(w-24)*fraction, y+21, 5, fill=color, outline='')
 
@@ -96,11 +131,17 @@ class EnemyCard(tk.Canvas):
             text = '已离场'
         elif not self.monitoring and preview.get('blink'):
             text = '采样已暂停 · ' + text
-        color = '#ffd398' if self.flash else '#bdb1d4'
-        item = self.create_text(12, 123, text=text, width=w-24, anchor='nw',
-                               fill=color, font=self.font, tags='forecast')
-        # Full preview and all rules remain available in the detail window.
-        while self.bbox(item)[3] > 163 and len(text) > 6:
-            text = text[:-2] + '…'
-            self.itemconfigure(item, text=text)
-        self.create_text(12, 177, text='名称与行动规则 ›', anchor='w', fill='#83e5ed', font=self.font)
+        label, sep, skill = text.partition('：')
+        caption = '行动预告' + (' · ' + label if sep else '')
+        content = skill if sep else text
+        flashing = self.timer is not None and self.monitoring
+        background = '#655036' if flashing and self.flash else '#3e354e'
+        rounded(self, 8, 119, w-8, 203, 10, fill=background, outline='')
+        self.create_text(18, 133, text=caption, anchor='w', fill='#d8c8ad', font=self.font)
+        item = self.create_text(18, 148, text=content, width=w-36, anchor='nw',
+                               fill='#ffe4af', font=('Microsoft YaHei UI', -16, 'bold'), tags='forecast')
+        # The skill stays bright while the background pulses; full text is in details.
+        while self.bbox(item)[3] > 198 and len(content) > 6:
+            content = content[:-2] + '…'
+            self.itemconfigure(item, text=content)
+        self.create_text(12, 219, text='名称、行动规则与技能效果 ›', anchor='w', fill='#83e5ed', font=self.font)

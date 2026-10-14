@@ -15,8 +15,8 @@ class BattleTable(tk.Frame):
         self.rows = {}
         self.selected = ()
         self.bounds = {}
-        self.actor_font = tkfont.Font(family='Microsoft YaHei UI', size=-15, weight='bold')
-        self.skill_font = tkfont.Font(family='Microsoft YaHei UI', size=-13)
+        self.actor_font = tkfont.Font(family='Microsoft YaHei UI', size=-12)
+        self.skill_font = tkfont.Font(family='Microsoft YaHei UI', size=-16, weight='bold')
         self.badge_font = tkfont.Font(family='Segoe UI', size=-13, weight='bold')
         self.canvas.bind('<Configure>', lambda e: self.redraw())
         self.canvas.bind('<Button-1>', self.click)
@@ -111,7 +111,7 @@ class BattleTable(tk.Frame):
             edges.append(edges[-1]+w)
         for index, title in enumerate(('回合', '前排 · 左', '前排 · 中', '前排 · 右')):
             self.header.create_text((edges[index]+edges[index+1])/2, 19,
-                                    text=title, fill='#ded1ed', font=self.actor_font)
+                                    text=title, fill='#ded1ed', font=self.skill_font)
         y = 0
         for number, (key, row) in enumerate(self.rows.items()):
             blocks = []
@@ -120,8 +120,8 @@ class BattleTable(tk.Frame):
                 cx = (edges[index]+edges[index+1])/2
                 texts = []
                 for event in slot:
-                    texts.extend(((self.fit_title(actor_title(event), widths[index]-28), self.actor_font, '#ffe4af'),
-                                  (event['skill'], self.skill_font, '#c6bef4')))
+                    texts.extend(((self.fit_title(actor_title(event), widths[index]-28), self.actor_font, '#bdb1d4'),
+                                  (event['skill'], self.skill_font, '#ffe4af')))
                 if not texts:
                     texts = [('/', self.actor_font, '#9388a8')]
                 ids, height = [], 0

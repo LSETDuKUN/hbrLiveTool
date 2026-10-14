@@ -195,7 +195,7 @@ class App:
             self.history.grid(row=1, column=0, sticky='nsew', pady=(8, 0))
             self.detail_caption.pack_forget()
             self.resource_note.pack_forget()
-            self.enemy_view.configure(height=min(270, max(196, len(self.enemy_cards)*196)))
+            self.enemy_view.configure(height=min(270, max(238, len(self.enemy_cards)*238)))
             self.root.geometry(f'420x{min(850, self.root.winfo_screenheight()-90)}')
         else:
             self.root.minsize(1050, 730)
@@ -324,7 +324,7 @@ class App:
                 card.pack(fill='x', pady=(0, 6))
             self.enemy_cards[key].update_state(state)
         if self.compact.get():
-            self.enemy_view.configure(height=min(270, max(196, len(self.enemy_cards)*196)))
+            self.enemy_view.configure(height=min(270, max(238, len(self.enemy_cards)*238)))
 
     def target_label(self, address, fallback='目标未确认'):
         if address in self.enemy_keys:
