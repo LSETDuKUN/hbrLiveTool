@@ -12,7 +12,7 @@ from .components import RoundedCard, RoundedButton
 from .model import BattleModel
 from .enemy_cards import EnemyCard
 from .turns import context_label
-from .history import table_rows
+from .history import table_rows, DISPLAY_POSITIONS, POSITION_NAMES
 from .battle_table import BattleTable
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -341,7 +341,9 @@ class App:
             text += '部分事件位置未确认，未填入前排行动位。\n'
         frontline = (row['group'] or {}).get('frontline')
         if frontline:
-            text += '本批前排：' + ' / '.join(f"{p['position']+1} {p['actor']}" for p in frontline) + '\n'
+            text += '本批前排（左→右）：' + ' / '.join(
+                f"{POSITION_NAMES[p['position']]} {p['actor']}"
+                for pos in DISPLAY_POSITIONS for p in frontline if p['position'] == pos) + '\n'
         else:
             text += '完整前排名单未确认；仅使用事件中实际读到的位置。\n'
         text += '角色行动顺序：' + ' → '.join(e['actor'] for e in events) + '\n\n'
@@ -349,6 +351,8 @@ class App:
 
     def event_detail_text(self, event):
         text = f'{event["actor"]} · {event["skill"]}\n显示伤害 {event["value"]:,}  ·  {"已结算" if event["settled"] else "命中进行中"}\n\n'
+        if event.get('style_label') or event.get('style_name'):
+            text += f'风格：{event.get("style_name") or "名称未收录"}\n风格标识：{event.get("style_label") or "未确认"}\n\n'
         totals = {}
         for hit in event['hits']:
             totals[hit['target']] = totals.get(hit['target'], 0) + hit['damage']

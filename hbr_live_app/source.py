@@ -97,7 +97,8 @@ def snapshot(r, module):
                     raw_damage=r.i(content + 32), result_type=r.i(content + 28),
                     index=r.i(hit + 20), funnel=r.read(content + 174, 1) == b'\1',
                     critical=r.read(content + 171, 1) == b'\1'))
-        actions.append(dict(address=entry, actor=actor, actor_position=r.i(actor + 36), actor_is_player=r.cls(actor) == 'BattlePlayerData', executing=entry == preserved, actor_name=r.string(r.q(card + 24)) or r.cls(actor),
+        style_label = r.string(r.q(card + 24)) if card else ''
+        actions.append(dict(style_label=style_label, address=entry, actor=actor, actor_position=r.i(actor + 36), actor_is_player=r.cls(actor) == 'BattlePlayerData', executing=entry == preserved, actor_name=style_label or r.cls(actor),
             skill=r.string(r.q(master + 24)), skill_name=r.string(r.q(master + 32)) or '未知技能',
             hit_set=hit_set, hits=hits))
     return states, actions
@@ -168,6 +169,7 @@ def run(stop, paused, emit, outdir):
                     break
                 known_enemies.update(s['address'] for s in states)
                 for action in actions:
+                    action['style_name'] = names.style(action['style_label']) if action.get('style_label') else ''
                     action['actor_name'] = names.actor(action['actor_name'])
                     for hit in action['hits']:
                         if hit.get('target_name'):

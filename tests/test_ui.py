@@ -72,8 +72,24 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(len(self.app.tree.get_children()), 1)
         iid = self.app.tree.get_children()[0]
         values = self.app.tree.item(iid, 'values')
-        self.assertEqual(values, ('Turn 1 / Bonus 1 / Extra', '/', '角色\n技能', '/'))
+        self.assertEqual(values, ('Turn 1 / Bonus 1 / Extra', '角色\n技能', '/', '/'))
         self.assertFalse(self.app.details_open)
+        canvas = self.app.tree.canvas
+        labels = canvas.find_withtag('context')
+        self.assertEqual(''.join(canvas.itemcget(i, 'text') for i in labels), 'Turn 1 / Bonus 1 / Extra')
+        self.assertEqual(len({canvas.coords(i)[1] for i in labels}), 1)
+
+    def test_long_style_truncated_only_in_table(self):
+        style = '完整而且很长的风格名称' * 8
+        event = dict(event_id=1, actor='角色', actor_position=1, style_name=style,
+                     style_label='Card02', skill='技能', value=0, hits=[], settled=True)
+        self.app.model.update(dict(enemies=[], events=[event]))
+        self.app.render([event])
+        canvas = self.app.tree.canvas
+        titles = [canvas.itemcget(i, 'text') for i in canvas.find_all() if canvas.type(i) == 'text']
+        self.assertTrue(any(t.startswith('角色 / ') and t.endswith('…') for t in titles))
+        self.assertIn(style, self.app.detail_text())
+        self.assertIn('Card02', self.app.detail_text())
 
     def test_unknown_row_moves_after_recovery_and_text_is_centered(self):
         from hbr_live_app.turns import CommandLedger

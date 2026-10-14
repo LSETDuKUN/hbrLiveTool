@@ -1,6 +1,7 @@
 """Centered, individually styled table cells backed by a scrollable Tk canvas."""
 import tkinter as tk
 from tkinter import font as tkfont
+from .history import actor_title
 
 
 class BattleTable(tk.Frame):
@@ -92,10 +93,12 @@ class BattleTable(tk.Frame):
         self.selection_set(key)
         self.canvas.yview_moveto(self.bounds[key][0] / max(1, float(self.canvas.bbox('all')[3])))
 
-    def badge(self, cx, y, text, color, fill):
-        width = self.badge_font.measure(text) + 24
-        self.canvas.create_rectangle(cx-width/2, y, cx+width/2, y+24, fill=fill, outline=color)
-        self.canvas.create_text(cx, y+12, text=text, fill=color, font=self.badge_font)
+    def fit_title(self, text, width):
+        if self.actor_font.measure(text) <= width:
+            return text
+        while text and self.actor_font.measure(text + '…') > width:
+            text = text[:-1]
+        return text + '…'
 
     def redraw(self):
         self.canvas.delete('all')
@@ -106,7 +109,7 @@ class BattleTable(tk.Frame):
         edges = [0]
         for w in widths:
             edges.append(edges[-1]+w)
-        for index, title in enumerate(('回合', '前排 1', '前排 2', '前排 3')):
+        for index, title in enumerate(('回合', '前排 · 左', '前排 · 中', '前排 · 右')):
             self.header.create_text((edges[index]+edges[index+1])/2, 19,
                                     text=title, fill='#ded1ed', font=self.actor_font)
         y = 0
@@ -117,7 +120,7 @@ class BattleTable(tk.Frame):
                 cx = (edges[index]+edges[index+1])/2
                 texts = []
                 for event in slot:
-                    texts.extend(((event['actor'], self.actor_font, '#ffe4af'),
+                    texts.extend(((self.fit_title(actor_title(event), widths[index]-28), self.actor_font, '#ffe4af'),
                                   (event['skill'], self.skill_font, '#c6bef4')))
                 if not texts:
                     texts = [('/', self.actor_font, '#9388a8')]
@@ -136,7 +139,7 @@ class BattleTable(tk.Frame):
                 badges.append((f'Bonus {group["bonus"]}', '#ffdc9d', '#514432'))
             if group.get('additional') or group.get('extra'):
                 badges.append(('Extra', '#ffb4d7', '#513449'))
-            body_height = max(82, content_height+22, len(badges)*29+16)
+            body_height = max(82, content_height+22)
             height = body_height + (24 if row['unplaced'] else 0)
             fill = '#514360' if key in self.selected else ('#302b46' if number % 2 == 0 else '#352e4b')
             rect = self.canvas.create_rectangle(0, y, available, y+height, fill=fill, outline='#51475f')
@@ -144,10 +147,16 @@ class BattleTable(tk.Frame):
             for ids, block_height in blocks:
                 for item in ids:
                     self.canvas.move(item, 0, (body_height-block_height)/2)
-            badge_y = y+(body_height-len(badges)*29+5)/2
-            for text, color, background in badges:
-                self.badge(edges[1]/2, badge_y, text, color, background)
-                badge_y += 29
+            segments = []
+            for text, color, _ in badges:
+                if segments:
+                    segments.append((' / ', '#bdb1d4'))
+                segments.append((text, color))
+            x = (edges[1] - sum(self.badge_font.measure(t) for t, _ in segments))/2
+            for text, color in segments:
+                self.canvas.create_text(x, y+body_height/2, text=text, fill=color,
+                                        font=self.badge_font, anchor='w', tags=('context',))
+                x += self.badge_font.measure(text)
             for edge in edges[1:-1]:
                 self.canvas.create_line(edge, y+10, edge, y+body_height-10, fill='#554963')
             if row['unplaced']:

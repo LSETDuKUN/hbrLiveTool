@@ -2,6 +2,14 @@
 from collections import OrderedDict
 from .turns import context_label
 
+DISPLAY_POSITIONS = (1, 0, 2)
+POSITION_NAMES = {1: '左', 0: '中', 2: '右'}
+
+
+def actor_title(event):
+    style = event.get('style_name') or event.get('style_label')
+    return event['actor'] + (f' / {style}' if style else '')
+
 
 def table_rows(events):
     rows = OrderedDict()
@@ -21,12 +29,14 @@ def table_rows(events):
                 slots[position].append(event)
             else:
                 unknown.append(event)
+        # Game memory indexes the centre first; present screen left to right.
+        slots = [slots[position] for position in DISPLAY_POSITIONS]
         cells = []
         for slot in slots:
             actors = OrderedDict()
             for event in slot:
-                key = event.get('actor_id', event['actor'])
-                item = actors.setdefault(key, [event['actor'], []])
+                key = (event.get('actor_id', event['actor']), event.get('style_label'), event.get('style_name'))
+                item = actors.setdefault(key, [actor_title(event), []])
                 item[1].append(event['skill'])
             cells.append('；'.join(name + '\n' + ' / '.join(skills) for name, skills in actors.values()) or '/')
         row['values'] = (context_label(row['group']), *cells)
