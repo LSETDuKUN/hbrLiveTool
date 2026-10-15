@@ -19,6 +19,20 @@ def skill_title(event):
     return event['skill'] + (' · 追' if event.get('pursuit_count') else '')
 
 
+def beneficiary(event):
+    targets = {t['address']: t for t in event.get('targets', []) if t.get('is_player')}
+    if len(targets) == 1:
+        target = next(iter(targets.values()))
+        if target['address'] != event.get('actor_id'):
+            return target
+    return None
+
+
+def beneficiary_title(event):
+    target = beneficiary(event)
+    return actor_title(dict(target, actor=target.get('name') or '友方目标')) if target else ''
+
+
 def table_rows(events):
     rows = OrderedDict()
     for event in events:
@@ -56,7 +70,8 @@ def table_rows(events):
             for event in slot:
                 key = (event.get('actor_id', event['actor']), event.get('style_label'), event.get('style_name'))
                 item = actors.setdefault(key, [actor_title(event), []])
-                item[1].append(skill_title(event))
+                recipient = beneficiary_title(event)
+                item[1].append(skill_title(event)+(' → '+recipient if recipient else ''))
             cells.append('；'.join(name + '\n' + ' / '.join(skills) for name, skills in actors.values()) or '/')
         row['values'] = (context_label(row['group']), *cells)
         row['position_unknown'] = bool(unknown)

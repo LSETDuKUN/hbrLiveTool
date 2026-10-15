@@ -1,6 +1,7 @@
 """Exact enemy catalog enrichment; AI rules are reference, not a predicted turn axis."""
 import json
 import sqlite3
+from .skill_effects import EFFECT_NAMES
 
 
 def skill_title(skill):
@@ -15,7 +16,7 @@ def skill_title(skill):
 
 def skill_effects(skill):
     notes = [skill['desc']] if skill.get('desc') else []
-    kinds = {'AttackSkill': '攻击', 'Charge': '蓄力', 'AttackUp': '攻击提升',
+    kinds = {**EFFECT_NAMES, 'AttackSkill': '攻击', 'Charge': '蓄力', 'AttackUp': '攻击提升',
              'DefenseDown': '防御降低', 'HealDpRate': '按比例回复 DP', 'HealHpRate': '按比例回复 HP'}
     for part in skill.get('parts') or []:
         kind = part.get('skill_type')

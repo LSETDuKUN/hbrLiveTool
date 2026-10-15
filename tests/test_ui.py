@@ -6,6 +6,38 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_portraits_target_and_text_toggle(self):
+        from test_command_damage import event
+        photo = tk.PhotoImage(master=self.root, width=44, height=44)
+        e = dict(event(1, 0), actor_id=3, style_label='STezuka03',
+                 targets=[dict(address=9, name='苍井', is_player=True, style_label='EAoi04', style_name='风格')])
+        with patch.object(self.app.tree.portraits, 'get', return_value=photo) as lookup:
+            self.app.model.update(dict(enemies=[], events=[e]))
+            self.app.render([e])
+            canvas = self.app.tree.canvas
+            self.assertEqual(len([i for i in canvas.find_all() if canvas.type(i) == 'image']), 2)
+            images = [i for i in canvas.find_all() if canvas.type(i) == 'image']
+            skills = [i for i in canvas.find_all() if canvas.type(i) == 'text' and canvas.itemcget(i, 'text') == e['skill']]
+            self.assertEqual(canvas.coords(images[0])[1], canvas.coords(images[1])[1])
+            self.assertEqual(canvas.coords(images[0])[1], canvas.coords(skills[0])[1])
+            self.assertIn((('EAoi04',),), [(call.args,) for call in lookup.call_args_list])
+            self.app.tree.toggle_portraits()
+            self.assertFalse(any(canvas.type(i) == 'image' for i in canvas.find_all()))
+            texts = [canvas.itemcget(i, 'text') for i in canvas.find_all() if canvas.type(i) == 'text']
+            self.assertIn('→ 苍井 / 风格', texts)
+
+    def test_enemy_effect_text_expands_card_without_overlapping_footer(self):
+        branch = dict(skills=['技能'], effects=['5 Hit · 全体 · 资料威力 2075–24900（非实伤） · 混乱'],
+                      status='matched', share=1, weight=100)
+        self.app.model.update(dict(enemies=[dict(address=4, hp=100, dp=100, name='敌人',
+             forecast=dict(branches=[branch], text='技能', blink=False))], events=[]))
+        self.app.render()
+        card = self.app.enemy_cards[4]
+        with patch.object(card, 'winfo_width', return_value=300):
+            card.draw()
+        effects = card.find_withtag('skill_effects')
+        self.assertEqual(len(effects), 1)
+        self.assertLess(card.bbox(effects[0])[3], card.footer_y)
     def test_command_damage_cards_accumulate_and_settle_animation(self):
         from test_command_damage import event
         for value in (1000, 11086):

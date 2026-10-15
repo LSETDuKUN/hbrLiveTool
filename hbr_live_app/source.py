@@ -92,8 +92,11 @@ def snapshot(r, module):
                 if r.cls(content) != 'HitContent':
                     raise RuntimeError('命中内容已失效')
                 target = r.q(hit + 24)
-                target_name = r.string(r.q(r.q(r.q(target + 488) + 16) + 24)) if r.cls(target) == 'BattlePlayerData' else r.string(r.q(target + 496)) if r.cls(target) == 'BattleEnemyData' else None
-                hits.append(dict(address=hit, target=target, target_name=target_name, type=r.i(hit + 16),
+                target_is_player = r.cls(target) == 'BattlePlayerData'
+                target_style = r.string(r.q(r.q(r.q(target+488)+16)+24)) if target_is_player else ''
+                target_name = target_style if target_is_player else r.string(r.q(target + 496)) if r.cls(target) == 'BattleEnemyData' else None
+                hits.append(dict(address=hit, target=target, target_name=target_name,
+                    target_is_player=target_is_player, target_style_label=target_style, type=r.i(hit + 16),
                     finished=r.read(hit + 41, 1) == b'\1', damage=r.i(content + 36) or 0,
                     raw_damage=r.i(content + 32), result_type=r.i(content + 28),
                     index=r.i(hit + 20), funnel=r.read(content + 174, 1) == b'\1',
@@ -186,6 +189,7 @@ def run(stop, paused, emit, outdir):
                     action['style_name'] = names.style(action['style_label']) if action.get('style_label') else ''
                     action['actor_name'] = names.actor(action['actor_name'])
                     for hit in action['hits']:
+                        hit['target_style_name'] = names.style(hit['target_style_label']) if hit.get('target_style_label') else ''
                         if hit.get('target_name'):
                             hit['target_name'] = names.actor(hit['target_name'])
                 player_states = []

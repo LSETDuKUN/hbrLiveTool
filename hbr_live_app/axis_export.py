@@ -2,7 +2,7 @@
 import html
 import json
 from pathlib import Path
-from .history import table_rows, actor_title, skill_title
+from .history import table_rows, actor_title, skill_title, beneficiary_title
 
 
 def cells(row):
@@ -11,16 +11,29 @@ def cells(row):
         lines = []
         for event in slot:
             lines.extend([(skill_title(event), True), (actor_title(event), False)])
+            if beneficiary_title(event):
+                lines.append(('→ '+beneficiary_title(event), False))
         result.append(lines or [('/', False)])
     return result
 
 
-def save_axis(data, path):
+def save_axis(data, path, portraits=False):
     path = Path(path)
     rows = list(table_rows(data['actions']).values())
     if path.suffix.lower() == '.html':
         body = []
+        from .axis_portraits import Images, event_html
+        images = Images()
         for row in rows:
+            if portraits:
+                label = '<td>'+html.escape(row['values'][0])+'</td>'
+                if (row['group'] or {}).get('kind') == 'instant':
+                    body.append('<tr>'+label+'<td colspan="3">'+''.join(event_html(e, images) for e in row['events'])+'</td></tr>')
+                else:
+                    body.append('<tr>'+label+''.join('<td>'+(''.join(event_html(e, images) for e in slot) or '/')+'</td>' for slot in row['slots'])+'</tr>')
+                    if row['unplaced']:
+                        body.append('<tr><td>站位未确认</td><td colspan="3">'+''.join(event_html(e, images) for e in row['unplaced'])+'</td></tr>')
+                continue
             if (row['group'] or {}).get('kind') == 'instant':
                 body.append('<tr><td>'+html.escape(row['values'][0])+'</td><td colspan="3"><strong>'+
                     html.escape(' / '.join(e['skill'] for e in row['events']))+'</strong><br>不占指令 · '+
@@ -40,6 +53,7 @@ body{background:#201d32;color:#f7f0ff;font:16px "Microsoft YaHei",sans-serif;mar
 table{border-collapse:collapse;width:100%;table-layout:fixed}td,th{padding:16px;text-align:center;
 border-bottom:1px solid #605077;overflow-wrap:anywhere}td{color:#bdb1d4}strong{color:#ffd398;font-size:19px}
 th{color:#f5aacb}pre{white-space:pre-wrap;overflow-wrap:anywhere}summary{cursor:pointer;margin-top:24px}
+.event{display:flex;align-items:center;justify-content:center;gap:14px;min-height:76px}.event img{flex-shrink:0;object-fit:contain}.event strong{min-width:0}
 </style><h1>HBR Live · 行动轴</h1>'''
         page += '<p>'+html.escape(str(data.get('run_id') or '本场战斗'))+'</p>'
         page += '<table><thead><tr><th>回合</th><th>左</th><th>中</th><th>右</th></tr></thead><tbody>'
@@ -48,6 +62,9 @@ th{color:#f5aacb}pre{white-space:pre-wrap;overflow-wrap:anywhere}summary{cursor:
         return [path]
     if path.suffix.lower() != '.png':
         raise ValueError('请选择 .png 图片或 .html 表格。')
+    if portraits:
+        from .axis_portraits import save_portrait_png
+        return save_portrait_png(data, rows, path)
     return save_png(data, rows, path)
 
 

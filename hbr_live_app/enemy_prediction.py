@@ -5,6 +5,7 @@ from .enemy_conditions import evaluate
 
 def branches(info, rules, state):
     from .enemy_info import skill_title
+    from .skill_effects import preview_effects
     result = []
     for rule in rules:
         weight = rule.get('weight', 0)
@@ -25,6 +26,7 @@ def branches(info, rules, state):
                            status='matched' if verdict is True else 'unknown', weight=weight,
                            observed=bool('PlayedSkillCount' in rule.get('condition', '') and state.get('played_source')),
                            skills=[skill_title(s) for s in skills] or ['未收录技能'],
+                           effects=[preview_effects(s) for s in skills],
                            skill_ids=rule.get('skill_list', []), share=None, once=bool(rule.get('once'))))
     # These are conditional weight shares, not measured in-game probabilities.
     if result and all(b['status'] == 'matched' for b in result):

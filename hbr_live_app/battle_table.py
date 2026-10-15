@@ -1,7 +1,7 @@
 """Centered, individually styled table cells backed by a scrollable Tk canvas."""
 import tkinter as tk
 from tkinter import font as tkfont
-from .history import actor_title, skill_title
+from .history import actor_title, skill_title, beneficiary, beneficiary_title
 from .turns import context_label
 
 
@@ -16,6 +16,9 @@ class BattleTable(tk.Frame):
         self.rows = {}
         self.selected = ()
         self.bounds = {}
+        from .portraits import Portraits
+        self.portraits = Portraits(self)
+        self.show_portraits = True
         self.actor_font = tkfont.Font(family='Microsoft YaHei UI', size=-12)
         self.skill_font = tkfont.Font(family='Microsoft YaHei UI', size=-16, weight='bold')
         self.badge_font = tkfont.Font(family='Segoe UI', size=-13, weight='bold')
@@ -78,12 +81,56 @@ class BattleTable(tk.Frame):
             self.canvas.yview_moveto(1)
 
     def click(self, event):
+        current = self.canvas.find_withtag('current')
+        if current and 'portrait_switch' in self.canvas.gettags(current[0]):
+            self.toggle_portraits()
+            return
         y = self.canvas.canvasy(event.y)
         for key, (top, bottom) in self.bounds.items():
             if top <= y < bottom:
                 self.selection_set(key)
                 self.canvas.focus_set()
                 break
+
+    def toggle_portraits(self):
+        self.show_portraits = not self.show_portraits
+        self.redraw()
+
+    def draw_event(self, cx, y, width, event):
+        photo = self.portraits.get(event.get('style_label')) if self.show_portraits else None
+        target = beneficiary(event)
+        ids = []
+        if photo:
+            skill_width = min(self.skill_font.measure(skill_title(event))+4, max(60, width-(154 if target else 84)))
+            total_width = 44+14+skill_width+(78 if target else 0)
+            left = cx-total_width/2
+            ids.append(self.canvas.create_image(left+22, 0, image=photo, tags='portrait_switch'))
+            ids.append(self.canvas.create_text(left+58+skill_width/2, 0, text=skill_title(event),
+                width=skill_width, font=self.skill_font, fill='#ffe4af', justify='center'))
+            if target:
+                right = left+total_width-22
+                target_photo = self.portraits.get(target.get('style_label'))
+                if target_photo:
+                    ids.append(self.canvas.create_image(right, 0, image=target_photo, tags='portrait_switch'))
+                else:
+                    ids.append(self.canvas.create_text(right, 0, text=target.get('name') or '友方',
+                        width=44, font=self.actor_font, fill='#83e5ed', justify='center', tags='portrait_switch'))
+                ids.append(self.canvas.create_text(right-38, 0, text='→', font=self.actor_font, fill='#83e5ed'))
+            height = max(64, max(self.canvas.bbox(item)[3]-self.canvas.bbox(item)[1] for item in ids)+20)
+            for item in ids:
+                self.canvas.move(item, 0, y+height/2)
+            return ids, height
+        texts = [(self.fit_title(actor_title(event), width-28), self.actor_font, '#bdb1d4'),
+                 (skill_title(event), self.skill_font, '#ffe4af')]
+        if target:
+            texts.append(('→ '+beneficiary_title(event), self.actor_font, '#83e5ed'))
+        height = 0
+        for index, (text, font, color) in enumerate(texts):
+            item = self.canvas.create_text(cx, y+height, text=text, font=font, fill=color,
+                width=width-28, justify='center', anchor='n', tags='portrait_switch' if index == 0 else ())
+            height += self.canvas.bbox(item)[3]-self.canvas.bbox(item)[1]+6
+            ids.append(item)
+        return ids, height
 
     def step(self, direction):
         keys = list(self.rows)
@@ -116,17 +163,14 @@ class BattleTable(tk.Frame):
         y = 0
         for number, (key, row) in enumerate(self.rows.items()):
             if (row['group'] or {}).get('kind') == 'instant':
-                height = 100
-                self.canvas.create_rectangle(0, y, available, y+height,
+                items, content_height = self.draw_event((edges[1]+available)/2, y+10,
+                    available-edges[1], row['events'][0])
+                height = max(84, content_height+20)
+                rect = self.canvas.create_rectangle(0, y, available, y+height,
                     fill='#514360' if key in self.selected else '#352e4b', outline='#51475f')
+                self.canvas.tag_lower(rect)
                 self.canvas.create_text(edges[1]/2, y+height/2, text=context_label(row['group']),
                     width=edges[1]-20, font=self.badge_font, fill='#ffdc9d', justify='center')
-                self.canvas.create_text((edges[1]+available)/2, y+34,
-                    text=' / '.join(e['skill'] for e in row['events']),
-                    font=self.skill_font, fill='#ffe4af', width=available-edges[1]-28, justify='center')
-                self.canvas.create_text((edges[1]+available)/2, y+68,
-                    text='不占指令 · '+ ' / '.join(dict.fromkeys(actor_title(e) for e in row['events'])),
-                    font=self.actor_font, fill='#bdb1d4')
                 self.bounds[key] = (y, y+height)
                 y += height
                 continue
@@ -134,19 +178,14 @@ class BattleTable(tk.Frame):
             content_height = 0
             for index, slot in enumerate(row['slots'], 1):
                 cx = (edges[index]+edges[index+1])/2
-                texts = []
-                for event in slot:
-                    texts.extend(((self.fit_title(actor_title(event), widths[index]-28), self.actor_font, '#bdb1d4'),
-                                  (skill_title(event), self.skill_font, '#ffe4af')))
-                if not texts:
-                    texts = [('/', self.actor_font, '#9388a8')]
                 ids, height = [], 0
-                for text, font, color in texts:
-                    item = self.canvas.create_text(cx, y+height, text=text, font=font, fill=color,
-                                width=widths[index]-28, justify='center', anchor='n')
-                    box = self.canvas.bbox(item)
-                    height += box[3]-box[1]+6
-                    ids.append(item)
+                for event in slot:
+                    items, block_height = self.draw_event(cx, y+height, widths[index], event)
+                    ids.extend(items)
+                    height += block_height
+                if not slot:
+                    ids.append(self.canvas.create_text(cx, y, text='/', font=self.actor_font, fill='#9388a8', anchor='n'))
+                    height = 24
                 blocks.append((ids, height))
                 content_height = max(content_height, height)
             group = row['group'] or {}

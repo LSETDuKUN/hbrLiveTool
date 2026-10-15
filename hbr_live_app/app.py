@@ -165,6 +165,8 @@ class App:
         self.resource_note.pack(fill='x', padx=8, pady=5, before=self.enemy_view)
         self.history = tk.Frame(self.body, bg=BG)
         self.label(self.history, '行动记录', PINK, 13).pack(anchor='w', pady=(2, 10))
+        tk.Button(self.history, text='切换头像 / 角色风格', command=lambda: self.tree.toggle_portraits(),
+                  bg=CARD, fg=DIM, relief='flat', font=FONT).pack(anchor='e')
         tree_wrap = tk.Frame(self.history, bg=CARD)
         tree_wrap.pack(fill='both', expand=True)
         self.tree = BattleTable(tree_wrap)
@@ -511,7 +513,7 @@ class App:
         if path:
             try:
                 from .axis_export import save_axis
-                files = save_axis(data, Path(path))
+                files = save_axis(data, Path(path), portraits=self.tree.show_portraits)
                 self.set_status(f'行动轴已保存 · {len(files)} 个文件')
             except (OSError, ValueError, ImportError) as exc:
                 messagebox.showerror('保存失败', str(exc), parent=self.root)

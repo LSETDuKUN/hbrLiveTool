@@ -129,7 +129,16 @@ class EnemyCard(tk.Canvas):
         branches = preview.get('branches', [])
         visible = branches[:4]
         following = preview.get('future', [])[:2]
-        band_bottom = 169 + max(1, len(visible))*58
+        effect_texts, branch_heights = [], []
+        for branch in visible:
+            effects = branch.get('effects', [])
+            effect_text = '\n'.join((f'{i+1}. ' if len(effects)>1 else '')+value for i, value in enumerate(effects))
+            effect_texts.append(effect_text)
+            item = self.create_text(0, 0, text=effect_text, font=self.font, width=w-36, anchor='nw')
+            box = self.bbox(item)
+            branch_heights.append(58+(box[3]-box[1]+8 if effect_text and box else 0))
+            self.delete(item)
+        band_bottom = 169 + (sum(branch_heights) or 58)
         self.footer_y = band_bottom + 28*len(following) + (28 if preview.get('fallback') else 0) + 25
         height = self.footer_y+14
         if int(self.cget('height')) != height:
@@ -183,8 +192,9 @@ class EnemyCard(tk.Canvas):
         colors = ['#ffe4af', '#a9dbea', '#eab5d6', '#c5c1fa']
         if not visible:
             visible = [dict(skills=[text], status='unknown', share=None, weight=None)]
+        top = 169
         for index, branch in enumerate(visible):
-            top = 169+index*58
+            row_height = branch_heights[index] if index < len(branch_heights) else 58
             titles = branch['skills']
             content = '  ·  '.join(f'{i+1} {title}' for i, title in enumerate(titles)) if len(titles)>1 else titles[0]
             item = self.create_text(18, top+shift, text=content, width=w-36, anchor='nw',
@@ -192,13 +202,17 @@ class EnemyCard(tk.Canvas):
             while self.bbox(item)[3] > top+36+shift and len(content)>6:
                 content = content[:-2]+'…'
                 self.itemconfigure(item, text=content)
+            if index < len(effect_texts) and effect_texts[index]:
+                self.create_text(18, top+40, text=effect_texts[index], width=w-36, anchor='nw',
+                                 fill='#d0c5dd', font=self.font, tags='skill_effects')
             if branch.get('share') is not None and len(branches)>1:
-                self.create_line(18, top+44, 18+(w-135)*branch['share'], top+44, fill=colors[index], width=4)
-                self.create_text(w-18, top+44, text=f'{branch["share"]:.0%} 权重', anchor='e', fill=colors[index], font=self.font)
+                self.create_line(18, top+row_height-14, 18+(w-135)*branch['share'], top+row_height-14, fill=colors[index], width=4)
+                self.create_text(w-18, top+row_height-14, text=f'{branch["share"]:.0%} 权重', anchor='e', fill=colors[index], font=self.font)
             elif branch.get('weight') is not None:
                 label = ('观测推演' if branch.get('observed') else '条件已满足') if branch['status']=='matched' else '条件待确认'
-                self.create_text(18, top+44, text=label + (f' · 权重 {branch["weight"]}' if len(branches)>1 else ''),
+                self.create_text(18, top+row_height-14, text=label + (f' · 权重 {branch["weight"]}' if len(branches)>1 else ''),
                                  anchor='w', fill='#c0b3ca', font=self.font)
+            top += row_height
         below = band_bottom+15
         for row in following:
             title = ' / '.join(' → '.join(b['skills']) for b in row['branches'])

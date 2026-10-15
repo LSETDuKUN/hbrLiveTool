@@ -32,12 +32,17 @@ class ActionLedger:
                 old['observed'] = True
                 changed = True
             for hit in entry['hits']:
-                if hit['finished'] and hit.get('index') != 99:
+                if hit['finished'] and (hit.get('index') != 99 or old['observed']):
                     if not old['observed']:
                         changed = True
                     old['observed'] = True
                     if hit['target'] and hit['target'] not in old['targets']:
-                        old['targets'][hit['target']] = hit.get('target_name') or '目标未命名'
+                        target = dict(name=hit.get('target_name') or '目标未命名')
+                        for source, dest in [('target_is_player', 'is_player'),
+                                             ('target_style_label', 'style_label'), ('target_style_name', 'style_name')]:
+                            if source in hit:
+                                target[dest] = hit[source]
+                        old['targets'][hit['target']] = target
                         changed = True
             for hit in entry['hits']:
                 if hit['finished'] and hit['target'] in enemies and hit['type'] == 1 and hit['damage'] > 0:
@@ -58,4 +63,4 @@ class ActionLedger:
                     instant=old['instant'],
                     style_label=old['style_label'], style_name=old['style_name'],
                     value=sum(h['damage'] for h in hits), hits=hits, settled=done,
-                    targets=[dict(address=k, name=v) for k,v in old['targets'].items()])
+                    targets=[dict(address=k, **v) for k,v in old['targets'].items()])
