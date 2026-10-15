@@ -1,0 +1,759 @@
+{
+  "label": "BigotryGateAmonDefault01_04",
+  "pattern": {
+    "dp": {
+      "l": "BigotryGateAmonDefaultHard_DP1",
+      "p": [
+        {
+          "id": 39425701,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125562
+          ]
+        },
+        {
+          "id": 39425702,
+          "order": 2,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125561
+          ]
+        },
+        {
+          "id": 39425703,
+          "order": 3,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125563
+          ]
+        },
+        {
+          "id": 39425704,
+          "order": 4,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125565,
+            46125561
+          ]
+        },
+        {
+          "id": 39425705,
+          "order": 5,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125562
+          ]
+        },
+        {
+          "id": 39425706,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125563
+          ]
+        },
+        {
+          "id": 39425707,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125564
+          ]
+        },
+        {
+          "id": 39425708,
+          "order": 8,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125562
+          ]
+        },
+        {
+          "id": 39425709,
+          "order": 9,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125565,
+            46125563
+          ]
+        },
+        {
+          "id": 39425710,
+          "order": 10,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125561
+          ]
+        }
+      ]
+    },
+    "hp": {
+      "l": "BigotryGateAmonDefaultHard_break",
+      "p": [
+        {
+          "id": 39425761,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125564
+          ]
+        },
+        {
+          "id": 39425762,
+          "order": 2,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125565,
+            46125563
+          ]
+        },
+        {
+          "id": 39425763,
+          "order": 3,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125561
+          ]
+        },
+        {
+          "id": 39425764,
+          "order": 4,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125562
+          ]
+        },
+        {
+          "id": 39425765,
+          "order": 5,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125565,
+            46125563
+          ]
+        },
+        {
+          "id": 39425766,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125564
+          ]
+        },
+        {
+          "id": 39425767,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46125561
+          ]
+        }
+      ]
+    }
+  },
+  "bars": {
+    "main": [
+      {
+        "v": 1600000,
+        "g": "BigotryGateAmonDefaultHard_DP1",
+        "inh": false,
+        "kind": "dp"
+      },
+      {
+        "v": 1600000,
+        "g": "BigotryGateAmonDefaultHard_DP2",
+        "inh": false,
+        "kind": "dp"
+      },
+      {
+        "v": 1600000,
+        "g": "BigotryGateAmonDefaultHard_DP3",
+        "inh": false,
+        "kind": "dp"
+      }
+    ],
+    "break": [
+      {
+        "v": 1166600,
+        "g": "BigotryGateAmonDefaultHard_break",
+        "inh": false,
+        "kind": "hp"
+      }
+    ],
+    "esp": 0
+  },
+  "extra_gauge": {
+    "dp": [
+      1600000,
+      1600000,
+      1600000
+    ],
+    "hp": null,
+    "esp": 0,
+    "eshield": {
+      "def_up_rate": 0,
+      "dmg_limit": 0,
+      "ele_list": null
+    },
+    "pattern": {
+      "dp": [
+        {
+          "l": "BigotryGateAmonDefaultHard_DP1",
+          "p": [
+            {
+              "id": 39425701,
+              "order": 1,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125562
+              ]
+            },
+            {
+              "id": 39425702,
+              "order": 2,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125561
+              ]
+            },
+            {
+              "id": 39425703,
+              "order": 3,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            },
+            {
+              "id": 39425704,
+              "order": 4,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125561
+              ]
+            },
+            {
+              "id": 39425705,
+              "order": 5,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125562
+              ]
+            },
+            {
+              "id": 39425706,
+              "order": 6,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            },
+            {
+              "id": 39425707,
+              "order": 7,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            },
+            {
+              "id": 39425708,
+              "order": 8,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125562
+              ]
+            },
+            {
+              "id": 39425709,
+              "order": 9,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125563
+              ]
+            },
+            {
+              "id": 39425710,
+              "order": 10,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125561
+              ]
+            }
+          ]
+        },
+        {
+          "l": "BigotryGateAmonDefaultHard_DP2",
+          "p": [
+            {
+              "id": 39425721,
+              "order": 1,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            },
+            {
+              "id": 39425722,
+              "order": 2,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125562
+              ]
+            },
+            {
+              "id": 39425723,
+              "order": 3,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            },
+            {
+              "id": 39425724,
+              "order": 4,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125561
+              ]
+            },
+            {
+              "id": 39425725,
+              "order": 5,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            },
+            {
+              "id": 39425726,
+              "order": 6,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125561
+              ]
+            },
+            {
+              "id": 39425727,
+              "order": 7,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125562
+              ]
+            },
+            {
+              "id": 39425728,
+              "order": 8,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            }
+          ]
+        },
+        {
+          "l": "BigotryGateAmonDefaultHard_DP3",
+          "p": [
+            {
+              "id": 39425741,
+              "order": 1,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            },
+            {
+              "id": 39425742,
+              "order": 2,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125561
+              ]
+            },
+            {
+              "id": 39425743,
+              "order": 3,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            },
+            {
+              "id": 39425744,
+              "order": 4,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            },
+            {
+              "id": 39425745,
+              "order": 5,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125565,
+                46125562
+              ]
+            },
+            {
+              "id": 39425746,
+              "order": 6,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125563
+              ]
+            },
+            {
+              "id": 39425747,
+              "order": 7,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125562
+              ]
+            },
+            {
+              "id": 39425748,
+              "order": 8,
+              "is_preemptive": false,
+              "once": false,
+              "weight": 100,
+              "condition": "",
+              "target_weight": null,
+              "skill_list": [
+                46125564
+              ]
+            }
+          ]
+        }
+      ],
+      "hp": []
+    }
+  },
+  "skills": [
+    {
+      "id": 46125561,
+      "label": "BigotryGateAmonD_AttackSingle01",
+      "name": "",
+      "desc": "",
+      "hit_count": 3,
+      "target_type": "Single",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-02-01 05:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46125562,
+      "label": "BigotryGateAmonD_AttackSingle02",
+      "name": "Disaster Shot",
+      "desc": "",
+      "hit_count": 1,
+      "target_type": "Single",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-02-01 05:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46125563,
+      "label": "BigotryGateAmonD_AttackAll01",
+      "name": "Strong Impulse",
+      "desc": "",
+      "hit_count": 1,
+      "target_type": "All",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-02-01 05:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46125564,
+      "label": "BigotryGateAmonD_AttackAll02",
+      "name": "Planar Collapse",
+      "desc": "",
+      "hit_count": 5,
+      "target_type": "All",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [
+        {
+          "id": 1,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 2,
+          "type": "Main",
+          "power_ratio": 0.2
+        },
+        {
+          "id": 3,
+          "type": "Main",
+          "power_ratio": 0.2
+        },
+        {
+          "id": 4,
+          "type": "Main",
+          "power_ratio": 0.2
+        },
+        {
+          "id": 5,
+          "type": "Main",
+          "power_ratio": 0.3
+        }
+      ],
+      "in_date": "2026-02-01 05:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46125565,
+      "label": "BigotryGateAmonD_AttackUp",
+      "name": "Lasting Power",
+      "desc": "",
+      "hit_count": -1,
+      "target_type": "Self",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-02-01 05:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    }
+  ]
+}

@@ -99,7 +99,9 @@ def snapshot(r, module):
                     index=r.i(hit + 20), funnel=r.read(content + 174, 1) == b'\1',
                     critical=r.read(content + 171, 1) == b'\1'))
         style_label = r.string(r.q(card + 24)) if card else ''
-        actions.append(dict(style_label=style_label, address=entry, actor=actor, actor_position=r.i(actor + 36), actor_is_player=r.cls(actor) == 'BattlePlayerData', executing=entry == preserved, actor_name=style_label or r.cls(actor),
+        actor_class = r.cls(actor)
+        instant = actor_class == 'BattleSpecialCommandCharacterData'
+        actions.append(dict(instant=instant, style_label=style_label, address=entry, actor=actor, actor_position=None if instant else r.i(actor + 36), actor_is_player=actor_class in ('BattlePlayerData', 'BattleSpecialCommandCharacterData'), executing=entry == preserved, actor_name=style_label or ('小按钮' if instant else actor_class),
             skill=r.string(r.q(master + 24)), skill_name=r.string(r.q(master + 32)) or '未知技能',
             hit_set=hit_set, hits=hits))
     return states, actions
@@ -116,6 +118,8 @@ def run(stop, paused, emit, outdir):
     commands = CommandLedger()
     names = Names()
     enemy_reader = EnemyReader(r)
+    from .player_transitions import PlayerTransitions
+    player_transitions = PlayerTransitions()
     try:
         r.open_process(game_pid())
         emit(('status', '正在定位战斗，请暂不行动…'))
@@ -146,6 +150,8 @@ def run(stop, paused, emit, outdir):
             previous_context = None
             while not stop.is_set():
                 if paused.is_set():
+                    enemy_reader.observations.invalidate()
+                    player_transitions.invalidate()
                     stop.wait(0.1)
                     continue
                 context = None
@@ -169,6 +175,7 @@ def run(stop, paused, emit, outdir):
                     context['frontline'] = last_formation
                 if not states:
                     break
+                enemy_reader.observations.update(states, actions)
                 for state in states:
                     try:
                         state.update(enemy_reader.sample(state, context))
@@ -181,9 +188,17 @@ def run(stop, paused, emit, outdir):
                     for hit in action['hits']:
                         if hit.get('target_name'):
                             hit['target_name'] = names.actor(hit['target_name'])
-                events = commands.update(ledger.update(actions, known_enemies), context)
+                player_states = []
+                transitions = []
+                try:
+                    player_states = player_transitions.sample(r, formation_reader, names)
+                    transitions = player_transitions.update(player_states)
+                except (RuntimeError, ValueError, TypeError, KeyError):
+                    player_transitions.invalidate()
+                events = commands.update(transitions + ledger.update(actions, known_enemies), context)
                 if states != previous or events or context != previous_context:
-                    packet = dict(time=time.time(), enemies=states, events=events, turn_context=context)
+                    packet = dict(time=time.time(), enemies=states, events=events, turn_context=context,
+                                  player_states=player_states)
                     emit(('snapshot', packet))
                     log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     log.flush()
@@ -197,6 +212,8 @@ def run(stop, paused, emit, outdir):
                 stop.wait(0.02)
             log.write(json.dumps({'kind': 'end', 'time': time.time(), 'reason': 'stopped' if stop.is_set() else 'battle_end'})+'\n')
         emit(('status', '已停止 · 记录已保存' if stop.is_set() else '战斗结束 · 记录已保存'))
+        if not stop.is_set():
+            emit(('battle_end', {'run_id': run_id}))
     except InterruptedError:
         emit(('status', '已取消连接'))
     except Exception as exc:

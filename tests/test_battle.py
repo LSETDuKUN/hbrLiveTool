@@ -164,6 +164,7 @@ class ReadFailures(unittest.TestCase):
             records = [json.loads(line) for line in next(Path(directory).glob('*.jsonl')).read_text(encoding='utf-8').splitlines()]
         self.assertFalse(any(kind == 'error' for kind, _ in messages))
         self.assertEqual(records[-1]['reason'], 'battle_end')
+        self.assertEqual(sum(kind == 'battle_end' for kind, _ in messages), 1)
         model = BattleModel()
         for record in records:
             if 'enemies' in record:

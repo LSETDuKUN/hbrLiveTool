@@ -85,6 +85,8 @@ class CommandLedger:
         self.pending = None
         self.last_context = None
         self.unresolved = {}
+        self.pending_instants = {}
+        self.damage_groups = {}
 
     @staticmethod
     def identity(context):
@@ -112,7 +114,12 @@ class CommandLedger:
             key = event['event_id']
             if key not in self.events:
                 group = None
-                if context and context.get('command_visit', context['command_count']) > 0:
+                if event.get('instant'):
+                    group = copy.deepcopy(context or {})
+                    group.update(id=f'instant:{key}', kind='instant')
+                    bucket = next(iter(self.pending_instants.values()))['damage_group_id'] if self.pending_instants else f'pending:{key}'
+                    self.damage_groups[key] = bucket
+                elif context and context.get('command_visit', context['command_count']) > 0:
                     count = context.get('command_visit', context['command_count'])
                     if count not in self.groups:
                         source = self.pending if self.pending and self.pending.get('command_visit', self.pending['command_count']) == count else context
@@ -122,13 +129,22 @@ class CommandLedger:
                         group.update(id=count, sequence=len(self.groups) + 1)
                         self.groups[count] = group
                     group = self.groups[count]
+                    for instant_key, saved in self.pending_instants.items():
+                        self.damage_groups[instant_key] = group['id']
+                        result.append(dict(saved, damage_group_id=group['id']))
+                    self.pending_instants.clear()
                 self.events[key] = group
                 if context is None:
                     self.unresolved[key] = (copy.deepcopy(event), self.identity(self.last_context))
             elif key in self.unresolved:
                 self.unresolved[key] = (copy.deepcopy(event), self.unresolved[key][1])
             # Final hits may arrive after Turn/OD has changed: never re-parent.
-            result.append(dict(event, command=copy.deepcopy(self.events[key]) if self.events[key] else None))
+            record = dict(event, command=copy.deepcopy(self.events[key]) if self.events[key] else None)
+            if key in self.damage_groups:
+                record['damage_group_id'] = self.damage_groups[key]
+            if event.get('instant') and isinstance(self.damage_groups.get(key), str) and self.damage_groups[key].startswith('pending:'):
+                self.pending_instants[key] = copy.deepcopy(record)
+            result.append(record)
         if context:
             self.last_context = copy.deepcopy(context)
         return result
@@ -137,9 +153,11 @@ class CommandLedger:
 def context_label(group):
     if not group:
         return '回合未识别'
-    parts = [f'Turn {group["turn"]}']
-    if group['od']:
+    parts = [f'Turn {group["turn"]}'] if group.get('turn') else ['回合未识别']
+    if group.get('od'):
         parts.append(f'Bonus {group["bonus"]}')
     if group.get('additional') or group.get('extra'):
         parts.append('Extra')
+    if group.get('kind') == 'instant':
+        parts.append('小按钮')
     return ' / '.join(parts)

@@ -6,6 +6,54 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_command_damage_cards_accumulate_and_settle_animation(self):
+        from test_command_damage import event
+        for value in (1000, 11086):
+            e = event(1, value)
+            self.app.model.update(dict(enemies=[], events=[e]))
+            self.app.render([e])
+        self.assertEqual(self.app.total_label.cget('text'), '11,086')
+        self.assertEqual(self.app.current_damage_label.cget('text'), '1,000 + 10,086')
+        self.root.after_cancel(self.app.damage_timer)
+        self.app.settle_damage()
+        self.assertEqual(self.app.current_damage_label.cget('text'), '11,086')
+        e = event(2, 10, command=2)
+        self.app.model.update(dict(enemies=[], events=[e]))
+        self.app.render([e])
+        self.assertEqual(self.app.total_label.cget('text'), '11,086')
+        self.assertEqual(self.app.current_damage_label.cget('text'), '0 + 10')
+
+    def test_history_defaults_hidden_and_can_be_embedded_without_losing_records(self):
+        self.assertFalse(self.app.history_visible.get())
+        self.assertEqual(self.app.history.winfo_manager(), '')
+        event = dict(event_id=1, actor='角色', skill='技能', value=1, hits=[], settled=True)
+        self.app.model.update(dict(enemies=[], events=[event]))
+        self.app.render([event])
+        for visible in (True, False, True):
+            self.app.history_visible.set(visible)
+            self.app.layout()
+            self.assertEqual(self.app.history.winfo_manager(), 'grid' if visible else '')
+            self.assertEqual(len(self.app.model.actions), 1)
+
+    def test_only_battle_end_offers_save_once_and_decline_does_not_export(self):
+        self.app.model.actions[1] = dict(event_id=1, actor='角色', skill='技能', value=1, hits=[], settled=True)
+        self.app.queue.put(('stopped', None))
+        with patch.object(self.app.root, 'after_idle') as later:
+            self.app.pump()
+            later.assert_not_called()
+            self.app.queue.put(('battle_end', dict(run_id='one')))
+            self.app.queue.put(('battle_end', dict(run_id='one')))
+            self.app.pump()
+            later.assert_called_once()
+        with patch('hbr_live_app.app.messagebox.askyesno', return_value=False), \
+                patch.object(self.app, 'export_axis') as export:
+            self.app.offer_axis(self.app.model.export())
+            export.assert_not_called()
+        with patch('hbr_live_app.app.messagebox.askyesno', return_value=True), \
+                patch.object(self.app, 'export_axis') as export:
+            self.app.offer_axis(self.app.model.export())
+            export.assert_called_once()
+
     def setUp(self):
         self.root = tk.Tk()
         self.root.withdraw()
@@ -14,6 +62,8 @@ class DashboardTests(unittest.TestCase):
 
     def tearDown(self):
         self.app.closing = True
+        for card in self.app.enemy_cards.values():
+            card.set_monitoring(False)
         self.root.update_idletasks()
         for after in self.root.tk.call('after', 'info'):
             self.root.after_cancel(after)
@@ -78,11 +128,12 @@ class DashboardTests(unittest.TestCase):
         card.update_state(self.app.model.enemies[4])
         self.assertEqual(card.name_kind, 'en')
         with patch.object(self.app, 'text_window') as show:
-            card.click(SimpleNamespace(y=219))
+            card.click(SimpleNamespace(y=card.footer_y))
             self.assertIn('English Enemy', show.call_args.args[1])
             self.assertIn('DP 阶段规则', show.call_args.args[1])
         card.set_monitoring(False)
         self.assertIsNone(card.timer)
+
         card.set_monitoring(True)
         card.update_state(dict(self.app.model.enemies[4], dp=50))
         self.assertIsNotNone(card.trail_timer)
@@ -92,6 +143,36 @@ class DashboardTests(unittest.TestCase):
         card.set_monitoring(True)
         card.update_state(dict(self.app.model.enemies[4], active=False))
         self.assertIsNone(card.timer)
+
+    def test_enemy_wheel_branches_and_progress_animation(self):
+        from hbr_live_app.enemy_prediction import predict
+        info = dict(patterns={'dp': dict(l='rules', p=[
+            dict(id=1, order=1, weight=75, skill_list=[1, 2]),
+            dict(id=2, order=1, weight=25, skill_list=[2]),
+            dict(id=3, order=2, weight=100, skill_list=[2])])},
+            skills={1: dict(name='技能甲'), 2: dict(name='技能乙')})
+        live = dict(dp=100, dp_order=0, hp_order=0, dp_pattern='rules', down=0, overridden=False)
+        preview = predict(info, live, dict(selecting=True))
+        enemy = dict(address=4, dp=100, hp=500, name='敌人', forecast=preview)
+        self.app.model.update(dict(enemies=[enemy], events=[]))
+        self.app.render([])
+        card = self.app.enemy_cards[4]
+        card.set_monitoring(True)
+        with patch.object(card, 'winfo_width', return_value=300):
+            card.draw()
+        texts = [card.itemcget(i, 'text') for i in card.find_all() if card.type(i) == 'text']
+        self.assertIn('75% 权重', texts)
+        self.assertIn('25% 权重', texts)
+        self.assertTrue(any('1 技能甲' in text and '2 技能乙' in text for text in texts))
+        self.assertGreater(card.footer_y, 219)
+        live['dp_order'] = 1
+        enemy['forecast'] = predict(info, live, dict(selecting=True))
+        self.app.model.update(dict(enemies=[enemy], events=[]))
+        self.app.render([])
+        self.assertIsNotNone(card.wheel_timer)
+        card.set_monitoring(False)
+        card.rotate()
+        self.assertIsNone(card.wheel_timer)
 
     def test_command_table_positions_updates_and_folded_details(self):
         from hbr_live_app.turns import CommandLedger

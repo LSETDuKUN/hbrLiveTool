@@ -32,7 +32,20 @@ class BattleModel:
     def total(self):
         return sum(e['value'] for e in self.actions.values())
 
+    @property
+    def command_damage(self):
+        totals = OrderedDict()
+        for event in self.actions.values():
+            group = event.get('command')
+            key = event.get('damage_group_id')
+            if key is None:
+                key = group['id'] if group else f'unknown:{event["event_id"]}'
+            totals[key] = totals.get(key, 0) + event['value']
+        current = next(reversed(totals), None)
+        return dict(current_id=current, current=totals.get(current, 0), maximum=max(totals.values(), default=0))
+
     def export(self):
         return {'schema': 2, 'run_id': self.run_id, 'display_damage': self.total,
+                'command_damage': self.command_damage,
                 'turn_context': self.turn_context,
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}

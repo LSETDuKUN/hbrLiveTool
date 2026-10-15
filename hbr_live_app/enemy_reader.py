@@ -1,5 +1,7 @@
 """Read validated enemy identity and AI progress, independently of damage collection."""
-from .enemy_info import EnemyCatalog, forecast
+from .enemy_info import EnemyCatalog
+from .enemy_observations import EnemyObservations
+from .enemy_preview import EnemyPreview
 
 
 class EnemyReader:
@@ -7,6 +9,8 @@ class EnemyReader:
         self.r = r
         self.layouts = {}
         self.catalog = EnemyCatalog()
+        self.observations = EnemyObservations()
+        self.previews = EnemyPreview()
 
     def offsets(self, obj, cls, required):
         r = self.r
@@ -59,12 +63,62 @@ class EnemyReader:
                     hp_order=r.i(enemy+fields['<breakCommandPatternOrder>k__BackingField']),
                     down=r.i(enemy+fields['<breakDownTurn>k__BackingField']), charged=charged == b'\1',
                     overridden=bool(r.q(enemy+fields['overrideEnemy']) or
-                        r.read(enemy+fields['<existsHpExtraGauge>k__BackingField'], 1) != b'\0' or
-                        r.read(enemy+fields['<existsDpExtraGauge>k__BackingField'], 1) != b'\0' or
                         r.q(domain+df['<overrideMainCommandPattern>k__BackingField']) or
                         r.q(domain+df['<overrideBreakCommandPattern>k__BackingField'])))
+        for pool in ('dp', 'hp'):
+            raw = r.read(enemy+fields['<exists'+pool.capitalize()+'ExtraGauge>k__BackingField'], 1)
+            live[pool+'_extra'] = raw != b'\0'
+            if not live[pool+'_extra']:
+                continue
+            try:
+                name = pool+'IndexInternal'
+                off = self.offsets(enemy, 'BattleEnemyData', {name: ('BattleCharacterData', 17)})[name]
+                index = r.i(enemy+off)
+                live[pool+'_index'] = index
+                name = '_commandPatternList' if pool == 'dp' else '_breakCommandPatternList'
+                off = self.offsets(domain, 'DomainEnemy', {name: ('DomainEnemy', 21)})[name]
+                sequence = r.q(domain+off)
+                if r.cls(sequence) != 'List`1':
+                    raise RuntimeError('行动阶段列表未确认')
+                from .source import members
+                groups = members(r, sequence)
+                if not isinstance(index, int) or not 0 <= index < len(groups):
+                    raise RuntimeError('行动阶段索引未确认')
+                group = groups[index]
+                name = '<groupLabel>k__BackingField'
+                off = self.offsets(group, 'DomainEnemyCommandPattern', {
+                    name: ('DomainEnemyCommandPattern', 14)})[name]
+                live[pool+'_active_pattern'] = r.string(r.q(group+off))
+            except (RuntimeError, ValueError, TypeError, KeyError):
+                live[pool+'_active_pattern'] = None
         if live['down'] is None:
             raise RuntimeError('倒地状态读取失败')
-        preview = forecast(info, live, context) if state['hp'] > 0 else dict(text='已击败', blink=False)
+        live.update(self.observations.state(enemy, live, context))
+        for pool in ('dp', 'hp'):
+            name = '<defaultMax' + pool.capitalize() + '>k__BackingField'
+            try:
+                off = self.offsets(enemy, 'BattleEnemyData', {name: ('BattleEnemyData', 10)})[name]
+                maximum = r.q(enemy+off)
+                if 0 <= maximum <= 10**12:
+                    live[pool+'_max'] = maximum
+                if 0 < maximum <= 10**12:
+                    live[pool+'_rate'] = state[pool]/maximum
+            except (RuntimeError, ValueError, KeyError):
+                pass
+        # Optional state fields are metadata-validated independently; missing
+        # fields degrade individual conditions rather than the entire card.
+        for name, key, kind in [('enemyChargeStep', 'charge_step', 8), ('_damageRate', 'damage_rate', 12)]:
+            try:
+                off = self.offsets(enemy, 'BattleEnemyData', {name: ('BattleEnemyData', kind)})[name]
+                if kind == 8:
+                    live[key] = r.i(enemy+off)
+                else:
+                    import struct
+                    raw = r.read(enemy+off, 4)
+                    if len(raw) == 4:
+                        live[key] = struct.unpack('<f', raw)[0]
+            except (RuntimeError, ValueError, KeyError):
+                pass
+        preview = self.previews.update(enemy, info, live, context) if state['hp'] > 0 else dict(text='已击败', blink=False)
         return dict(enemy_label=strings['Label'], enemy_id=identity, names=aliases,
                     action_rules=info['rules'], enemy_progress=live, forecast=preview)

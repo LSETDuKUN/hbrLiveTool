@@ -35,6 +35,10 @@ class App:
         self.enemy_keys = []
         self.history_rows = {}
         self.details_open = False
+        self.history_visible = tk.BooleanVar(master=self.root, value=False)
+        self.prompted_runs = set()
+        self.damage_timer = None
+        self.damage_display = (None, 0)
         self.log_lines = []
         self.last_packet = None
         self.last_sample = None
@@ -62,14 +66,14 @@ class App:
             return {}
 
     def _restore_geometry(self):
-        default = (420, 740) if self.compact.get() else (1280, 790)
+        default = (520, 740) if not self.history_visible.get() or self.compact.get() else (1280, 790)
         values = self.settings.get('bounds', [*default, 80, 60])
         try:
             w, h, x, y = map(int, values)
         except (TypeError, ValueError):
             w, h, x, y = *default, 80, 60
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        w, h = min(max(390 if self.compact.get() else 1050, w), sw-30), min(max(650, h), sh-70)
+        w, h = min(max(390 if self.compact.get() or not self.history_visible.get() else 1050, w), sw-30), min(max(650, h), sh-70)
         x, y = max(0, min(x, sw-w-16)), max(0, min(y, sh-h-60))
         self.root.geometry(f'{w}x{h}+{x}+{y}')
 
@@ -107,17 +111,23 @@ class App:
                                 command=lambda: self.root.attributes('-alpha', self.opacity.get()))
         menu.add_separator()
         menu.add_command(label='导出本场摘要…', command=self.export)
+        menu.add_command(label='保存行动轴…', command=self.export_axis)
         menu.add_command(label='打开记录文件夹', command=self.open_sessions)
         menu.add_command(label='诊断日志', command=self.show_logs)
         self.hero = RoundedCard(self.root)
         self.hero.pack(fill='x', padx=18, pady=6)
         hero = self.hero.content
-        self.label(hero, '本场显示伤害', DIM, 10).pack(anchor='w')
+        self.label(hero, 'TurnMaxDamage · 指令最大伤害', DIM, 10).pack(anchor='w')
         self.total_label = tk.Label(hero, text='0', bg=CARD, fg=PINK,
                                    font=('Segoe UI', -46, 'bold italic'), anchor='w')
         self.total_label.pack(fill='x')
         self.summary = self.label(hero, '尚未连接  ·  等待第一笔行动', DIM)
         self.summary.pack(anchor='w')
+        self.current_damage_card = RoundedCard(self.root)
+        self.current_damage_card.pack(fill='x', padx=18, pady=6)
+        self.label(self.current_damage_card.content, 'TurnDamage · 当前指令伤害', DIM, 10).pack(anchor='w')
+        self.current_damage_label = self.label(self.current_damage_card.content, '0', CYAN, 22, anchor='w')
+        self.current_damage_label.pack(fill='x')
         controls = tk.Frame(self.root, bg=BG)
         controls.pack(fill='x', padx=18, pady=(8, 4))
         for col in range(3):
@@ -130,6 +140,13 @@ class App:
         self.status = self.label(self.root, '先进入战斗指令选择画面，再连接。窗口可随时拖动。', DIM,
                                  anchor='w', justify='left', wraplength=800)
         self.status.pack(fill='x', padx=24, pady=(3, 8))
+        history_bar = tk.Frame(self.root, bg=BG)
+        history_bar.pack(fill='x', padx=22, pady=(0, 6))
+        tk.Checkbutton(history_bar, text='显示行动轴', variable=self.history_visible, command=self.layout,
+                       bg=BG, fg=PINK, selectcolor=CARD, activebackground=BG,
+                       activeforeground=FG, font=FONT).pack(side='left')
+        tk.Button(history_bar, text='保存行动轴…', command=self.export_axis, bg=CARD, fg=FG,
+                  relief='flat', font=FONT).pack(side='right')
         self.body = tk.Frame(self.root, bg=BG)
         self.body.pack(fill='both', expand=True, padx=18)
         self.resources = tk.Frame(self.body, bg=BG)
@@ -183,7 +200,18 @@ class App:
     def layout(self):
         self.resources.grid_forget()
         self.history.grid_forget()
-        if self.compact.get():
+        if not self.history_visible.get():
+            self.root.minsize(390, 650)
+            self.body.columnconfigure(0, weight=1, minsize=0)
+            self.body.columnconfigure(1, weight=0, minsize=0)
+            self.body.rowconfigure(0, weight=1)
+            self.body.rowconfigure(1, weight=0)
+            self.resources.pack_propagate(True)
+            self.resources.grid(row=0, column=0, sticky='nsew')
+            self.enemy_view.configure(height=350)
+            self.subtitle.pack_forget()
+            self.root.geometry('520x740')
+        elif self.compact.get():
             self.root.minsize(390, 820)
             self.body.columnconfigure(0, weight=1)
             self.body.columnconfigure(1, weight=0)
@@ -267,6 +295,7 @@ class App:
                 if kind == 'connected':
                     self.model = BattleModel()
                     self.model.run_id = data['run_id']
+                    self.update_damage()
                     self.session_path = data['path']
                     self.tree.delete(*self.tree.get_children())
                     self.history_rows = {}
@@ -291,6 +320,12 @@ class App:
                         card.set_monitoring(False)
                     self.start_button.configure(text='连接新战斗')
                     self.pause_button.configure(text='暂停')
+                elif kind == 'battle_end':
+                    run_id = data['run_id']
+                    if run_id not in self.prompted_runs:
+                        self.prompted_runs.add(run_id)
+                        saved = self.model.export()
+                        self.root.after_idle(lambda saved=saved: self.offer_axis(saved))
                 elif kind == 'error':
                     self.set_status(data, '#ffadb7')
                 elif kind == 'status':
@@ -304,12 +339,11 @@ class App:
             self.root.after(60, self.pump)
 
     def render(self, events=()):
-        self.total_label.configure(text=f'{self.model.total:,}')
-        biggest = max((e['value'] for e in self.model.actions.values()), default=0)
-        batches = {e['command']['id'] for e in self.model.actions.values() if e.get('command')}
+        self.update_damage()
+        batches = {e['command']['id'] for e in self.model.actions.values() if e.get('command') and e['command'].get('kind') != 'instant'}
         current = self.model.turn_context
         prefix = f'Turn {current["turn"]}  ·  ' if current else ''
-        self.summary.configure(text=f'{prefix}{len(batches)} 组指令 · {len(self.model.actions)} 次角色行动 · 单次最高 {biggest:,}')
+        self.summary.configure(text=f'{prefix}{len(batches)} 组指令 · 本场累计 {self.model.total:,}')
         self.enemy_keys = list(self.model.enemies)
         self.render_enemy()
         if events:
@@ -317,13 +351,35 @@ class App:
             self.tree.set_rows(self.history_rows)
         self.render_details()
 
+    def update_damage(self):
+        stats = self.model.command_damage
+        self.total_label.configure(text=f'{stats["maximum"]:,}')
+        identity, value = stats['current_id'], stats['current']
+        old_id, old_value = self.damage_display
+        if (identity, value) == self.damage_display:
+            return
+        if self.damage_timer is not None:
+            self.root.after_cancel(self.damage_timer)
+            self.damage_timer = None
+        base = old_value if identity == old_id else 0
+        self.damage_display = (identity, value)
+        if value > base:
+            self.current_damage_label.configure(text=f'{base:,} + {value-base:,}')
+            self.damage_timer = self.root.after(600, self.settle_damage)
+        else:
+            self.current_damage_label.configure(text=f'{value:,}')
+
+    def settle_damage(self):
+        self.damage_timer = None
+        self.current_damage_label.configure(text=f'{self.damage_display[1]:,}')
+
     def render_enemy(self):
         for number, (key, state) in enumerate(self.model.enemies.items(), 1):
             if key not in self.enemy_cards:
                 card = self.enemy_cards[key] = EnemyCard(self.enemy_stack, number, self.show_enemy_details)
                 card.pack(fill='x', pady=(0, 6))
             self.enemy_cards[key].update_state(state)
-        if self.compact.get():
+        if self.compact.get() and self.history_visible.get():
             self.enemy_view.configure(height=min(270, max(238, len(self.enemy_cards)*238)))
 
     def target_label(self, address, fallback='目标未确认'):
@@ -337,7 +393,8 @@ class App:
         if state.get('enemy_label'):
             text += f'\n资料标识：{state["enemy_label"]}'
         preview = state.get('forecast', {})
-        text += '\n\n' + preview.get('text', '行动预告未取得') + '\n' + preview.get('note', '')
+        from .enemy_prediction import prediction_details
+        text += '\n\n' + prediction_details(preview)
         text += '\n\n' + (state.get('action_rules') or '本地资料尚未收录此敌人的行动规则。')
         self.text_window(f'敌{number} · 名称与行动规则', text)
 
@@ -436,6 +493,28 @@ class App:
                 self.set_status('摘要已导出')
             except OSError as exc:
                 messagebox.showerror('导出失败', str(exc), parent=self.root)
+
+    def offer_axis(self, data):
+        if self.closing or not data['actions']:
+            return
+        if messagebox.askyesno('战斗结束', '是否保存本场行动轴？\n可保存为图片或表格。', parent=self.root):
+            self.export_axis(data)
+
+    def export_axis(self, data=None):
+        data = data or self.model.export()
+        if not data['actions']:
+            self.set_status('尚无角色行动可保存。')
+            return
+        path = filedialog.asksaveasfilename(parent=self.root, title='保存行动轴',
+            initialfile=(data['run_id'] or 'battle')+'-行动轴.png', defaultextension='.png',
+            filetypes=[('行动轴图片', '*.png'), ('行动轴表格', '*.html')])
+        if path:
+            try:
+                from .axis_export import save_axis
+                files = save_axis(data, Path(path))
+                self.set_status(f'行动轴已保存 · {len(files)} 个文件')
+            except (OSError, ValueError, ImportError) as exc:
+                messagebox.showerror('保存失败', str(exc), parent=self.root)
 
     def close(self):
         if not self.closing:

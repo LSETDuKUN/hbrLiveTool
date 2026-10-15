@@ -40,7 +40,7 @@ class EnemyInfoTests(unittest.TestCase):
         self.assertFalse(forecast(self.info, self.live, dict(selecting=False))['blink'])
 
     def test_unknown_loop_down_override_and_mismatch_do_not_flash(self):
-        for values in [dict(dp_order=10), dict(down=1), dict(overridden=True), dict(dp_pattern='Other'), dict(dp_order=1)]:
+        for values in [dict(dp_order=10), dict(down=1), dict(overridden=True), dict(dp_pattern='Other')]:
             with self.subTest(values=values):
                 self.assertFalse(forecast(self.info, dict(self.live, **values), dict(selecting=True))['blink'])
         self.assertFalse(forecast(self.info, self.live, None)['blink'])

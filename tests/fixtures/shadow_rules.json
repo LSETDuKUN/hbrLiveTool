@@ -1,0 +1,420 @@
+{
+  "label": "SkullFeatherHead2nd_CC05_scoreattack96_g",
+  "pattern": {
+    "dp": {
+      "l": "SkullFeatherHead2nd_CC05_scoreattack96",
+      "p": [
+        {
+          "id": 39442001,
+          "order": 0,
+          "is_preemptive": true,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522905
+          ]
+        },
+        {
+          "id": 39442002,
+          "order": 1,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522901,
+            46522903
+          ]
+        },
+        {
+          "id": 39442003,
+          "order": 2,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46522904
+          ]
+        },
+        {
+          "id": 39442004,
+          "order": 3,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522902
+          ]
+        },
+        {
+          "id": 39442005,
+          "order": 4,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522905,
+            46522903
+          ]
+        },
+        {
+          "id": 39442006,
+          "order": 5,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46522904
+          ]
+        },
+        {
+          "id": 39442007,
+          "order": 6,
+          "is_preemptive": false,
+          "once": true,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522902
+          ]
+        },
+        {
+          "id": 39442008,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522902,
+            46522905
+          ]
+        },
+        {
+          "id": 39442009,
+          "order": 8,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522901,
+            46522903
+          ]
+        },
+        {
+          "id": 39442010,
+          "order": 9,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "IsEnemyCharge()",
+          "target_weight": null,
+          "skill_list": [
+            46522904
+          ]
+        },
+        {
+          "id": 39442011,
+          "order": 10,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522902
+          ]
+        }
+      ]
+    },
+    "hp": {
+      "l": "SkullFeatherHead2nd_CC05_scoreattack96_break",
+      "p": [
+        {
+          "id": 39442101,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "",
+          "target_weight": null,
+          "skill_list": [
+            46522906
+          ]
+        }
+      ]
+    }
+  },
+  "bars": {
+    "main": [
+      {
+        "v": 0,
+        "g": "SkullFeatherHead2nd_CC05_scoreattack96",
+        "inh": false,
+        "kind": "dp"
+      }
+    ],
+    "break": [
+      {
+        "v": 30000,
+        "g": "SkullFeatherHead2nd_CC05_scoreattack96_break",
+        "inh": false,
+        "kind": "hp"
+      }
+    ],
+    "esp": 40
+  },
+  "extra_gauge": {
+    "dp": null,
+    "hp": null,
+    "esp": 40,
+    "eshield": {
+      "def_up_rate": 9900,
+      "dmg_limit": 0,
+      "ele_list": [
+        "Fire",
+        "Light",
+        "Dark"
+      ]
+    },
+    "pattern": {
+      "dp": [],
+      "hp": []
+    }
+  },
+  "skills": [
+    {
+      "id": 46522901,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_AttackSingle01",
+      "name": "Pale Beam",
+      "desc": "",
+      "hit_count": 3,
+      "target_type": "Single",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [
+        {
+          "id": 1,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 2,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 3,
+          "type": "Main",
+          "power_ratio": 0.8
+        }
+      ],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46522902,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_AttackAll01",
+      "name": "Cruel Slap",
+      "desc": "",
+      "hit_count": 2,
+      "target_type": "All",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [
+        {
+          "id": 1,
+          "type": "Main",
+          "power_ratio": 0.5
+        },
+        {
+          "id": 2,
+          "type": "Main",
+          "power_ratio": 0.5
+        }
+      ],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46522903,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_Charge",
+      "name": "Demise Domination",
+      "desc": "",
+      "hit_count": -1,
+      "target_type": "Self",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46522904,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_AttackAll02",
+      "name": "Final Verdict",
+      "desc": "",
+      "hit_count": 8,
+      "target_type": "All",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [
+        {
+          "id": 1,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 2,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 3,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 4,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 5,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 6,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 7,
+          "type": "Main",
+          "power_ratio": 0.1
+        },
+        {
+          "id": 8,
+          "type": "Main",
+          "power_ratio": 0.3
+        }
+      ],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46522905,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_AttackAll03",
+      "name": "Dread Roar",
+      "desc": "",
+      "hit_count": 1,
+      "target_type": "All",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    },
+    {
+      "id": 46522906,
+      "label": "SkullFeatherHead2nd_CC05_scoreattack96_ESHeal",
+      "name": "",
+      "desc": "",
+      "hit_count": -1,
+      "target_type": "Self",
+      "consume_type": "Sp",
+      "is_restricted": 0,
+      "auto_priority": 0,
+      "is_adv": false,
+      "use_count": -1,
+      "sp_cost": 0,
+      "max_level": 0,
+      "interval_turn": 0,
+      "overwrite": 0,
+      "overwrite_cond": "",
+      "effect": "",
+      "cond": "",
+      "passive": null,
+      "hits": [],
+      "in_date": "2026-10-07 23:00:00+00:00",
+      "iuc_cond": "",
+      "card_form": ""
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "fields": [
+      {
+        "name": "_isAnotherCardForm",
+        "offset": 496,
+        "type": 2,
+        "declared": "BattlePlayerData",
+        "value": false
+      },
+      {
+        "name": "_reinforcedModeTurn",
+        "offset": 500,
+        "type": 8,
+        "declared": "BattlePlayerData",
+        "value": 0
+      },
+      {
+        "name": "_reinforcedModeUsedCount",
+        "offset": 508,
+        "type": 8,
+        "declared": "BattlePlayerData",
+        "value": 0
+      }
+    ],
+    "actions": [],
+    "context": {
+      "command_count": 1,
+      "command_visit": 1,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "コマンド選択",
+      "phase_count": 1,
+      "state_address": "0x2b64e45f000",
+      "fsm_address": "0x2bea34838c0"
+    }
+  },
+  {
+    "fields": [
+      {
+        "name": "_isAnotherCardForm",
+        "offset": 496,
+        "type": 2,
+        "declared": "BattlePlayerData",
+        "value": false
+      },
+      {
+        "name": "_reinforcedModeTurn",
+        "offset": 500,
+        "type": 8,
+        "declared": "BattlePlayerData",
+        "value": 3
+      },
+      {
+        "name": "_reinforcedModeUsedCount",
+        "offset": 508,
+        "type": 8,
+        "declared": "BattlePlayerData",
+        "value": 1
+      }
+    ],
+    "actions": [],
+    "context": {
+      "command_count": 1,
+      "command_visit": 1,
+      "turn": 1,
+      "od": false,
+      "bonus": 0,
+      "bonus_max": 0,
+      "od_activation": 0,
+      "od_before_enemy": false,
+      "additional": false,
+      "extra": false,
+      "extra_turn": 0,
+      "selecting": true,
+      "phase": "コマンド選択",
+      "phase_count": 1,
+      "state_address": "0x2b64e45f000",
+      "fsm_address": "0x2bea34838c0"
+    }
+  }
+]

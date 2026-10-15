@@ -1,0 +1,840 @@
+{
+  "label": "DiamondEyeballRectusDefault01_01",
+  "pattern": {
+    "dp": {
+      "l": "DiamondEyeballRectusDefaultHard",
+      "p": [
+        {
+          "id": 39425601,
+          "order": 1,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425602,
+          "order": 2,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125523
+          ]
+        },
+        {
+          "id": 39425603,
+          "order": 3,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125522
+          ]
+        },
+        {
+          "id": 39425604,
+          "order": 4,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425605,
+          "order": 5,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125525
+          ]
+        },
+        {
+          "id": 39425606,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125524
+          ]
+        },
+        {
+          "id": 39425607,
+          "order": 6,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125521
+          ]
+        },
+        {
+          "id": 39425608,
+          "order": 7,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425609,
+          "order": 8,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125523
+          ]
+        },
+        {
+          "id": 39425610,
+          "order": 9,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 75,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125523
+          ]
+        },
+        {
+          "id": 39425611,
+          "order": 9,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 25,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125525
+          ]
+        },
+        {
+          "id": 39425612,
+          "order": 10,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425613,
+          "order": 11,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125525
+          ]
+        },
+        {
+          "id": 39425614,
+          "order": 12,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125524
+          ]
+        },
+        {
+          "id": 39425615,
+          "order": 12,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125521
+          ]
+        },
+        {
+          "id": 39425616,
+          "order": 13,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425617,
+          "order": 14,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125523
+          ]
+        },
+        {
+          "id": 39425618,
+          "order": 15,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125522
+          ]
+        },
+        {
+          "id": 39425619,
+          "order": 16,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425620,
+          "order": 17,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125525
+          ]
+        },
+        {
+          "id": 39425621,
+          "order": 18,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 75,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125523
+          ]
+        },
+        {
+          "id": 39425622,
+          "order": 18,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 25,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125525
+          ]
+        },
+        {
+          "id": 39425623,
+          "order": 19,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425624,
+          "order": 20,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125523
+          ]
+        },
+        {
+          "id": 39425625,
+          "order": 21,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125524
+          ]
+        },
+        {
+          "id": 39425626,
+          "order": 21,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125521
+          ]
+        },
+        {
+          "id": 39425627,
+          "order": 22,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425628,
+          "order": 23,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125525
+          ]
+        },
+        {
+          "id": 39425629,
+          "order": 24,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 75,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125523
+          ]
+        },
+        {
+          "id": 39425630,
+          "order": 24,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 25,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125525
+          ]
+        },
+        {
+          "id": 39425631,
+          "order": 25,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 0",
+          "target_weight": null,
+          "skill_list": [
+            46125527,
+            46125523
+          ]
+        },
+        {
+          "id": 39425632,
+          "order": 26,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 100,
+          "condition": "EnemyCount() < 2 && PlayedSkillCount(DiamondEyeballRectusD_Buff02) == 1",
+          "target_weight": null,
+          "skill_list": [
+            46125522,
+            46125523
+          ]
+        },
+        {
+          "id": 39425633,
+          "order": 27,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125524
+          ]
+        },
+        {
+          "id": 39425634,
+          "order": 27,
+          "is_preemptive": false,
+          "once": false,
+          "weight": 50,
+          "condition": "EnemyCount() == 2",
+          "target_weight": null,
+          "skill_list": [
+            46125522
+          ]
+        }
+      ]
+    },
+    "hp": {
+      "l": "",
+      "p": []
+    }
+  },
+  "skills": [
+    {
+      "id": 46125521,
+      "label": "DiamondEyeballRectusD_AttackSingle01",
+      "name": "Converge Laser",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_AttackSingle01",
+          "skill_type": "AttackSkill",
+          "target_type": "Single",
+          "type": "Stab",
+          "elements": [],
+          "power": [
+            400.0,
+            4800.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 250,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 1,
+            "luk": 0,
+            "con": 2
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "None",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 46125522,
+      "label": "DiamondEyeballRectusD_AttackSingle02",
+      "name": "Eroding Spirit",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_AttackSingle02",
+          "skill_type": "AttackSkill",
+          "target_type": "Single",
+          "type": "Stab",
+          "elements": [],
+          "power": [
+            450.0,
+            5400.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 250,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 1,
+            "luk": 0,
+            "con": 2
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "None",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "label": "DiamondEyeballRectusD_AttackSingle02_2",
+          "skill_type": "SpiritDownValue",
+          "target_type": "Single",
+          "type": null,
+          "elements": [],
+          "power": [
+            30.0,
+            0.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 0.0,
+            "hp": 0.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 0,
+          "parameters": {
+            "str": 0,
+            "wis": 1,
+            "dex": 0,
+            "spr": 0,
+            "luk": 0,
+            "con": 0
+          },
+          "growth": [],
+          "hits": [
+            {
+              "id": 99,
+              "type": "Main",
+              "power_ratio": 0.0
+            }
+          ],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "EnemyTurnEnd",
+            "exitVal": [
+              2,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 46125523,
+      "label": "DiamondEyeballRectusD_AttackSingle03",
+      "name": "Nil of Demise",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_AttackSingle03",
+          "skill_type": "AttackSkill",
+          "target_type": "Single",
+          "type": "Stab",
+          "elements": [],
+          "power": [
+            850.0,
+            10200.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 250,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 1,
+            "luk": 0,
+            "con": 2
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "None",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 46125524,
+      "label": "DiamondEyeballRectusD_AttackAll01",
+      "name": "Disaster Ray",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_AttackAll01",
+          "skill_type": "AttackSkill",
+          "target_type": "All",
+          "type": "Stab",
+          "elements": [],
+          "power": [
+            350.0,
+            4200.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 250,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 2,
+            "luk": 0,
+            "con": 1
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "None",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 46125525,
+      "label": "DiamondEyeballRectusD_AttackAll02",
+      "name": "Malevolent Nil",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_AttackAll02",
+          "skill_type": "AttackSkill",
+          "target_type": "All",
+          "type": "Stab",
+          "elements": [],
+          "power": [
+            650.0,
+            7800.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 250,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 2,
+            "luk": 0,
+            "con": 1
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": false,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "None",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 46125527,
+      "label": "DiamondEyeballRectusD_Buff02",
+      "name": "- Madness Mode -",
+      "parts": [
+        {
+          "label": "DiamondEyeballRectusD_Buff02",
+          "skill_type": "AttackUp",
+          "target_type": "Self",
+          "type": null,
+          "elements": [],
+          "power": [
+            1.0,
+            0.0
+          ],
+          "value": [
+            0.0,
+            0.0
+          ],
+          "strval": [
+            -1,
+            -1
+          ],
+          "cond": "",
+          "sstl": null,
+          "dv": 0,
+          "multipliers": {
+            "dp": 1.0,
+            "hp": 1.0,
+            "dr": 0.0
+          },
+          "diff_for_max": 0,
+          "parameters": {
+            "str": 0,
+            "wis": 0,
+            "dex": 0,
+            "spr": 0,
+            "luk": 0,
+            "con": 0
+          },
+          "growth": [],
+          "hits": [],
+          "hit_condition": "",
+          "target_condition": "",
+          "effect": {
+            "ir": true,
+            "category": "None",
+            "limitType": "None",
+            "exitCond": "Eternal",
+            "exitVal": [
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

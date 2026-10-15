@@ -19,6 +19,13 @@ def watch_sample(module, turns):
                    main=r.i(enemy+608), broken=r.i(enemy+612), base_main=r.i(enemy+400),
                    base_broken=r.i(enemy+404), down=r.i(enemy+128), selected_once=r.read(enemy+640,1).hex(),
                    commands=r.fields(commands) if commands else None)
+        row['gauge_state'] = {}
+        for f in r.fields(enemy)['fields']:
+            if f['name'] in ('hpIndexInternal', 'dpIndexInternal',
+                    '<expectedHpIndex>k__BackingField', '<expectedDpIndex>k__BackingField',
+                    '<existsHpExtraGauge>k__BackingField', '<existsDpExtraGauge>k__BackingField'):
+                row['gauge_state'][f['name']] = dict(offset=f['offset'], type=f['type'],
+                    raw=r.read(enemy+f['offset'], 4).hex(), value=r.i(enemy+f['offset']))
         if commands and r.cls(commands) == 'List`1':
             row['items'] = [r.fields(p) for p in members(r, commands)]
         result['enemies'].append(row)
@@ -64,6 +71,17 @@ def main():
     r.open_process(game_pid())
     try:
         module = locate(r)
+        if '--preview' in sys.argv:
+            from .enemy_reader import EnemyReader
+            reader = EnemyReader(r)
+            context = TurnReader(r, module).sample()
+            results = []
+            for enemy in members(r, r.q(r.q(module+144)+168)):
+                state = dict(address=enemy, hp=r.q(enemy+72), dp=r.q(enemy+80), name='probe')
+                results.append(reader.sample(state, context))
+            path = Path(__file__).resolve().parent.parent / 'sessions' / 'enemy-preview-check.json'
+            path.write_text(json.dumps(dict(context=context, enemies=results), ensure_ascii=False, indent=2), encoding='utf-8')
+            return
         data = inspect(module)
         path = Path(__file__).resolve().parent.parent / 'sessions' / ('enemy-probe-' + time.strftime('%H%M%S') + '.json')
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')

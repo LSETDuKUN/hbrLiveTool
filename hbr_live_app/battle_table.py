@@ -1,7 +1,8 @@
 """Centered, individually styled table cells backed by a scrollable Tk canvas."""
 import tkinter as tk
 from tkinter import font as tkfont
-from .history import actor_title
+from .history import actor_title, skill_title
+from .turns import context_label
 
 
 class BattleTable(tk.Frame):
@@ -114,6 +115,21 @@ class BattleTable(tk.Frame):
                                     text=title, fill='#ded1ed', font=self.skill_font)
         y = 0
         for number, (key, row) in enumerate(self.rows.items()):
+            if (row['group'] or {}).get('kind') == 'instant':
+                height = 100
+                self.canvas.create_rectangle(0, y, available, y+height,
+                    fill='#514360' if key in self.selected else '#352e4b', outline='#51475f')
+                self.canvas.create_text(edges[1]/2, y+height/2, text=context_label(row['group']),
+                    width=edges[1]-20, font=self.badge_font, fill='#ffdc9d', justify='center')
+                self.canvas.create_text((edges[1]+available)/2, y+34,
+                    text=' / '.join(e['skill'] for e in row['events']),
+                    font=self.skill_font, fill='#ffe4af', width=available-edges[1]-28, justify='center')
+                self.canvas.create_text((edges[1]+available)/2, y+68,
+                    text='不占指令 · '+ ' / '.join(dict.fromkeys(actor_title(e) for e in row['events'])),
+                    font=self.actor_font, fill='#bdb1d4')
+                self.bounds[key] = (y, y+height)
+                y += height
+                continue
             blocks = []
             content_height = 0
             for index, slot in enumerate(row['slots'], 1):
@@ -121,7 +137,7 @@ class BattleTable(tk.Frame):
                 texts = []
                 for event in slot:
                     texts.extend(((self.fit_title(actor_title(event), widths[index]-28), self.actor_font, '#bdb1d4'),
-                                  (event['skill'], self.skill_font, '#ffe4af')))
+                                  (skill_title(event), self.skill_font, '#ffe4af')))
                 if not texts:
                     texts = [('/', self.actor_font, '#9388a8')]
                 ids, height = [], 0
@@ -134,11 +150,13 @@ class BattleTable(tk.Frame):
                 blocks.append((ids, height))
                 content_height = max(content_height, height)
             group = row['group'] or {}
-            badges = [(f'Turn {group["turn"]}', '#8fe5ed', '#2d4b55')] if group else [('回合待确认', '#d7c8e8', '#4a3b57')]
+            badges = [(f'Turn {group["turn"]}', '#8fe5ed', '#2d4b55')] if group.get('turn') else [('回合待确认', '#d7c8e8', '#4a3b57')]
             if group.get('od'):
                 badges.append((f'Bonus {group["bonus"]}', '#ffdc9d', '#514432'))
             if group.get('additional') or group.get('extra'):
                 badges.append(('Extra', '#ffb4d7', '#513449'))
+            if group.get('kind') == 'instant':
+                badges.append(('小按钮', '#ffdc9d', '#514432'))
             body_height = max(82, content_height+22)
             height = body_height + (24 if row['unplaced'] else 0)
             fill = '#514360' if key in self.selected else ('#302b46' if number % 2 == 0 else '#352e4b')
@@ -161,7 +179,7 @@ class BattleTable(tk.Frame):
                 self.canvas.create_line(edge, y+10, edge, y+body_height-10, fill='#554963')
             if row['unplaced']:
                 self.canvas.create_text(available/2, y+body_height+10,
-                    text=f'{len(row["unplaced"])} 条行动位置未确认 · 展开详情查看', fill='#e1bb94', font=self.skill_font)
+                    text=' / '.join(skill_title(e) for e in row['unplaced']) if group.get('kind') == 'instant' else f'{len(row["unplaced"])} 条行动位置未确认 · 展开详情查看', fill='#e1bb94', font=self.skill_font)
             self.bounds[key] = (y, y+height)
             y += height
         self.canvas.configure(scrollregion=(0, 0, available, y))

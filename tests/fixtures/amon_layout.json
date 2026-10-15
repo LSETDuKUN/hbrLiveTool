@@ -1,0 +1,254 @@
+{
+  "enemy0": {
+    "address": "0x2b46fe972a0",
+    "class": "BattleEnemyData",
+    "fields": [
+      {
+        "name": "domainEnemy",
+        "offset": 480,
+        "type": 18,
+        "declared": "BattleEnemyData",
+        "object": {
+          "address": "0x2b46f93f990",
+          "class": "DomainEnemy"
+        }
+      },
+      {
+        "name": "overrideEnemy",
+        "offset": 488,
+        "type": 18,
+        "declared": "BattleEnemyData"
+      },
+      {
+        "name": "<groupLabel>k__BackingField",
+        "offset": 496,
+        "type": 14,
+        "declared": "BattleEnemyData",
+        "text": "BigotryGateAmonDefault01"
+      },
+      {
+        "name": "<defaultMaxHp>k__BackingField",
+        "offset": 528,
+        "type": 10,
+        "declared": "BattleEnemyData",
+        "value": 1166600
+      },
+      {
+        "name": "<defaultMaxDp>k__BackingField",
+        "offset": 536,
+        "type": 10,
+        "declared": "BattleEnemyData",
+        "value": 1600000
+      },
+      {
+        "name": "<existsHpExtraGauge>k__BackingField",
+        "offset": 552,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": false
+      },
+      {
+        "name": "<existsDpExtraGauge>k__BackingField",
+        "offset": 568,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": true
+      },
+      {
+        "name": "isEnemyCharge",
+        "offset": 592,
+        "type": 2,
+        "declared": "BattleEnemyData",
+        "value": false
+      },
+      {
+        "name": "<mainCommandPatternOrder>k__BackingField",
+        "offset": 608,
+        "type": 8,
+        "declared": "BattleEnemyData",
+        "value": 0
+      },
+      {
+        "name": "<breakCommandPatternOrder>k__BackingField",
+        "offset": 612,
+        "type": 8,
+        "declared": "BattleEnemyData",
+        "value": 0
+      },
+      {
+        "name": "hpIndexInternal",
+        "offset": 88,
+        "type": 17,
+        "declared": "BattleCharacterData"
+      },
+      {
+        "name": "dpIndexInternal",
+        "offset": 92,
+        "type": 17,
+        "declared": "BattleCharacterData"
+      },
+      {
+        "name": "<breakDownTurn>k__BackingField",
+        "offset": 128,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      },
+      {
+        "name": "<mainCommandPatternOrder>k__BackingField",
+        "offset": 400,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      },
+      {
+        "name": "<breakCommandPatternOrder>k__BackingField",
+        "offset": 404,
+        "type": 8,
+        "declared": "BattleCharacterData",
+        "value": 0
+      }
+    ]
+  },
+  "enemy0.domainEnemy": {
+    "address": "0x2b46f93f990",
+    "class": "DomainEnemy",
+    "fields": [
+      {
+        "name": "<master>k__BackingField",
+        "offset": 16,
+        "type": 18,
+        "declared": "DomainEnemy",
+        "object": {
+          "address": "0x2b5f48f5d00",
+          "class": "MasterEnemy"
+        }
+      },
+      {
+        "name": "_commandPatternList",
+        "offset": 104,
+        "type": 21,
+        "declared": "DomainEnemy",
+        "object": {
+          "address": "0x2b462f7e0c0",
+          "class": "List`1"
+        }
+      },
+      {
+        "name": "<overrideMainCommandPattern>k__BackingField",
+        "offset": 112,
+        "type": 18,
+        "declared": "DomainEnemy"
+      },
+      {
+        "name": "_breakCommandPatternList",
+        "offset": 120,
+        "type": 21,
+        "declared": "DomainEnemy",
+        "object": {
+          "address": "0x2b462f7e090",
+          "class": "List`1"
+        }
+      },
+      {
+        "name": "<overrideBreakCommandPattern>k__BackingField",
+        "offset": 128,
+        "type": 18,
+        "declared": "DomainEnemy"
+      }
+    ]
+  },
+  "enemy0.domainEnemy.<master>k__BackingField": {
+    "address": "0x2b5f48f5d00",
+    "class": "MasterEnemy",
+    "fields": [
+      {
+        "name": "Id",
+        "offset": 16,
+        "type": 10,
+        "declared": "MasterEnemy",
+        "value": 13402716
+      },
+      {
+        "name": "Label",
+        "offset": 24,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "BigotryGateAmonDefault01_04"
+      },
+      {
+        "name": "Name",
+        "offset": 32,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "阿蒙之门Ω : 等级4"
+      },
+      {
+        "name": "MasterCommandPattern",
+        "offset": 80,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "BigotryGateAmonDefaultHard_DP1"
+      },
+      {
+        "name": "BreakMasterCommandPattern",
+        "offset": 88,
+        "type": 14,
+        "declared": "MasterEnemy",
+        "text": "BigotryGateAmonDefaultHard_break"
+      }
+    ]
+  },
+  "enemy0.domainEnemy._commandPatternList[0]": {
+    "address": "0x2b61fcdaf00",
+    "class": "DomainEnemyCommandPattern",
+    "fields": [
+      {
+        "name": "<groupLabel>k__BackingField",
+        "offset": 32,
+        "type": 14,
+        "declared": "DomainEnemyCommandPattern",
+        "text": "BigotryGateAmonDefaultHard_DP1"
+      }
+    ]
+  },
+  "enemy0.domainEnemy._commandPatternList[1]": {
+    "address": "0x2b61fcda720",
+    "class": "DomainEnemyCommandPattern",
+    "fields": [
+      {
+        "name": "<groupLabel>k__BackingField",
+        "offset": 32,
+        "type": 14,
+        "declared": "DomainEnemyCommandPattern",
+        "text": "BigotryGateAmonDefaultHard_DP2"
+      }
+    ]
+  },
+  "enemy0.domainEnemy._commandPatternList[2]": {
+    "address": "0x2b61fcdbfc0",
+    "class": "DomainEnemyCommandPattern",
+    "fields": [
+      {
+        "name": "<groupLabel>k__BackingField",
+        "offset": 32,
+        "type": 14,
+        "declared": "DomainEnemyCommandPattern",
+        "text": "BigotryGateAmonDefaultHard_DP3"
+      }
+    ]
+  },
+  "enemy0.domainEnemy._breakCommandPatternList[0]": {
+    "address": "0x2b61fcdb960",
+    "class": "DomainEnemyCommandPattern",
+    "fields": [
+      {
+        "name": "<groupLabel>k__BackingField",
+        "offset": 32,
+        "type": 14,
+        "declared": "DomainEnemyCommandPattern",
+        "text": "BigotryGateAmonDefaultHard_break"
+      }
+    ]
+  }
+}
