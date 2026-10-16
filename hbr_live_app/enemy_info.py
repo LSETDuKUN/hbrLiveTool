@@ -108,6 +108,7 @@ class EnemyCatalog:
                     if len(details) == 1:
                         data = json.loads(details[0][0])
                         result['rules'] = rules_text(data)
+                        result['base_resistances'] = (data.get('resistances') or {}).get('element')
                         result['patterns'] = data.get('pattern') or {}
                         result['bars'] = data.get('bars') or {}
                         result['extra_patterns'] = (data.get('extra_gauge') or {}).get('pattern') or {}

@@ -1,0 +1,38 @@
+[
+  {
+    "statusLabel": "雷之印 <size=80%>[等级6]</size>",
+    "statusComment": "技能攻击时的伤害增加，根据等级产生追加效果",
+    "continuationCount": "永久回合",
+    "alpha": 1.0
+  },
+  {
+    "statusLabel": "士气 <size=80%>[等级2]</size>",
+    "statusComment": "根据等级提升全能力与技能攻击时的伤害（最大等级10）（不可解除）",
+    "continuationCount": "永久回合",
+    "alpha": 1.0
+  },
+  {
+    "statusLabel": "雷属性攻击力提升 <size=80%>[祈祷之花，托付于风]</size>",
+    "statusComment": "技能攻击时雷属性的伤害增加",
+    "continuationCount": "剩余 4 回合",
+    "alpha": 1.0
+  },
+  {
+    "statusLabel": "攻击力提升 <size=80%>[祈祷之花，托付于风]</size>",
+    "statusComment": "技能攻击时伤害增加",
+    "continuationCount": "剩余 4 回合",
+    "alpha": 1.0
+  },
+  {
+    "statusLabel": "攻击力提升 <size=80%>[加速]</size>",
+    "statusComment": "技能攻击时伤害增加",
+    "continuationCount": "剩余 1 次",
+    "alpha": 0.5
+  },
+  {
+    "statusLabel": "暴击伤害提升 <size=80%>[加速]</size>",
+    "statusComment": "暴击伤害增加",
+    "continuationCount": "剩余 1 次",
+    "alpha": 1.0
+  }
+]

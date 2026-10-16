@@ -1,0 +1,592 @@
+[
+  {
+    "player": {
+      "address": "0x205faa21480",
+      "class": "FunnelSpecialStatus",
+      "fields": [
+        {
+          "name": "<numValue>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "FunnelSpecialStatus",
+          "value": 5
+        },
+        {
+          "name": "<rateValueInt>k__BackingField",
+          "offset": 116,
+          "type": 8,
+          "declared": "FunnelSpecialStatus",
+          "value": 1200
+        },
+        {
+          "name": "<domainSpecialStatus>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205d269e260",
+            "class": "DomainSpecialStatus"
+          }
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 24,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "0d000000"
+        },
+        {
+          "name": "<buffLimitType>k__BackingField",
+          "offset": 28,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "04000000"
+        },
+        {
+          "name": "<expectedToAdd>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<expectedToRemove>k__BackingField",
+          "offset": 33,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<exitCondition>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205fbb05e40",
+            "class": "TurnEndExitCondition"
+          }
+        },
+        {
+          "name": "<isCountConsume>k__BackingField",
+          "offset": 48,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<owner>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205d2042920",
+            "class": "UniqCharacterEntity"
+          }
+        },
+        {
+          "name": "<ownerId>k__BackingField",
+          "offset": 64,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 4000083
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 72,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 76,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 80,
+          "type": 14,
+          "declared": "SpecialStatus",
+          "text": "RKayamoriSkill09b"
+        },
+        {
+          "name": "<reasonSkillLevel>k__BackingField",
+          "offset": 88,
+          "type": 8,
+          "declared": "SpecialStatus",
+          "value": 1
+        },
+        {
+          "name": "<reasonSkillPartId>k__BackingField",
+          "offset": 96,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 47011191
+        },
+        {
+          "name": "<isHideIcon>k__BackingField",
+          "offset": 104,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<ignoreRemove>k__BackingField",
+          "offset": 105,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        }
+      ]
+    },
+    "player.<domainSpecialStatus>k__BackingField": {
+      "address": "0x205d269e260",
+      "class": "DomainSpecialStatus",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSpecialStatus",
+          "object": {
+            "address": "0x1fdbbb32360",
+            "class": "MasterSpecialStatus"
+          }
+        }
+      ]
+    },
+    "player.<exitCondition>k__BackingField": {
+      "address": "0x205fbb05e40",
+      "class": "TurnEndExitCondition",
+      "fields": [
+        {
+          "name": "<totalTurn>k__BackingField",
+          "offset": 24,
+          "type": 8,
+          "declared": "TurnEndExitCondition",
+          "value": 3
+        },
+        {
+          "name": "<progressedTurn>k__BackingField",
+          "offset": 28,
+          "type": 8,
+          "declared": "TurnEndExitCondition",
+          "value": 2
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 16,
+          "type": 17,
+          "declared": "ExitCondition",
+          "raw4": "05000000"
+        }
+      ]
+    },
+    "player.<owner>k__BackingField": {
+      "address": "0x205d2042920",
+      "class": "UniqCharacterEntity",
+      "fields": []
+    },
+    "player.<domainSpecialStatus>k__BackingField.master": {
+      "address": "0x1fdbbb32360",
+      "class": "MasterSpecialStatus",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSpecialStatus",
+          "value": 244000013
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "SpecialStatus.Funnel"
+        },
+        {
+          "name": "SpecialStatusType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "0d000000"
+        },
+        {
+          "name": "BuffIconPositiveType",
+          "offset": 36,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "IconPath",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "Assets/UI/Texture/BattleIcon/iconFunnel.png"
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "release.initial"
+        },
+        {
+          "name": "EnableIconElement",
+          "offset": 56,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "LimitCategory",
+          "offset": 60,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "08000000"
+        },
+        {
+          "name": "EnableRemoveDebuff",
+          "offset": 64,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableDebuffGuard",
+          "offset": 65,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableRemoveBuff",
+          "offset": 66,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "IsShowIconFromPassive",
+          "offset": 67,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "IsShowDebuffLabel",
+          "offset": 68,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "SpecialStatusCategory",
+          "offset": 72,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "01000000"
+        }
+      ]
+    }
+  },
+  {
+    "player": {
+      "address": "0x205fa582a80",
+      "class": "FunnelSpecialStatus",
+      "fields": [
+        {
+          "name": "<numValue>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "FunnelSpecialStatus",
+          "value": 5
+        },
+        {
+          "name": "<rateValueInt>k__BackingField",
+          "offset": 116,
+          "type": 8,
+          "declared": "FunnelSpecialStatus",
+          "value": 1200
+        },
+        {
+          "name": "<domainSpecialStatus>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205d269e260",
+            "class": "DomainSpecialStatus"
+          }
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 24,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "0d000000"
+        },
+        {
+          "name": "<buffLimitType>k__BackingField",
+          "offset": 28,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "04000000"
+        },
+        {
+          "name": "<expectedToAdd>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<expectedToRemove>k__BackingField",
+          "offset": 33,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<exitCondition>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205fa5ecea0",
+            "class": "TurnEndExitCondition"
+          }
+        },
+        {
+          "name": "<isCountConsume>k__BackingField",
+          "offset": 48,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<owner>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x205d2042920",
+            "class": "UniqCharacterEntity"
+          }
+        },
+        {
+          "name": "<ownerId>k__BackingField",
+          "offset": 64,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 4000083
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 72,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 76,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 80,
+          "type": 14,
+          "declared": "SpecialStatus",
+          "text": "RKayamoriSkill09b"
+        },
+        {
+          "name": "<reasonSkillLevel>k__BackingField",
+          "offset": 88,
+          "type": 8,
+          "declared": "SpecialStatus",
+          "value": 1
+        },
+        {
+          "name": "<reasonSkillPartId>k__BackingField",
+          "offset": 96,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 47011191
+        },
+        {
+          "name": "<isHideIcon>k__BackingField",
+          "offset": 104,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<ignoreRemove>k__BackingField",
+          "offset": 105,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        }
+      ]
+    },
+    "player.<domainSpecialStatus>k__BackingField": {
+      "address": "0x205d269e260",
+      "class": "DomainSpecialStatus",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSpecialStatus",
+          "object": {
+            "address": "0x1fdbbb32360",
+            "class": "MasterSpecialStatus"
+          }
+        }
+      ]
+    },
+    "player.<exitCondition>k__BackingField": {
+      "address": "0x205fa5ecea0",
+      "class": "TurnEndExitCondition",
+      "fields": [
+        {
+          "name": "<totalTurn>k__BackingField",
+          "offset": 24,
+          "type": 8,
+          "declared": "TurnEndExitCondition",
+          "value": 3
+        },
+        {
+          "name": "<progressedTurn>k__BackingField",
+          "offset": 28,
+          "type": 8,
+          "declared": "TurnEndExitCondition",
+          "value": 1
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 16,
+          "type": 17,
+          "declared": "ExitCondition",
+          "raw4": "05000000"
+        }
+      ]
+    },
+    "player.<owner>k__BackingField": {
+      "address": "0x205d2042920",
+      "class": "UniqCharacterEntity",
+      "fields": []
+    },
+    "player.<domainSpecialStatus>k__BackingField.master": {
+      "address": "0x1fdbbb32360",
+      "class": "MasterSpecialStatus",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSpecialStatus",
+          "value": 244000013
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "SpecialStatus.Funnel"
+        },
+        {
+          "name": "SpecialStatusType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "0d000000"
+        },
+        {
+          "name": "BuffIconPositiveType",
+          "offset": 36,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "IconPath",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "Assets/UI/Texture/BattleIcon/iconFunnel.png"
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "release.initial"
+        },
+        {
+          "name": "EnableIconElement",
+          "offset": 56,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "LimitCategory",
+          "offset": 60,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "08000000"
+        },
+        {
+          "name": "EnableRemoveDebuff",
+          "offset": 64,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableDebuffGuard",
+          "offset": 65,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableRemoveBuff",
+          "offset": 66,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "IsShowIconFromPassive",
+          "offset": 67,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "IsShowDebuffLabel",
+          "offset": 68,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "SpecialStatusCategory",
+          "offset": 72,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "01000000"
+        }
+      ]
+    }
+  }
+]

@@ -45,6 +45,7 @@ class App:
         self.session_path = None
         self.settings = self._load_settings()
         self.compact = tk.BooleanVar(value=bool(self.settings.get('compact', False)))
+        self.players_visible = tk.BooleanVar(value=not self.compact.get())
         self.topmost = tk.BooleanVar(value=bool(self.settings.get('topmost', True)))
         self.opacity = tk.DoubleVar(value=max(.7, min(1., float(self.settings.get('opacity', 1)))))
         self.root.title('HBR Live · 星屑战斗手帐')
@@ -66,14 +67,14 @@ class App:
             return {}
 
     def _restore_geometry(self):
-        default = (520, 740) if not self.history_visible.get() or self.compact.get() else (1280, 790)
+        default = (520, 850) if self.compact.get() else (1080, 900)
         values = self.settings.get('bounds', [*default, 80, 60])
         try:
             w, h, x, y = map(int, values)
         except (TypeError, ValueError):
             w, h, x, y = *default, 80, 60
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        w, h = min(max(390 if self.compact.get() or not self.history_visible.get() else 1050, w), sw-30), min(max(650, h), sh-70)
+        w, h = min(max(420 if self.compact.get() else 820, w), sw-30), min(max(650, h), sh-70)
         x, y = max(0, min(x, sw-w-16)), max(0, min(y, sh-h-60))
         self.root.geometry(f'{w}x{h}+{x}+{y}')
 
@@ -103,7 +104,7 @@ class App:
         menu_button.pack(side='right')
         menu = tk.Menu(menu_button, tearoff=False, bg=CARD, fg=FG)
         menu_button.configure(menu=menu)
-        menu.add_checkbutton(label='紧凑模式', variable=self.compact, command=self.layout)
+        menu.add_checkbutton(label='紧凑模式', variable=self.compact, command=self.change_compact)
         menu.add_checkbutton(label='保持置顶', variable=self.topmost,
                              command=lambda: self.root.attributes('-topmost', self.topmost.get()))
         for value, title in ((1., '不透明'), (.9, '透明度 90%'), (.8, '透明度 80%')):
@@ -114,8 +115,12 @@ class App:
         menu.add_command(label='保存行动轴…', command=self.export_axis)
         menu.add_command(label='打开记录文件夹', command=self.open_sessions)
         menu.add_command(label='诊断日志', command=self.show_logs)
-        self.hero = RoundedCard(self.root)
-        self.hero.pack(fill='x', padx=18, pady=6)
+        damage_summary = tk.Frame(self.root, bg=BG)
+        damage_summary.pack(fill='x', padx=18, pady=6)
+        damage_summary.columnconfigure(0,weight=1,uniform='damage')
+        damage_summary.columnconfigure(1,weight=1,uniform='damage')
+        self.hero = RoundedCard(damage_summary)
+        self.hero.grid(row=0,column=0,sticky='nsew',padx=(0,6))
         hero = self.hero.content
         self.label(hero, 'TurnMaxDamage · 指令最大伤害', DIM, 10).pack(anchor='w')
         self.total_label = tk.Label(hero, text='0', bg=CARD, fg=PINK,
@@ -123,8 +128,8 @@ class App:
         self.total_label.pack(fill='x')
         self.summary = self.label(hero, '尚未连接  ·  等待第一笔行动', DIM)
         self.summary.pack(anchor='w')
-        self.current_damage_card = RoundedCard(self.root)
-        self.current_damage_card.pack(fill='x', padx=18, pady=6)
+        self.current_damage_card = RoundedCard(damage_summary)
+        self.current_damage_card.grid(row=0,column=1,sticky='nsew',padx=(6,0))
         self.label(self.current_damage_card.content, 'TurnDamage · 当前指令伤害', DIM, 10).pack(anchor='w')
         self.current_damage_label = self.label(self.current_damage_card.content, '0', CYAN, 22, anchor='w')
         self.current_damage_label.pack(fill='x')
@@ -142,15 +147,34 @@ class App:
         self.status.pack(fill='x', padx=24, pady=(3, 8))
         history_bar = tk.Frame(self.root, bg=BG)
         history_bar.pack(fill='x', padx=22, pady=(0, 6))
-        tk.Checkbutton(history_bar, text='显示行动轴', variable=self.history_visible, command=self.layout,
+        tk.Checkbutton(history_bar,text='角色状态',variable=self.players_visible,command=self.layout,
+                       bg=BG,fg=PINK,selectcolor=CARD,activebackground=BG,activeforeground=FG,font=FONT).pack(side='left')
+        tk.Checkbutton(history_bar, text='行动轴独立窗口', variable=self.history_visible, command=self.toggle_history,
                        bg=BG, fg=PINK, selectcolor=CARD, activebackground=BG,
                        activeforeground=FG, font=FONT).pack(side='left')
         tk.Button(history_bar, text='保存行动轴…', command=self.export_axis, bg=CARD, fg=FG,
                   relief='flat', font=FONT).pack(side='right')
+        self.field_label = tk.Label(self.root, text='场地 · 待连接', bg='#304536', fg='#c8e7bb',
+                                    anchor='w', justify='left', padx=14, pady=8, font=FONT, cursor='hand2')
+        self.field_label.pack(fill='x',padx=22,pady=(0,8))
+        self.field_label.bind('<Button-1>',lambda e:self.show_field_details())
+        self.field_label.bind('<Configure>',lambda e:self.field_label.configure(wraplength=max(160,e.width-30)))
         self.body = tk.Frame(self.root, bg=BG)
         self.body.pack(fill='both', expand=True, padx=18)
+        self.allies = tk.Frame(self.body, bg=BG)
+        self.label(self.allies, '队伍 · 六人状态', PINK, 13).pack(anchor='w', padx=8, pady=(2,10))
+        self.player_view = tk.Canvas(self.allies, bg=BG, highlightthickness=0)
+        player_scroll = ttk.Scrollbar(self.allies, command=self.player_view.yview)
+        self.player_view.configure(yscrollcommand=player_scroll.set)
+        player_scroll.pack(side='right', fill='y')
+        self.player_view.pack(fill='both', expand=True)
+        from .player_panel import PlayerPanel
+        self.player_panel = PlayerPanel(self.player_view, self.text_window)
+        player_slot = self.player_view.create_window(0,0,anchor='nw',window=self.player_panel)
+        self.player_view.bind('<Configure>',lambda e:self.player_view.itemconfigure(player_slot,width=e.width))
+        self.player_panel.bind('<Configure>',lambda e:self.player_view.configure(scrollregion=self.player_view.bbox('all')))
         self.resources = tk.Frame(self.body, bg=BG)
-        self.label(self.resources, '敌方状态', CYAN, 13).pack(anchor='w', padx=8, pady=(2, 10))
+        self.label(self.resources, 'Boss 状态与行动', CYAN, 13).pack(anchor='w', padx=8, pady=(2, 10))
         self.enemy_cards = {}
         self.enemy_view = tk.Canvas(self.resources, bg=BG, highlightthickness=0, height=350)
         enemy_scroll = ttk.Scrollbar(self.resources, command=self.enemy_view.yview)
@@ -158,12 +182,20 @@ class App:
         enemy_scroll.pack(side='right', fill='y')
         self.enemy_view.pack(fill='both', expand=True)
         self.enemy_stack = tk.Frame(self.enemy_view, bg=BG)
+        self.enemy_status_panels = {}
         enemy_slot = self.enemy_view.create_window(0, 0, anchor='nw', window=self.enemy_stack)
         self.enemy_view.bind('<Configure>', lambda e: self.enemy_view.itemconfigure(enemy_slot, width=e.width))
         self.enemy_stack.bind('<Configure>', lambda e: self.enemy_view.configure(scrollregion=self.enemy_view.bbox('all')))
         self.resource_note = self.label(self.resources, '各条独立读取 · 比例参考本场观测最大值', DIM, 9, anchor='w', wraplength=275)
         self.resource_note.pack(fill='x', padx=8, pady=5, before=self.enemy_view)
-        self.history = tk.Frame(self.body, bg=BG)
+        self.history_window = tk.Toplevel(self.root)
+        self.history_window.title('HBR Live · 行动记录')
+        self.history_window.configure(bg=BG)
+        self.history_window.geometry('1120x680')
+        self.history_window.withdraw()
+        self.history_window.protocol('WM_DELETE_WINDOW', self.hide_history)
+        self.history = tk.Frame(self.history_window, bg=BG, padx=16, pady=12)
+        self.history.pack(fill='both', expand=True)
         self.label(self.history, '行动记录', PINK, 13).pack(anchor='w', pady=(2, 10))
         tk.Button(self.history, text='切换头像 / 角色风格', command=lambda: self.tree.toggle_portraits(),
                   bg=CARD, fg=DIM, relief='flat', font=FONT).pack(anchor='e')
@@ -193,6 +225,15 @@ class App:
         self.footer = self.label(self.root, '本地记录  ·  只读内存  ·  无需截图', DIM, 9, anchor='w')
         self.footer.pack(side='bottom', fill='x', padx=24, pady=(10, 14), before=self.body)
         self.root.bind('<Configure>', self.on_resize, add='+')
+        self.root.bind_all('<MouseWheel>', self.scroll_battle, add='+')
+
+    def scroll_battle(self, event):
+        widget = event.widget
+        while widget is not None:
+            if widget in (self.player_view, self.enemy_view):
+                widget.yview_scroll(-int(event.delta / 120), 'units')
+                return 'break'
+            widget = getattr(widget, 'master', None)
 
     def on_resize(self, event):
         if event.widget is self.root:
@@ -200,49 +241,33 @@ class App:
             self.total_label.configure(font=('Segoe UI', -36 if event.width < 500 else -46, 'bold italic'))
 
     def layout(self):
-        self.resources.grid_forget()
-        self.history.grid_forget()
-        if not self.history_visible.get():
-            self.root.minsize(390, 650)
-            self.body.columnconfigure(0, weight=1, minsize=0)
-            self.body.columnconfigure(1, weight=0, minsize=0)
-            self.body.rowconfigure(0, weight=1)
-            self.body.rowconfigure(1, weight=0)
-            self.resources.pack_propagate(True)
-            self.resources.grid(row=0, column=0, sticky='nsew')
-            self.enemy_view.configure(height=350)
-            self.subtitle.pack_forget()
-            self.root.geometry('520x740')
-        elif self.compact.get():
-            self.root.minsize(390, 820)
-            self.body.columnconfigure(0, weight=1)
-            self.body.columnconfigure(1, weight=0)
-            self.body.rowconfigure(0, weight=0)
-            self.body.rowconfigure(1, weight=1)
-            self.resources.pack_propagate(True)
-            self.subtitle.pack_forget()
-            self.resources.grid(row=0, column=0, sticky='ew')
-            self.history.grid(row=1, column=0, sticky='nsew', pady=(8, 0))
-            self.detail_caption.pack_forget()
-            self.resource_note.pack_forget()
-            self.enemy_view.configure(height=min(270, max(238, len(self.enemy_cards)*238)))
-            self.root.geometry(f'420x{min(850, self.root.winfo_screenheight()-90)}')
+        visible = self.players_visible.get()
+        self.root.minsize(820 if visible else 420, 730)
+        self.body.columnconfigure(0, weight=1 if visible else 0, uniform='battle' if visible else '', minsize=360 if visible else 0)
+        self.body.columnconfigure(1, weight=1, uniform='battle' if visible else '', minsize=360)
+        self.body.rowconfigure(0, weight=1)
+        if visible:
+            self.allies.grid(row=0,column=0,sticky='nsew',padx=(0,8))
         else:
-            self.root.minsize(1050, 730)
-            self.body.columnconfigure(0, weight=0, minsize=295)
-            self.body.columnconfigure(1, weight=1)
-            self.body.rowconfigure(0, weight=1)
-            self.body.rowconfigure(1, weight=0)
-            self.resources.configure(width=300)
-            self.resources.pack_propagate(False)
-            self.subtitle.pack(side='left', padx=12)
-            self.resources.grid(row=0, column=0, sticky='nsew', padx=(0, 16))
-            self.history.grid(row=0, column=1, sticky='nsew')
-            self.detail_caption.pack(fill='x', pady=8)
-            self.resource_note.pack(fill='x', padx=8, pady=8)
-            self.root.geometry('1280x790')
-
+            self.allies.grid_remove()
+        self.resources.grid(row=0,column=1,sticky='nsew',padx=(8 if visible else 0,0))
+        self.root.geometry('1080x900' if visible else '520x850')
         self.update_detail_visibility()
+
+    def change_compact(self):
+        self.players_visible.set(not self.compact.get())
+        self.layout()
+
+    def toggle_history(self):
+        if self.history_visible.get():
+            self.history_window.deiconify()
+            self.history_window.lift()
+        else:
+            self.history_window.withdraw()
+
+    def hide_history(self):
+        self.history_visible.set(False)
+        self.history_window.withdraw()
 
     def update_detail_visibility(self):
         if self.details_open:
@@ -305,6 +330,11 @@ class App:
                     for card in self.enemy_cards.values():
                         card.destroy()
                     self.enemy_cards.clear()
+                    for panel in self.enemy_status_panels.values():
+                        panel.destroy()
+                    self.enemy_status_panels.clear()
+                    self.player_panel.reset()
+                    self.field_label.configure(text='场地 · 等待采样')
                     self.last_sample = None
                     self.connected = True
                     self.start_button.configure(text='停止')
@@ -348,6 +378,12 @@ class App:
         self.summary.configure(text=f'{prefix}{len(batches)} 组指令 · 本场累计 {self.model.total:,}')
         self.enemy_keys = list(self.model.enemies)
         self.render_enemy()
+        self.player_panel.update_state(self.model.players, self.model.element_gauge)
+        field = self.model.field_state or {}
+        active = [s for s in field.get('statuses',[]) if not s.get('pending_add') and not s.get('pending_remove')]
+        from .statuses import status_line
+        self.field_label.configure(text='场地 · '+('  /  '.join(status_line(s)+' · '+s.get('duration','持续待确认') for s in active)
+            if active else '未观测到场地' if field.get('available') else '暂不可读'))
         if events:
             self.history_rows = table_rows(self.model.actions.values())
             self.tree.set_rows(self.history_rows)
@@ -380,9 +416,22 @@ class App:
             if key not in self.enemy_cards:
                 card = self.enemy_cards[key] = EnemyCard(self.enemy_stack, number, self.show_enemy_details)
                 card.pack(fill='x', pady=(0, 6))
+                from .status_groups import StatusGroups
+                panel = StatusGroups(self.enemy_stack, self.show_status_details, enemy=True)
+                panel.pack(fill='x', padx=4, pady=(0,12))
+                self.enemy_status_panels[key] = panel
             self.enemy_cards[key].update_state(state)
-        if self.compact.get() and self.history_visible.get():
-            self.enemy_view.configure(height=min(270, max(238, len(self.enemy_cards)*238)))
+            self.enemy_status_panels[key].update_state(state)
+
+    def show_status_details(self, status):
+        from .statuses import status_details
+        self.text_window(status['name'], status_details(dict(statuses_available=True,statuses=[status])))
+
+    def show_field_details(self):
+        from .statuses import status_details
+        field = self.model.field_state or {}
+        self.text_window('场地详情', status_details(dict(statuses_available=field.get('available'),statuses=field.get('statuses',[])))
+            +'\n\n场地独立于角色状态。特殊场地的原始参数不直接当作通用加攻倍率。')
 
     def target_label(self, address, fallback='目标未确认'):
         if address in self.enemy_keys:
@@ -398,6 +447,8 @@ class App:
         from .enemy_prediction import prediction_details
         text += '\n\n' + prediction_details(preview)
         text += '\n\n' + (state.get('action_rules') or '本地资料尚未收录此敌人的行动规则。')
+        from .statuses import status_details
+        text += '\n\n当前状态：\n' + status_details(state)
         self.text_window(f'敌{number} · 名称与行动规则', text)
 
     def target_summary(self, event):

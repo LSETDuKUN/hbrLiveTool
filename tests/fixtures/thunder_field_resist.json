@@ -1,0 +1,604 @@
+[
+  {
+    "player": {
+      "address": "0x2377c27aab0",
+      "class": "ZoneSpecialStatus",
+      "fields": [
+        {
+          "name": "<rateValueInt>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "ZoneSpecialStatus",
+          "value": 19500
+        },
+        {
+          "name": "<elementType>k__BackingField",
+          "offset": 116,
+          "type": 17,
+          "declared": "ZoneSpecialStatus",
+          "raw4": "03000000"
+        },
+        {
+          "name": "<strValue1>k__BackingField",
+          "offset": 120,
+          "type": 14,
+          "declared": "ZoneSpecialStatus",
+          "text": "Strong"
+        },
+        {
+          "name": "<domainSpecialStatus>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x2377c25f140",
+            "class": "DomainSpecialStatus"
+          }
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 24,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "0e000000"
+        },
+        {
+          "name": "<buffLimitType>k__BackingField",
+          "offset": 28,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<expectedToAdd>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<expectedToRemove>k__BackingField",
+          "offset": 33,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<exitCondition>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x22f165aad80",
+            "class": "EternalExitCondition"
+          }
+        },
+        {
+          "name": "<isCountConsume>k__BackingField",
+          "offset": 48,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<owner>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "SpecialStatus"
+        },
+        {
+          "name": "<ownerId>k__BackingField",
+          "offset": 64,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 0
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 72,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 76,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 80,
+          "type": 14,
+          "declared": "SpecialStatus",
+          "text": "MAikawaSkill56b"
+        },
+        {
+          "name": "<reasonSkillLevel>k__BackingField",
+          "offset": 88,
+          "type": 8,
+          "declared": "SpecialStatus",
+          "value": 10
+        },
+        {
+          "name": "<reasonSkillPartId>k__BackingField",
+          "offset": 96,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 47013173
+        },
+        {
+          "name": "<isHideIcon>k__BackingField",
+          "offset": 104,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<ignoreRemove>k__BackingField",
+          "offset": 105,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        }
+      ]
+    },
+    "player.<domainSpecialStatus>k__BackingField": {
+      "address": "0x2377c25f140",
+      "class": "DomainSpecialStatus",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSpecialStatus",
+          "object": {
+            "address": "0x22f186d07e0",
+            "class": "MasterSpecialStatus"
+          }
+        }
+      ]
+    },
+    "player.<exitCondition>k__BackingField": {
+      "address": "0x22f165aad80",
+      "class": "EternalExitCondition",
+      "fields": [
+        {
+          "name": "<type>k__BackingField",
+          "offset": 16,
+          "type": 17,
+          "declared": "ExitCondition",
+          "raw4": "02000000"
+        }
+      ]
+    },
+    "player.<domainSpecialStatus>k__BackingField.master": {
+      "address": "0x22f186d07e0",
+      "class": "MasterSpecialStatus",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSpecialStatus",
+          "value": 244000014
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "SpecialStatus.Zone"
+        },
+        {
+          "name": "SpecialStatusType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "0e000000"
+        },
+        {
+          "name": "BuffIconPositiveType",
+          "offset": 36,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "IconPath",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": ""
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "release.initial"
+        },
+        {
+          "name": "EnableIconElement",
+          "offset": 56,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "LimitCategory",
+          "offset": 60,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "EnableRemoveDebuff",
+          "offset": 64,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableDebuffGuard",
+          "offset": 65,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "EnableRemoveBuff",
+          "offset": 66,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "IsShowIconFromPassive",
+          "offset": 67,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "IsShowDebuffLabel",
+          "offset": 68,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "SpecialStatusCategory",
+          "offset": 72,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "00000000"
+        }
+      ]
+    }
+  },
+  {
+    "player": {
+      "address": "0x237788a2b40",
+      "class": "ResistSpecialStatus",
+      "fields": [
+        {
+          "name": "<rateValueInt>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "ResistSpecialStatus",
+          "value": -5940
+        },
+        {
+          "name": "<elementType>k__BackingField",
+          "offset": 116,
+          "type": 17,
+          "declared": "ResistSpecialStatus",
+          "raw4": "03000000"
+        },
+        {
+          "name": "<elementTypeList>k__BackingField",
+          "offset": 120,
+          "type": 21,
+          "declared": "ResistSpecialStatus",
+          "object": {
+            "address": "0x237788a1a80",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<domainSpecialStatus>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x237778c1ec0",
+            "class": "DomainSpecialStatus"
+          }
+        },
+        {
+          "name": "<type>k__BackingField",
+          "offset": 24,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "12000000"
+        },
+        {
+          "name": "<buffLimitType>k__BackingField",
+          "offset": 28,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "02000000"
+        },
+        {
+          "name": "<expectedToAdd>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<expectedToRemove>k__BackingField",
+          "offset": 33,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<exitCondition>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x22f1673c4e0",
+            "class": "EternalExitCondition"
+          }
+        },
+        {
+          "name": "<isCountConsume>k__BackingField",
+          "offset": 48,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<owner>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "SpecialStatus",
+          "object": {
+            "address": "0x22f46c44620",
+            "class": "UniqCharacterEntity"
+          }
+        },
+        {
+          "name": "<ownerId>k__BackingField",
+          "offset": 64,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 13402704
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 72,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 76,
+          "type": 17,
+          "declared": "SpecialStatus",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 80,
+          "type": 14,
+          "declared": "SpecialStatus",
+          "text": "MAikawaSkill56b"
+        },
+        {
+          "name": "<reasonSkillLevel>k__BackingField",
+          "offset": 88,
+          "type": 8,
+          "declared": "SpecialStatus",
+          "value": 10
+        },
+        {
+          "name": "<reasonSkillPartId>k__BackingField",
+          "offset": 96,
+          "type": 10,
+          "declared": "SpecialStatus",
+          "value": 47013172
+        },
+        {
+          "name": "<isHideIcon>k__BackingField",
+          "offset": 104,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        },
+        {
+          "name": "<ignoreRemove>k__BackingField",
+          "offset": 105,
+          "type": 2,
+          "declared": "SpecialStatus",
+          "value": false
+        }
+      ]
+    },
+    "player.<elementTypeList>k__BackingField": {
+      "address": "0x237788a1a80",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 1
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 0
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    "player.<domainSpecialStatus>k__BackingField": {
+      "address": "0x237778c1ec0",
+      "class": "DomainSpecialStatus",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSpecialStatus",
+          "object": {
+            "address": "0x22f186d02a0",
+            "class": "MasterSpecialStatus"
+          }
+        }
+      ]
+    },
+    "player.<exitCondition>k__BackingField": {
+      "address": "0x22f1673c4e0",
+      "class": "EternalExitCondition",
+      "fields": [
+        {
+          "name": "<type>k__BackingField",
+          "offset": 16,
+          "type": 17,
+          "declared": "ExitCondition",
+          "raw4": "02000000"
+        }
+      ]
+    },
+    "player.<owner>k__BackingField": {
+      "address": "0x22f46c44620",
+      "class": "UniqCharacterEntity",
+      "fields": []
+    },
+    "player.<domainSpecialStatus>k__BackingField.master": {
+      "address": "0x22f186d02a0",
+      "class": "MasterSpecialStatus",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSpecialStatus",
+          "value": 244000018
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "SpecialStatus.ResistDown"
+        },
+        {
+          "name": "SpecialStatusType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "12000000"
+        },
+        {
+          "name": "BuffIconPositiveType",
+          "offset": 36,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "02000000"
+        },
+        {
+          "name": "IconPath",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "Assets/UI/Texture/BattleIcon/IconResistElement.png"
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSpecialStatus",
+          "text": "release.initial"
+        },
+        {
+          "name": "EnableIconElement",
+          "offset": 56,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "LimitCategory",
+          "offset": 60,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "23000000"
+        },
+        {
+          "name": "EnableRemoveDebuff",
+          "offset": 64,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "EnableDebuffGuard",
+          "offset": 65,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "EnableRemoveBuff",
+          "offset": 66,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "IsShowIconFromPassive",
+          "offset": 67,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": false
+        },
+        {
+          "name": "IsShowDebuffLabel",
+          "offset": 68,
+          "type": 2,
+          "declared": "MasterSpecialStatus",
+          "value": true
+        },
+        {
+          "name": "SpecialStatusCategory",
+          "offset": 72,
+          "type": 17,
+          "declared": "MasterSpecialStatus",
+          "raw4": "02000000"
+        }
+      ]
+    }
+  }
+]

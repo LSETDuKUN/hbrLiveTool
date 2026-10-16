@@ -7,21 +7,21 @@ from .formation import FormationReader
 from .turns import TurnReader
 from .windows import game_pid
 
-def inspect(player):
+def inspect(player, max_depth=4, max_objects=180, list_limit=24):
     out={}; queue=[('player',player,0)];seen=set()
-    while queue and len(out)<180:
+    while queue and len(out)<max_objects:
         path,obj,depth=queue.pop(0)
         if obj in seen:continue
         seen.add(obj); d=r.fields(obj);out[path]=d
         for f in d['fields']:
             if f['type']==17:f['raw4']=r.read(obj+f['offset'],4).hex()
-        if depth>=4:continue
+        if depth>=max_depth:continue
         if d['class']=='List`1':
-            try:queue.extend((path+f'[{i}]',v,depth+1) for i,v in enumerate(members(r,obj)[:24]) if r.cls(v))
+            try:queue.extend((path+f'[{i}]',v,depth+1) for i,v in enumerate(members(r,obj)[:list_limit]) if r.cls(v))
             except RuntimeError:pass
         for f in d['fields']:
             child=f.get('object')
-            if child and any(s in (f['name']+child['class']).lower() for s in ('special','status','domain','master','style','mode','form','command')):
+            if child and any(s in (f['name']+child['class']).lower() for s in ('special','status','domain','master','style','mode','form','command','exitcondition','zone','field')):
                 queue.append((path+'.'+f['name'],int(child['address'],16),depth+1))
     return out
 

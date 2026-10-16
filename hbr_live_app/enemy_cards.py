@@ -139,7 +139,10 @@ class EnemyCard(tk.Canvas):
             branch_heights.append(58+(box[3]-box[1]+8 if effect_text and box else 0))
             self.delete(item)
         band_bottom = 169 + (sum(branch_heights) or 58)
+        status_text = ''
         self.footer_y = band_bottom + 28*len(following) + (28 if preview.get('fallback') else 0) + 25
+        if status_text:
+            self.footer_y += 25
         height = self.footer_y+14
         if int(self.cget('height')) != height:
             self.configure(height=height)
@@ -223,7 +226,11 @@ class EnemyCard(tk.Canvas):
             below += 28
         if preview.get('fallback'):
             self.create_text(16, below, text='↳ 条件不成立时有后续分支 · 见详情', anchor='w', fill='#c0b3ca', font=self.font)
-        footer = '名称、分支条件与技能效果 ›'
+        if status_text:
+            while self.font.measure(status_text)>w-32 and len(status_text)>8:
+                status_text=status_text[:-2]+'…'
+            self.create_text(16, self.footer_y-25, text=status_text, anchor='w', fill='#eab5d6', font=self.font)
+        footer = '名称、状态与技能效果 ›'
         if len(branches)>4:
             footer = f'另 {len(branches)-4} 个分支 · '+footer
         self.create_text(12, self.footer_y, text=footer, anchor='w', fill='#83e5ed', font=self.font)

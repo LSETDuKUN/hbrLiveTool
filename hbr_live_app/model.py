@@ -8,8 +8,17 @@ class BattleModel:
         self.enemies = OrderedDict()
         self.run_id = None
         self.turn_context = None
+        self.players = []
+        self.element_gauge = None
+        self.field_state = None
 
     def update(self, packet):
+        if 'field_state' in packet:
+            self.field_state = packet['field_state']
+        if 'element_gauge' in packet:
+            self.element_gauge = packet['element_gauge']
+        if 'player_states' in packet:
+            self.players = packet['player_states']
         if 'turn_context' in packet:
             self.turn_context = packet['turn_context']
         present = {s['address'] for s in packet['enemies']}
@@ -48,4 +57,7 @@ class BattleModel:
         return {'schema': 2, 'run_id': self.run_id, 'display_damage': self.total,
                 'command_damage': self.command_damage,
                 'turn_context': self.turn_context,
+                'player_states': self.players,
+                'element_gauge': self.element_gauge,
+                'field_state': self.field_state,
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}

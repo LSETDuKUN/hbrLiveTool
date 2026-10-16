@@ -123,6 +123,11 @@ def run(stop, paused, emit, outdir):
     enemy_reader = EnemyReader(r)
     from .player_transitions import PlayerTransitions
     player_transitions = PlayerTransitions()
+    from .statuses import StatusReader
+    status_reader = StatusReader(r)
+    previous_players = None
+    previous_gauge = None
+    previous_fields = None
     try:
         r.open_process(game_pid())
         emit(('status', '正在定位战斗，请暂不行动…'))
@@ -200,14 +205,26 @@ def run(stop, paused, emit, outdir):
                 except (RuntimeError, ValueError, TypeError, KeyError):
                     player_transitions.invalidate()
                 events = commands.update(transitions + ledger.update(actions, known_enemies), context)
-                if states != previous or events or context != previous_context:
+                for player in player_states:
+                    try:
+                        player.update(status_reader.sample(player['actor_id'], resources=True))
+                    except (RuntimeError, ValueError, TypeError, KeyError):
+                        player.update(statuses=[], statuses_available=False)
+                for state in states:
+                    state.update(status_reader.sample(state['address']))
+                gauge = status_reader.element_gauge(module)
+                fields = status_reader.sample_fields(module)
+                if states != previous or events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields:
                     packet = dict(time=time.time(), enemies=states, events=events, turn_context=context,
-                                  player_states=player_states)
+                                  player_states=player_states, element_gauge=gauge, field_state=fields)
                     emit(('snapshot', packet))
                     log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     log.flush()
                     previous = states
                     previous_context = context
+                    previous_players = player_states
+                    previous_gauge = gauge
+                    previous_fields = fields
                 if time.monotonic() - heartbeat >= 1:
                     emit(('heartbeat', time.time()))
                     heartbeat = time.monotonic()

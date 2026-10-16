@@ -121,4 +121,5 @@ class EnemyReader:
                 pass
         preview = self.previews.update(enemy, info, live, context) if state['hp'] > 0 else dict(text='已击败', blink=False)
         return dict(enemy_label=strings['Label'], enemy_id=identity, names=aliases,
+                    base_resistances=info.get('base_resistances'),
                     action_rules=info['rules'], enemy_progress=live, forecast=preview)

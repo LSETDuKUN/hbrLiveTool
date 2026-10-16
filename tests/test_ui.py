@@ -6,6 +6,41 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_six_portraits_stay_fixed_on_swap_and_details_start_collapsed(self):
+        players=[dict(actor_id=i+1,actor_position=i,actor=f'角色{i}',style_label='',statuses_available=True,statuses=[]) for i in range(6)]
+        panel=self.app.player_panel
+        panel.update_state(players,None)
+        order=list(panel.order)
+        tiles={key:value['frame'] for key,value in panel.tiles.items()}
+        self.assertEqual(len(tiles),6)
+        self.assertEqual(panel.detail.winfo_manager(),'')
+        players[0]=dict(players[0],actor_position=3)
+        players[3]=dict(players[3],actor_position=0)
+        panel.update_state(players,None)
+        self.assertEqual(panel.order,order)
+        self.assertEqual({key:value['frame'] for key,value in panel.tiles.items()},tiles)
+        self.assertEqual(panel.tiles[4]['badge'].cget('text'),'前排 · 中')
+        panel.update_state([],None)
+        self.assertEqual(panel.order,order)
+        self.assertEqual(panel.tiles[4]['badge'].cget('text'),'暂不可读')
+        panel.update_state(players,None)
+        self.assertEqual(panel.order,order)
+        self.assertEqual({key:value['frame'] for key,value in panel.tiles.items()},tiles)
+        panel.select(4)
+        self.assertEqual(panel.detail.winfo_manager(),'pack')
+        panel.select(4)
+        self.assertEqual(panel.detail.winfo_manager(),'')
+        panel.reset()
+        self.assertEqual(panel.order,[])
+        self.assertEqual(panel.tiles,{})
+
+    def test_compact_hides_players_without_losing_samples(self):
+        self.app.compact.set(True);self.app.change_compact()
+        self.assertFalse(self.app.players_visible.get())
+        self.assertEqual(self.app.allies.winfo_manager(),'')
+        self.app.compact.set(False);self.app.change_compact()
+        self.assertEqual(self.app.allies.winfo_manager(),'grid')
+
     def test_portraits_target_and_text_toggle(self):
         from test_command_damage import event
         photo = tk.PhotoImage(master=self.root, width=44, height=44)
@@ -55,17 +90,21 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(self.app.total_label.cget('text'), '11,086')
         self.assertEqual(self.app.current_damage_label.cget('text'), '0 + 10')
 
-    def test_history_defaults_hidden_and_can_be_embedded_without_losing_records(self):
+    def test_history_uses_independent_window_without_losing_records(self):
         self.assertFalse(self.app.history_visible.get())
-        self.assertEqual(self.app.history.winfo_manager(), '')
+        self.assertEqual(self.app.history_window.state(), 'withdrawn')
+        self.assertEqual(self.app.allies.grid_info()['column'], 0)
+        self.assertEqual(self.app.resources.grid_info()['column'], 1)
         event = dict(event_id=1, actor='角色', skill='技能', value=1, hits=[], settled=True)
         self.app.model.update(dict(enemies=[], events=[event]))
         self.app.render([event])
         for visible in (True, False, True):
             self.app.history_visible.set(visible)
-            self.app.layout()
-            self.assertEqual(self.app.history.winfo_manager(), 'grid' if visible else '')
+            self.app.toggle_history()
+            self.assertEqual(self.app.history_window.state(), 'normal' if visible else 'withdrawn')
             self.assertEqual(len(self.app.model.actions), 1)
+        self.app.hide_history()
+        self.assertFalse(self.app.history_visible.get())
 
     def test_only_battle_end_offers_save_once_and_decline_does_not_export(self):
         self.app.model.actions[1] = dict(event_id=1, actor='角色', skill='技能', value=1, hits=[], settled=True)
