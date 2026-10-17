@@ -66,6 +66,19 @@ class App:
         except (OSError, ValueError):
             return {}
 
+    def open_damage_calculator(self):
+        from .damage_window import DamageWindow
+        window = getattr(self, 'damage_window', None)
+        if window is not None and window.winfo_exists():
+            window.deiconify();window.lift();return
+        def snapshot():
+            return dict(connected=self.connected,
+                players=[dict(p,name=p.get('actor'), inputs=p.get('combat_inputs', {})) for p in self.model.players],
+                enemies=[dict(e,inputs=e.get('combat_inputs', {}))
+                         for e in self.model.enemies.values() if e.get('active')],field_state=self.model.field_state,
+                         element_gauge=self.model.element_gauge)
+        self.damage_window = DamageWindow(self.root, snapshot)
+
     def _restore_geometry(self):
         default = (520, 850) if self.compact.get() else (1080, 900)
         values = self.settings.get('bounds', [*default, 80, 60])
@@ -154,6 +167,8 @@ class App:
                        activeforeground=FG, font=FONT).pack(side='left')
         tk.Button(history_bar, text='保存行动轴…', command=self.export_axis, bg=CARD, fg=FG,
                   relief='flat', font=FONT).pack(side='right')
+        tk.Button(history_bar, text='伤害试算', command=self.open_damage_calculator, bg=CARD, fg=FG,
+                  relief='flat', font=FONT).pack(side='right',padx=6)
         self.field_label = tk.Label(self.root, text='场地 · 待连接', bg='#304536', fg='#c8e7bb',
                                     anchor='w', justify='left', padx=14, pady=8, font=FONT, cursor='hand2')
         self.field_label.pack(fill='x',padx=22,pady=(0,8))

@@ -6,6 +6,47 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_damage_autofill_uses_current_snapshot_without_overwriting_edits(self):
+        from unittest.mock import patch
+        from test_damage_autofill import setup
+        p,e,lookup=setup();p.update(actor='测试角色');e.update(hp=100,active=True,name='测试敌人')
+        p['combat_inputs']['selected_skill']['parts']=[dict(Label='test',skill_type_raw=10)]
+        self.app.model.players=[dict(actor_id=3,actor='辅助',actor_position=0),p]
+        self.app.model.enemies[2]=e;self.app.connected=True
+        # A synthetic skill has no catalog entry, so feed its source explicitly.
+        from hbr_live_app.damage_autofill import autofill
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f,**kw:autofill(p,e,f,lookup,**kw)):
+            self.app.open_damage_calculator();window=self.app.damage_window
+            self.assertEqual(set(window.mode_choices),{'transcend','high_boost'})
+            self.assertEqual(window.player_box.current(),1)
+            self.assertEqual(window.params['orb'].get(),'5')
+            self.assertEqual(window.values['destruction'].get(),'250')
+            self.assertTrue(window.use_skill.get())
+            window.values['attack'].set('123')
+            window.refresh();self.assertEqual(window.values['attack'].get(),'123')
+            window.fill();self.assertEqual(window.values['attack'].get(),'0')
+            p['statuses']=[dict(label='SpecialStatus.HighBoost',duration_kind='turn',remaining=0)]
+            window.fill();self.assertEqual(window.values['attack'].get(),'0')
+            window.mode_choices['high_boost'].set('启用')
+            window.fill();self.assertEqual(window.values['attack'].get(),'180')
+            self.app.connected=False
+            window.values['attack'].set('77');window.fill()
+            self.assertEqual(window.values['attack'].get(),'77')
+            window.destroy()
+
+    def test_manual_damage_window_keeps_unknown_base_and_can_refresh(self):
+        self.app.open_damage_calculator()
+        window=self.app.damage_window
+        self.root.update_idletasks()
+        self.assertNotIn('未衰减试算伤害：',window.result.get('1.0','end'))
+        window.values['base'].set('100')
+        window.values['element_bonus'].set('300')
+        window.values['resistance'].set('50')
+        window.compute()
+        self.assertIn('300.00',window.result.get('1.0','end'))
+        window.refresh()
+        window.destroy()
+
     def test_six_portraits_stay_fixed_on_swap_and_details_start_collapsed(self):
         players=[dict(actor_id=i+1,actor_position=i,actor=f'角色{i}',style_label='',statuses_available=True,statuses=[]) for i in range(6)]
         panel=self.app.player_panel

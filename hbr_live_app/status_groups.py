@@ -5,7 +5,7 @@ from .statuses import status_line
 GROUPS = (
     ('boost', '加攻 · 心眼', '#f5aacb'),
     ('funnel', '连击珠', '#83e5ed'),
-    ('charge', '充能 / 蓄力 · 独立乘区', '#a5e9b4'),
+    ('charge', '充能 / 蓄力', '#a5e9b4'),
     ('critical', '暴击 · 爆伤', '#ffd398'),
     ('debuff', '减防 · 脆弱', '#e9a5b8'),
     ('resist', '抗性 · 弱点', '#b8b0f3'),

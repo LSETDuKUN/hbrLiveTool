@@ -160,6 +160,7 @@ class StatusReader:
         self.names = {}
         self.effects = {}
         self.cache = {}
+        self.input_cache = {}
         self.stamp = 0
 
     def fields(self, address):
@@ -215,7 +216,9 @@ class StatusReader:
                 for row in rows:
                     for part in json.loads(row[0]).get('parts',[]):
                         if part.get('skill_type')==kind:
-                            item=dict(elements=part.get('elements',[]), effect=part.get('effect',{}),target_condition=part.get('target_condition',''))
+                            item=dict(elements=part.get('elements',[]), effect=part.get('effect',{}),
+                                      target_condition=part.get('target_condition',''),
+                                      condition=part.get('cond',''), hit_condition=part.get('hit_condition',''))
                             candidates[json.dumps(item,sort_keys=True)]=item
                 if len(candidates)==1:result=next(iter(candidates.values()))
             except (OSError,ValueError,RuntimeError,sqlite3.Error,TypeError,KeyError):
@@ -297,11 +300,19 @@ class StatusReader:
         now = time.monotonic()
         if now-self.stamp >= .4:
             self.cache.clear()
+            self.input_cache.clear()
             self.stamp = now
 
     def sample(self, actor, resources=False):
         self.refresh()
         result = {}
+        try:
+            from .damage_inputs import read_inputs
+            if actor not in self.input_cache:
+                self.input_cache[actor] = read_inputs(self, actor)
+            result['combat_inputs'] = self.input_cache[actor]
+        except (ValueError, RuntimeError, TypeError, KeyError):
+            result['combat_inputs'] = dict(unavailable=True)
         if resources:
             for pool in ('hp','dp'):
                 field = self.fields(actor).get(pool+'Internal')

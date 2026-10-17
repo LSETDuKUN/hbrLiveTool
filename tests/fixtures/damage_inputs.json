@@ -1,0 +1,3813 @@
+{
+  "objects": [
+    {
+      "address": "0x182777fecf0",
+      "class": "DomainSkill",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkill",
+          "object": {
+            "address": "0x17a161c5930",
+            "class": "MasterSkill"
+          }
+        },
+        {
+          "name": "originalSkillMaster",
+          "offset": 24,
+          "type": 18,
+          "declared": "DomainSkill",
+          "object": {
+            "address": "0x17a161c5930",
+            "class": "MasterSkill"
+          }
+        },
+        {
+          "name": "<masterCharacterId>k__BackingField",
+          "offset": 32,
+          "type": 10,
+          "declared": "DomainSkill",
+          "value": 4001001
+        },
+        {
+          "name": "<masterCharacterLabel>k__BackingField",
+          "offset": 40,
+          "type": 14,
+          "declared": "DomainSkill",
+          "text": "STezuka"
+        },
+        {
+          "name": "<masterCharacterLabelForOverrideTimeLine>k__BackingField",
+          "offset": 48,
+          "type": 14,
+          "declared": "DomainSkill",
+          "text": "STezuka"
+        },
+        {
+          "name": "isForceGeneralized",
+          "offset": 56,
+          "type": 2,
+          "declared": "DomainSkill",
+          "value": false
+        },
+        {
+          "name": "availableForceGeneralize",
+          "offset": 57,
+          "type": 2,
+          "declared": "DomainSkill",
+          "value": false
+        },
+        {
+          "name": "_skillHitList",
+          "offset": 64,
+          "type": 21,
+          "declared": "DomainSkill",
+          "object": {
+            "address": "0x179ec84c300",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "_skillPartList",
+          "offset": 72,
+          "type": 21,
+          "declared": "DomainSkill",
+          "object": {
+            "address": "0x179ec84c330",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "_allSkillPartList",
+          "offset": 80,
+          "type": 21,
+          "declared": "DomainSkill",
+          "object": {
+            "address": "0x179ec84c450",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "_skillPartCache",
+          "offset": 88,
+          "type": 21,
+          "declared": "DomainSkill"
+        },
+        {
+          "name": "_skillDescriptionList",
+          "offset": 96,
+          "type": 21,
+          "declared": "DomainSkill"
+        },
+        {
+          "name": "restrictedCardLabel",
+          "offset": 104,
+          "type": 14,
+          "declared": "DomainSkill",
+          "text": "STezuka03"
+        },
+        {
+          "name": "_elementTypeList",
+          "offset": 112,
+          "type": 21,
+          "declared": "DomainSkill"
+        },
+        {
+          "name": "fixedSkillLevel",
+          "offset": 120,
+          "type": 8,
+          "declared": "DomainSkill",
+          "value": 1
+        },
+        {
+          "name": "<skillExperienceBackup>k__BackingField",
+          "offset": 124,
+          "type": 8,
+          "declared": "DomainSkill",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "address": "0x17a161c5930",
+      "class": "MasterSkill",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkill",
+          "value": 46041403
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "Name",
+          "offset": 32,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "凌空铁锤"
+        },
+        {
+          "name": "Info",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "降低敌方全体防御力，以雷枪贯穿 [破坏率特大]\n此外 鬼神状态中自身获得追加回合"
+        },
+        {
+          "name": "RestrictedCardLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "STezuka03"
+        },
+        {
+          "name": "HitCount",
+          "offset": 56,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 1
+        },
+        {
+          "name": "TargetType",
+          "offset": 60,
+          "type": 17,
+          "declared": "MasterSkill",
+          "raw4": "02000000"
+        },
+        {
+          "name": "Sp",
+          "offset": 64,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 12
+        },
+        {
+          "name": "Condition",
+          "offset": 72,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "Advance",
+          "offset": 80,
+          "type": 2,
+          "declared": "MasterSkill",
+          "value": false
+        },
+        {
+          "name": "TimelinePath",
+          "offset": 88,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "Assets/Contents/Timeline/Battle/Character/STezuka/STezukaSoldierBattleUniqueAttackAll02.prefab"
+        },
+        {
+          "name": "RandomTrack",
+          "offset": 96,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "SelectedTrack",
+          "offset": 104,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "EffectLabel",
+          "offset": 112,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "ShowSkillBoard",
+          "offset": 120,
+          "type": 2,
+          "declared": "MasterSkill",
+          "value": false
+        },
+        {
+          "name": "AutoConditionSaving",
+          "offset": 128,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "true"
+        },
+        {
+          "name": "AutoConditionFull",
+          "offset": 136,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "true"
+        },
+        {
+          "name": "AutoPriority",
+          "offset": 144,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 12
+        },
+        {
+          "name": "LimitCountLevels",
+          "offset": 152,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "LimitCountValues",
+          "offset": 160,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "MaxSkillLevel",
+          "offset": 168,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 10
+        },
+        {
+          "name": "VoiceKeys",
+          "offset": 176,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "VoiceTimingKey",
+          "offset": 184,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "AltVoiceCategory",
+          "offset": 192,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "AltVoiceKeys",
+          "offset": 200,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "PanelInfo",
+          "offset": 208,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "HideMiniCutIn",
+          "offset": 216,
+          "type": 2,
+          "declared": "MasterSkill",
+          "value": true
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 224,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": "release.lance_start"
+        },
+        {
+          "name": "OverrideTimelineLabel",
+          "offset": 232,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "OverwriteSpCondition",
+          "offset": 240,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "OverwriteSp",
+          "offset": 248,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 0
+        },
+        {
+          "name": "IsDynamicLoad",
+          "offset": 252,
+          "type": 2,
+          "declared": "MasterSkill",
+          "value": true
+        },
+        {
+          "name": "PassiveSkillLabel",
+          "offset": 256,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "IsExSkill",
+          "offset": 264,
+          "type": 2,
+          "declared": "MasterSkill",
+          "value": false
+        },
+        {
+          "name": "SkillExperienceUpItemLabelList",
+          "offset": 272,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "ElementList",
+          "offset": 280,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "SpListByUsedCount",
+          "offset": 288,
+          "type": 29,
+          "declared": "MasterSkill"
+        },
+        {
+          "name": "ConsumeType",
+          "offset": 296,
+          "type": 17,
+          "declared": "MasterSkill",
+          "raw4": "00000000"
+        },
+        {
+          "name": "IgnoreUsedCountCondition",
+          "offset": 304,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "RestrictedCardFormLabel",
+          "offset": 312,
+          "type": 14,
+          "declared": "MasterSkill",
+          "text": ""
+        },
+        {
+          "name": "IntervalTurn",
+          "offset": 320,
+          "type": 8,
+          "declared": "MasterSkill",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "address": "0x17a1699c540",
+      "class": "BattleEnemyData",
+      "fields": [
+        {
+          "name": "domainEnemy",
+          "offset": 480,
+          "type": 18,
+          "declared": "BattleEnemyData",
+          "object": {
+            "address": "0x18279734750",
+            "class": "DomainEnemy"
+          }
+        },
+        {
+          "name": "overrideEnemy",
+          "offset": 488,
+          "type": 18,
+          "declared": "BattleEnemyData"
+        },
+        {
+          "name": "<groupLabel>k__BackingField",
+          "offset": 496,
+          "type": 14,
+          "declared": "BattleEnemyData",
+          "text": "BigotryGateAmonDefault01"
+        },
+        {
+          "name": "<scoreAttackRules>k__BackingField",
+          "offset": 504,
+          "type": 21,
+          "declared": "BattleEnemyData",
+          "object": {
+            "address": "0x179ec8d8600",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<index>k__BackingField",
+          "offset": 512,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "<weakeningCount>k__BackingField",
+          "offset": 516,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "_borderRefParam",
+          "offset": 520,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 610
+        },
+        {
+          "name": "_defenseRefParam",
+          "offset": 524,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 610
+        },
+        {
+          "name": "<defaultMaxHp>k__BackingField",
+          "offset": 528,
+          "type": 10,
+          "declared": "BattleEnemyData",
+          "value": 1166600
+        },
+        {
+          "name": "<defaultMaxDp>k__BackingField",
+          "offset": 536,
+          "type": 10,
+          "declared": "BattleEnemyData",
+          "value": 1600000
+        },
+        {
+          "name": "<maxHpList>k__BackingField",
+          "offset": 544,
+          "type": 21,
+          "declared": "BattleEnemyData"
+        },
+        {
+          "name": "<existsHpExtraGauge>k__BackingField",
+          "offset": 552,
+          "type": 2,
+          "declared": "BattleEnemyData",
+          "value": false
+        },
+        {
+          "name": "<maxDpList>k__BackingField",
+          "offset": 560,
+          "type": 21,
+          "declared": "BattleEnemyData"
+        },
+        {
+          "name": "<existsDpExtraGauge>k__BackingField",
+          "offset": 568,
+          "type": 2,
+          "declared": "BattleEnemyData",
+          "value": true
+        },
+        {
+          "name": "<initialEsp>k__BackingField",
+          "offset": 572,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "_damageRate",
+          "offset": 576,
+          "type": 12,
+          "declared": "BattleEnemyData",
+          "value": 100.0
+        },
+        {
+          "name": "<damageRateValue>k__BackingField",
+          "offset": 580,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 4
+        },
+        {
+          "name": "<maxDamageRate>k__BackingField",
+          "offset": 584,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 300
+        },
+        {
+          "name": "<learningElement>k__BackingField",
+          "offset": 588,
+          "type": 17,
+          "declared": "BattleEnemyData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "isEnemyCharge",
+          "offset": 592,
+          "type": 2,
+          "declared": "BattleEnemyData",
+          "value": false
+        },
+        {
+          "name": "enemyChargeStep",
+          "offset": 596,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "_selectedCommands",
+          "offset": 600,
+          "type": 21,
+          "declared": "BattleEnemyData"
+        },
+        {
+          "name": "<mainCommandPatternOrder>k__BackingField",
+          "offset": 608,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "<breakCommandPatternOrder>k__BackingField",
+          "offset": 612,
+          "type": 8,
+          "declared": "BattleEnemyData",
+          "value": 0
+        },
+        {
+          "name": "<frontSkillList>k__BackingField",
+          "offset": 616,
+          "type": 21,
+          "declared": "BattleEnemyData",
+          "object": {
+            "address": "0x179ec8d8720",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<defaultNormalSkill>k__BackingField",
+          "offset": 624,
+          "type": 18,
+          "declared": "BattleEnemyData",
+          "object": {
+            "address": "0x179f48b68c0",
+            "class": "BattleSkill"
+          }
+        },
+        {
+          "name": "<breakNormalSkill>k__BackingField",
+          "offset": 632,
+          "type": 18,
+          "declared": "BattleEnemyData"
+        },
+        {
+          "name": "<selectedOnce>k__BackingField",
+          "offset": 640,
+          "type": 2,
+          "declared": "BattleEnemyData",
+          "value": false
+        },
+        {
+          "name": "<instanceId>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x18277dec600",
+            "class": "UniqCharacterEntity"
+          }
+        },
+        {
+          "name": "<skillCostumeInstanceId>k__BackingField",
+          "offset": 24,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<team>k__BackingField",
+          "offset": 32,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<position>k__BackingField",
+          "offset": 36,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<initialPosition>k__BackingField",
+          "offset": 40,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<noiseLevelMaxCharacterCount>k__BackingField",
+          "offset": 44,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 6
+        },
+        {
+          "name": "<fireElementCharacterCount>k__BackingField",
+          "offset": 48,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<iceElementCharacterCount>k__BackingField",
+          "offset": 52,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<thunderElementCharacterCount>k__BackingField",
+          "offset": 56,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<darkElementCharacterCount>k__BackingField",
+          "offset": 60,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<conquestBikeLevel>k__BackingField",
+          "offset": 64,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 123
+        },
+        {
+          "name": "<criticalRate>k__BackingField",
+          "offset": 68,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "hpInternal",
+          "offset": 72,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "08cd1100"
+        },
+        {
+          "name": "dpInternal",
+          "offset": 80,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "006a1800"
+        },
+        {
+          "name": "hpIndexInternal",
+          "offset": 88,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "dpIndexInternal",
+          "offset": 92,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "espInternal",
+          "offset": 96,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<eShieldElementTypeList>k__BackingField",
+          "offset": 104,
+          "type": 21,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<eShieldDefenseUpRate>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<eShieldDamageLimit>k__BackingField",
+          "offset": 120,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<breakDownTurn>k__BackingField",
+          "offset": 128,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<damageRate>k__BackingField",
+          "offset": 132,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<damageRateBeforeSuperBreakDown>k__BackingField",
+          "offset": 136,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<maxDamageRateBeforeSuperBreakDown>k__BackingField",
+          "offset": 140,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<isDamageRateOverLimitBeforeSuperBreakDown>k__BackingField",
+          "offset": 144,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<damageRateOverLimitInSuperBreakDown>k__BackingField",
+          "offset": 148,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "spInternal",
+          "offset": 152,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "epInternal",
+          "offset": 156,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "tokenInternal",
+          "offset": 160,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "onChangeHp",
+          "offset": 168,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81ea0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDp",
+          "offset": 176,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81d80",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEsp",
+          "offset": 184,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81900",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEShieldElementType",
+          "offset": 192,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c817e0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeSp",
+          "offset": 200,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81c60",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEp",
+          "offset": 208,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81b40",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeVirus",
+          "offset": 216,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81a20",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeToken",
+          "offset": 224,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c816c0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDamageRate",
+          "offset": 232,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c81510",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeMaxDamageRate",
+          "offset": 240,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c813f0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDownTurn",
+          "offset": 248,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c812d0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeSpecialStatus",
+          "offset": 256,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c811b0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "<expectedAdditionalHitOnAttacked>k__BackingField",
+          "offset": 264,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedHp>k__BackingField",
+          "offset": 272,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 1166600
+        },
+        {
+          "name": "<hasDeathNotice>k__BackingField",
+          "offset": 280,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedDp>k__BackingField",
+          "offset": 288,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 1600000
+        },
+        {
+          "name": "<expectedHpIndex>k__BackingField",
+          "offset": 296,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedDpIndex>k__BackingField",
+          "offset": 300,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedDamageRate>k__BackingField",
+          "offset": 304,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 100.0
+        },
+        {
+          "name": "<expectedEsp>k__BackingField",
+          "offset": 308,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedBreakDownTurn>k__BackingField",
+          "offset": 312,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedSp>k__BackingField",
+          "offset": 316,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<spToConsume>k__BackingField",
+          "offset": 320,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "usedSpecialStatusListToConsumeSp",
+          "offset": 328,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x179f1bd8cd0",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "<expectedEp>k__BackingField",
+          "offset": 336,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<epToConsume>k__BackingField",
+          "offset": 340,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedToken>k__BackingField",
+          "offset": 344,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<tokenToConsume>k__BackingField",
+          "offset": 348,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedIgnoreSkillUsedCount>k__BackingField",
+          "offset": 352,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedTakenDamageInActionBeforeDecay>k__BackingField",
+          "offset": 360,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedTakenDamageInAction>k__BackingField",
+          "offset": 368,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "expectedIsDodge",
+          "offset": 372,
+          "type": 21,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<expectedToAddSuperBreakDownHitContent>k__BackingField",
+          "offset": 376,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<specialStatusManager>k__BackingField",
+          "offset": 384,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x179f58b53c0",
+            "class": "SpecialStatusManager"
+          }
+        },
+        {
+          "name": "<hasSummoned>k__BackingField",
+          "offset": 392,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<selectedCommandIndex>k__BackingField",
+          "offset": 396,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<mainCommandPatternOrder>k__BackingField",
+          "offset": 400,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<breakCommandPatternOrder>k__BackingField",
+          "offset": 404,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<maxOrderOfCommandPattern>k__BackingField",
+          "offset": 408,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a165dbcc0",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<totalAttackDamage>k__BackingField",
+          "offset": 416,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<supportCard>k__BackingField",
+          "offset": 424,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<supportSkill>k__BackingField",
+          "offset": 432,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<supportPassiveSkill>k__BackingField",
+          "offset": 440,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<playedSkillCount>k__BackingField",
+          "offset": 448,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a165dbc60",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "_opponentAim",
+          "offset": 456,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a16f82640",
+            "class": "BattlePlayerData"
+          }
+        },
+        {
+          "name": "<opponentAimWithRandom>k__BackingField",
+          "offset": 464,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "_allyAim",
+          "offset": 472,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        }
+      ]
+    },
+    {
+      "address": "0x179f58b2960",
+      "class": "BattlePlayerData",
+      "fields": [
+        {
+          "name": "domainSlot",
+          "offset": 480,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ec9a9d20",
+            "class": "DomainCharacterSlot"
+          }
+        },
+        {
+          "name": "domainCard",
+          "offset": 488,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x1784c687540",
+            "class": "DomainCard"
+          }
+        },
+        {
+          "name": "_isAnotherCardForm",
+          "offset": 496,
+          "type": 2,
+          "declared": "BattlePlayerData",
+          "value": false
+        },
+        {
+          "name": "_reinforcedModeTurn",
+          "offset": 500,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 3
+        },
+        {
+          "name": "_reinforcedModeIntervalTurn",
+          "offset": 504,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 0
+        },
+        {
+          "name": "_reinforcedModeUsedCount",
+          "offset": 508,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 1
+        },
+        {
+          "name": "<scoreAttackRules>k__BackingField",
+          "offset": 512,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee2d7f60",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<criticalRate>k__BackingField",
+          "offset": 520,
+          "type": 12,
+          "declared": "BattlePlayerData",
+          "value": 0.10000000149011612
+        },
+        {
+          "name": "<power>k__BackingField",
+          "offset": 524,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 767
+        },
+        {
+          "name": "<dexterity>k__BackingField",
+          "offset": 528,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 621
+        },
+        {
+          "name": "<toughness>k__BackingField",
+          "offset": 532,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 655
+        },
+        {
+          "name": "<spirit>k__BackingField",
+          "offset": 536,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 635
+        },
+        {
+          "name": "<wisdom>k__BackingField",
+          "offset": 540,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 641
+        },
+        {
+          "name": "<luck>k__BackingField",
+          "offset": 544,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 599
+        },
+        {
+          "name": "<defaultMaxHp>k__BackingField",
+          "offset": 552,
+          "type": 10,
+          "declared": "BattlePlayerData",
+          "value": 1899
+        },
+        {
+          "name": "<defaultMaxDp>k__BackingField",
+          "offset": 560,
+          "type": 10,
+          "declared": "BattlePlayerData",
+          "value": 6505
+        },
+        {
+          "name": "<initialSp>k__BackingField",
+          "offset": 568,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 4
+        },
+        {
+          "name": "<spRecoveryPerTurn>k__BackingField",
+          "offset": 572,
+          "type": 8,
+          "declared": "BattlePlayerData",
+          "value": 2
+        },
+        {
+          "name": "elementResistRates",
+          "offset": 576,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x17a17212e40",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "debuffResistPercents",
+          "offset": 584,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x17a172487e0",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<normalPursuitSkillList>k__BackingField",
+          "offset": 592,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee2c8f00",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<normalPriorPursuitSkillList>k__BackingField",
+          "offset": 600,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee2c8ed0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<passiveSkillList>k__BackingField",
+          "offset": 608,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee2c8ea0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<supportCard>k__BackingField",
+          "offset": 616,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x178417b1e00",
+            "class": "DomainCard"
+          }
+        },
+        {
+          "name": "<supportSkill>k__BackingField",
+          "offset": 624,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x1784200f980",
+            "class": "DomainSupportSkill"
+          }
+        },
+        {
+          "name": "<supportPassiveSkill>k__BackingField",
+          "offset": 632,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x17a164c0300",
+            "class": "BattlePassiveSkill"
+          }
+        },
+        {
+          "name": "<openedSkillGrowthAbilityList>k__BackingField",
+          "offset": 640,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee22fba0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<openedAbilityList>k__BackingField",
+          "offset": 648,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee22fd20",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<limitBreakBonusList>k__BackingField",
+          "offset": 656,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee241cc0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<frontSkillList>k__BackingField",
+          "offset": 664,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x179ee2acb10",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<_normalSkill>k__BackingField",
+          "offset": 672,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x1827af73700",
+            "class": "BattleSkill"
+          }
+        },
+        {
+          "name": "<defaultNormalSkill>k__BackingField",
+          "offset": 680,
+          "type": 18,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x1827af73700",
+            "class": "BattleSkill"
+          }
+        },
+        {
+          "name": "<replaceNormalSkillList>k__BackingField",
+          "offset": 688,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x17a172be0c0",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<replacePursuitSkillList>k__BackingField",
+          "offset": 696,
+          "type": 21,
+          "declared": "BattlePlayerData",
+          "object": {
+            "address": "0x17a172be060",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<instanceId>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x18278081920",
+            "class": "UniqCharacterEntity"
+          }
+        },
+        {
+          "name": "<skillCostumeInstanceId>k__BackingField",
+          "offset": 24,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<team>k__BackingField",
+          "offset": 32,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<position>k__BackingField",
+          "offset": 36,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 2
+        },
+        {
+          "name": "<initialPosition>k__BackingField",
+          "offset": 40,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 2
+        },
+        {
+          "name": "<noiseLevelMaxCharacterCount>k__BackingField",
+          "offset": 44,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 6
+        },
+        {
+          "name": "<fireElementCharacterCount>k__BackingField",
+          "offset": 48,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<iceElementCharacterCount>k__BackingField",
+          "offset": 52,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 1
+        },
+        {
+          "name": "<thunderElementCharacterCount>k__BackingField",
+          "offset": 56,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 6
+        },
+        {
+          "name": "<darkElementCharacterCount>k__BackingField",
+          "offset": 60,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<conquestBikeLevel>k__BackingField",
+          "offset": 64,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 123
+        },
+        {
+          "name": "<criticalRate>k__BackingField",
+          "offset": 68,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "hpInternal",
+          "offset": 72,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "6b070000"
+        },
+        {
+          "name": "dpInternal",
+          "offset": 80,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "69190000"
+        },
+        {
+          "name": "hpIndexInternal",
+          "offset": 88,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "dpIndexInternal",
+          "offset": 92,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "espInternal",
+          "offset": 96,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<eShieldElementTypeList>k__BackingField",
+          "offset": 104,
+          "type": 21,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<eShieldDefenseUpRate>k__BackingField",
+          "offset": 112,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<eShieldDamageLimit>k__BackingField",
+          "offset": 120,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<breakDownTurn>k__BackingField",
+          "offset": 128,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<damageRate>k__BackingField",
+          "offset": 132,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<damageRateBeforeSuperBreakDown>k__BackingField",
+          "offset": 136,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<maxDamageRateBeforeSuperBreakDown>k__BackingField",
+          "offset": 140,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "<isDamageRateOverLimitBeforeSuperBreakDown>k__BackingField",
+          "offset": 144,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<damageRateOverLimitInSuperBreakDown>k__BackingField",
+          "offset": 148,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 0.0
+        },
+        {
+          "name": "spInternal",
+          "offset": 152,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "06000000"
+        },
+        {
+          "name": "epInternal",
+          "offset": 156,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "tokenInternal",
+          "offset": 160,
+          "type": 17,
+          "declared": "BattleCharacterData",
+          "raw4": "00000000"
+        },
+        {
+          "name": "onChangeHp",
+          "offset": 168,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43d80",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDp",
+          "offset": 176,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43c60",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEsp",
+          "offset": 184,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43750",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEShieldElementType",
+          "offset": 192,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43630",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeSp",
+          "offset": 200,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43b40",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeEp",
+          "offset": 208,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43990",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeVirus",
+          "offset": 216,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43870",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeToken",
+          "offset": 224,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43510",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDamageRate",
+          "offset": 232,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c433f0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeMaxDamageRate",
+          "offset": 240,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c432d0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeDownTurn",
+          "offset": 248,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c431b0",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "onChangeSpecialStatus",
+          "offset": 256,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a18c43090",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "<expectedAdditionalHitOnAttacked>k__BackingField",
+          "offset": 264,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedHp>k__BackingField",
+          "offset": 272,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 1899
+        },
+        {
+          "name": "<hasDeathNotice>k__BackingField",
+          "offset": 280,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedDp>k__BackingField",
+          "offset": 288,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 6505
+        },
+        {
+          "name": "<expectedHpIndex>k__BackingField",
+          "offset": 296,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedDpIndex>k__BackingField",
+          "offset": 300,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedDamageRate>k__BackingField",
+          "offset": 304,
+          "type": 12,
+          "declared": "BattleCharacterData",
+          "value": 100.0
+        },
+        {
+          "name": "<expectedEsp>k__BackingField",
+          "offset": 308,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedBreakDownTurn>k__BackingField",
+          "offset": 312,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedSp>k__BackingField",
+          "offset": 316,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 6
+        },
+        {
+          "name": "<spToConsume>k__BackingField",
+          "offset": 320,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "usedSpecialStatusListToConsumeSp",
+          "offset": 328,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x179f44fea50",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "<expectedEp>k__BackingField",
+          "offset": 336,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<epToConsume>k__BackingField",
+          "offset": 340,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedToken>k__BackingField",
+          "offset": 344,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<tokenToConsume>k__BackingField",
+          "offset": 348,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedIgnoreSkillUsedCount>k__BackingField",
+          "offset": 352,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<expectedTakenDamageInActionBeforeDecay>k__BackingField",
+          "offset": 360,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<expectedTakenDamageInAction>k__BackingField",
+          "offset": 368,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "expectedIsDodge",
+          "offset": 372,
+          "type": 21,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<expectedToAddSuperBreakDownHitContent>k__BackingField",
+          "offset": 376,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<specialStatusManager>k__BackingField",
+          "offset": 384,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x179f58b53c0",
+            "class": "SpecialStatusManager"
+          }
+        },
+        {
+          "name": "<hasSummoned>k__BackingField",
+          "offset": 392,
+          "type": 2,
+          "declared": "BattleCharacterData",
+          "value": false
+        },
+        {
+          "name": "<selectedCommandIndex>k__BackingField",
+          "offset": 396,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 2
+        },
+        {
+          "name": "<mainCommandPatternOrder>k__BackingField",
+          "offset": 400,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<breakCommandPatternOrder>k__BackingField",
+          "offset": 404,
+          "type": 8,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<maxOrderOfCommandPattern>k__BackingField",
+          "offset": 408,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a1717df00",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<totalAttackDamage>k__BackingField",
+          "offset": 416,
+          "type": 10,
+          "declared": "BattleCharacterData",
+          "value": 0
+        },
+        {
+          "name": "<supportCard>k__BackingField",
+          "offset": 424,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<supportSkill>k__BackingField",
+          "offset": 432,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<supportPassiveSkill>k__BackingField",
+          "offset": 440,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "<playedSkillCount>k__BackingField",
+          "offset": 448,
+          "type": 21,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a1717de40",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "_opponentAim",
+          "offset": 456,
+          "type": 18,
+          "declared": "BattleCharacterData",
+          "object": {
+            "address": "0x17a1699c540",
+            "class": "BattleEnemyData"
+          }
+        },
+        {
+          "name": "<opponentAimWithRandom>k__BackingField",
+          "offset": 464,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        },
+        {
+          "name": "_allyAim",
+          "offset": 472,
+          "type": 18,
+          "declared": "BattleCharacterData"
+        }
+      ]
+    },
+    {
+      "address": "0x179ec84c300",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 2
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 8
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    {
+      "address": "0x179ec84c330",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 2
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 2
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    {
+      "address": "0x179ec84c450",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 3
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 2
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    {
+      "address": "0x179ee2acb10",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 9
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 9
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    {
+      "address": "0x179ec84c2d0",
+      "class": "DomainSkillHit",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkillHit",
+          "object": {
+            "address": "0x179ebd805a0",
+            "class": "MasterSkillHit"
+          }
+        },
+        {
+          "name": "skillReasonType",
+          "offset": 24,
+          "type": 17,
+          "declared": "DomainSkillHit",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<skillLabel>k__BackingField",
+          "offset": 32,
+          "type": 14,
+          "declared": "DomainSkillHit",
+          "text": "STezukaSkill02"
+        }
+      ]
+    },
+    {
+      "address": "0x179ec84c2a0",
+      "class": "DomainSkillHit",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkillHit",
+          "object": {
+            "address": "0x179ebd80550",
+            "class": "MasterSkillHit"
+          }
+        },
+        {
+          "name": "skillReasonType",
+          "offset": 24,
+          "type": 17,
+          "declared": "DomainSkillHit",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<skillLabel>k__BackingField",
+          "offset": 32,
+          "type": 14,
+          "declared": "DomainSkillHit",
+          "text": "STezukaSkill02"
+        }
+      ]
+    },
+    {
+      "address": "0x17a16bccd20",
+      "class": "DomainSkillPart",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a456570e0",
+            "class": "MasterSkillPart"
+          }
+        },
+        {
+          "name": "masterSkillGrowth",
+          "offset": 24,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a1881a440",
+            "class": "MasterSkillGrowth"
+          }
+        },
+        {
+          "name": "<skillLevel>k__BackingField",
+          "offset": 32,
+          "type": 8,
+          "declared": "DomainSkillPart",
+          "value": 10
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 36,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 40,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 48,
+          "type": 14,
+          "declared": "DomainSkillPart",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "_elementTypeList",
+          "offset": 56,
+          "type": 21,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x1827c0284b0",
+            "class": "List`1"
+          }
+        }
+      ]
+    },
+    {
+      "address": "0x17a16bcc190",
+      "class": "DomainSkillPart",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a45657000",
+            "class": "MasterSkillPart"
+          }
+        },
+        {
+          "name": "masterSkillGrowth",
+          "offset": 24,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a1881a400",
+            "class": "MasterSkillGrowth"
+          }
+        },
+        {
+          "name": "<skillLevel>k__BackingField",
+          "offset": 32,
+          "type": 8,
+          "declared": "DomainSkillPart",
+          "value": 10
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 36,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 40,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 48,
+          "type": 14,
+          "declared": "DomainSkillPart",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "_elementTypeList",
+          "offset": 56,
+          "type": 21,
+          "declared": "DomainSkillPart"
+        }
+      ]
+    },
+    {
+      "address": "0x17a169eb460",
+      "class": "DomainSkillPart",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a456571c0",
+            "class": "MasterSkillPart"
+          }
+        },
+        {
+          "name": "masterSkillGrowth",
+          "offset": 24,
+          "type": 18,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17a1881a480",
+            "class": "MasterSkillGrowth"
+          }
+        },
+        {
+          "name": "<skillLevel>k__BackingField",
+          "offset": 32,
+          "type": 8,
+          "declared": "DomainSkillPart",
+          "value": 10
+        },
+        {
+          "name": "<skillReasonType>k__BackingField",
+          "offset": 36,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 40,
+          "type": 17,
+          "declared": "DomainSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 48,
+          "type": 14,
+          "declared": "DomainSkillPart",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "_elementTypeList",
+          "offset": 56,
+          "type": 21,
+          "declared": "DomainSkillPart",
+          "object": {
+            "address": "0x17840eff180",
+            "class": "List`1"
+          }
+        }
+      ]
+    },
+    {
+      "address": "0x1827af73620",
+      "class": "BattleSkill",
+      "fields": [
+        {
+          "name": "<domainSkill>k__BackingField",
+          "offset": 16,
+          "type": 18,
+          "declared": "BattleSkill",
+          "object": {
+            "address": "0x182777fecf0",
+            "class": "DomainSkill"
+          }
+        },
+        {
+          "name": "<battleAssetPool>k__BackingField",
+          "offset": 24,
+          "type": 18,
+          "declared": "BattleSkill",
+          "object": {
+            "address": "0x1827967b280",
+            "class": "BattleAssetLoaderPool"
+          }
+        },
+        {
+          "name": "<domainSkillOverwrite>k__BackingField",
+          "offset": 32,
+          "type": 18,
+          "declared": "BattleSkill"
+        },
+        {
+          "name": "<skill1>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "BattleSkill"
+        },
+        {
+          "name": "<skill2>k__BackingField",
+          "offset": 48,
+          "type": 18,
+          "declared": "BattleSkill"
+        },
+        {
+          "name": "<rootSkill>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "BattleSkill"
+        },
+        {
+          "name": "<selectedSkillSwitchIndex>k__BackingField",
+          "offset": 64,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 0
+        },
+        {
+          "name": "<remainingIntervalTurn>k__BackingField",
+          "offset": 68,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 0
+        },
+        {
+          "name": "<skillLevel>k__BackingField",
+          "offset": 72,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 10
+        },
+        {
+          "name": "<limitCount>k__BackingField",
+          "offset": 76,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 0
+        },
+        {
+          "name": "overwriteLimitCountByScoreAttackRule",
+          "offset": 80,
+          "type": 21,
+          "declared": "BattleSkill"
+        },
+        {
+          "name": "<usedCount>k__BackingField",
+          "offset": 88,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 0
+        },
+        {
+          "name": "<usedCountEachBattle>k__BackingField",
+          "offset": 92,
+          "type": 8,
+          "declared": "BattleSkill",
+          "value": 0
+        },
+        {
+          "name": "<isVisibleUsedCountEachBattle>k__BackingField",
+          "offset": 96,
+          "type": 2,
+          "declared": "BattleSkill",
+          "value": false
+        }
+      ]
+    },
+    {
+      "address": "0x179ebd805a0",
+      "class": "MasterSkillHit",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillHit",
+          "value": 2049140301
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02_Hit1"
+        },
+        {
+          "name": "MasterSkillLabel",
+          "offset": 32,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "Type",
+          "offset": 40,
+          "type": 17,
+          "declared": "MasterSkillHit",
+          "raw4": "02000000"
+        },
+        {
+          "name": "Index",
+          "offset": 44,
+          "type": 8,
+          "declared": "MasterSkillHit",
+          "value": 1
+        },
+        {
+          "name": "MasterSkillPartLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02_2"
+        },
+        {
+          "name": "PowerRatio",
+          "offset": 56,
+          "type": 12,
+          "declared": "MasterSkillHit",
+          "value": 0.0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 64,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "release.lance_start"
+        }
+      ]
+    },
+    {
+      "address": "0x179ebd80550",
+      "class": "MasterSkillHit",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillHit",
+          "value": 2049140302
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02_Hit2"
+        },
+        {
+          "name": "MasterSkillLabel",
+          "offset": 32,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "Type",
+          "offset": 40,
+          "type": 17,
+          "declared": "MasterSkillHit",
+          "raw4": "03000000"
+        },
+        {
+          "name": "Index",
+          "offset": 44,
+          "type": 8,
+          "declared": "MasterSkillHit",
+          "value": 1
+        },
+        {
+          "name": "MasterSkillPartLabel",
+          "offset": 48,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "STezukaSkill02_3"
+        },
+        {
+          "name": "PowerRatio",
+          "offset": 56,
+          "type": 12,
+          "declared": "MasterSkillHit",
+          "value": 0.0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 64,
+          "type": 14,
+          "declared": "MasterSkillHit",
+          "text": "release.lance_start"
+        }
+      ]
+    },
+    {
+      "address": "0x17a456570e0",
+      "class": "MasterSkillPart",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillPart",
+          "value": 47414032
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "STezukaSkill02_2"
+        },
+        {
+          "name": "SkillType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "22000000"
+        },
+        {
+          "name": "Power",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.20000000298023224
+        },
+        {
+          "name": "MaxPower",
+          "offset": 40,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.30000001192092896
+        },
+        {
+          "name": "RefParamDiffForMax",
+          "offset": 44,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 140
+        },
+        {
+          "name": "OverwriteTargetType",
+          "offset": 48,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "Value1",
+          "offset": 52,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "Value2",
+          "offset": 56,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "StrValue1",
+          "offset": 64,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "StrValue2",
+          "offset": 72,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "ExitConditionType",
+          "offset": 80,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "07000000"
+        },
+        {
+          "name": "ExitConditionValue1",
+          "offset": 84,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 1
+        },
+        {
+          "name": "ExitConditionValue2",
+          "offset": 88,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "VsDpRate",
+          "offset": 92,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 1.0
+        },
+        {
+          "name": "VsHpRate",
+          "offset": 96,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 1.0
+        },
+        {
+          "name": "DamageRateRate",
+          "offset": 100,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "ElementList",
+          "offset": 104,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "BuffLimitType",
+          "offset": 112,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "02000000"
+        },
+        {
+          "name": "BuffCategory",
+          "offset": 116,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "SpecialStatusTypeList",
+          "offset": 120,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "RefParamPower",
+          "offset": 128,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamWisdom",
+          "offset": 132,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 2
+        },
+        {
+          "name": "RefParamDexterity",
+          "offset": 136,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamSpirit",
+          "offset": 140,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamLuck",
+          "offset": 144,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 1
+        },
+        {
+          "name": "RefParamToughness",
+          "offset": 148,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 152,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "release.lance_start"
+        },
+        {
+          "name": "Condition",
+          "offset": 160,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "TargetCondition",
+          "offset": 168,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "IsHideIcon",
+          "offset": 176,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        },
+        {
+          "name": "MaxPower2",
+          "offset": 180,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "RefParamDiffForMax2",
+          "offset": 184,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "HitCondition",
+          "offset": 192,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "IgnoreRemove",
+          "offset": 200,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        }
+      ]
+    },
+    {
+      "address": "0x17a1881a440",
+      "class": "MasterSkillGrowth",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillGrowth",
+          "value": 56414032
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "STezukaSkill02_2"
+        },
+        {
+          "name": "PowerRate",
+          "offset": 32,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.0
+        },
+        {
+          "name": "MaxPowerRate",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "release.lance_start"
+        }
+      ]
+    },
+    {
+      "address": "0x17a45657000",
+      "class": "MasterSkillPart",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillPart",
+          "value": 47414033
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "STezukaSkill02_3"
+        },
+        {
+          "name": "SkillType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "3a000000"
+        },
+        {
+          "name": "Power",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 1.0
+        },
+        {
+          "name": "MaxPower",
+          "offset": 40,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "RefParamDiffForMax",
+          "offset": 44,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "OverwriteTargetType",
+          "offset": 48,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "03000000"
+        },
+        {
+          "name": "Value1",
+          "offset": 52,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "Value2",
+          "offset": 56,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "StrValue1",
+          "offset": 64,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "StrValue2",
+          "offset": 72,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "ExitConditionType",
+          "offset": 80,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "ExitConditionValue1",
+          "offset": 84,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "ExitConditionValue2",
+          "offset": 88,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "VsDpRate",
+          "offset": 92,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "VsHpRate",
+          "offset": 96,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "DamageRateRate",
+          "offset": 100,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "ElementList",
+          "offset": 104,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "BuffLimitType",
+          "offset": 112,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "BuffCategory",
+          "offset": 116,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "SpecialStatusTypeList",
+          "offset": 120,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "RefParamPower",
+          "offset": 128,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamWisdom",
+          "offset": 132,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamDexterity",
+          "offset": 136,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamSpirit",
+          "offset": 140,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamLuck",
+          "offset": 144,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamToughness",
+          "offset": 148,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 152,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "release.lance_start"
+        },
+        {
+          "name": "Condition",
+          "offset": 160,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "TargetCondition",
+          "offset": 168,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "IsReinforcedMode()"
+        },
+        {
+          "name": "IsHideIcon",
+          "offset": 176,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        },
+        {
+          "name": "MaxPower2",
+          "offset": 180,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "RefParamDiffForMax2",
+          "offset": 184,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "HitCondition",
+          "offset": 192,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "IgnoreRemove",
+          "offset": 200,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        }
+      ]
+    },
+    {
+      "address": "0x17a1881a400",
+      "class": "MasterSkillGrowth",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillGrowth",
+          "value": 56414033
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "STezukaSkill02_3"
+        },
+        {
+          "name": "PowerRate",
+          "offset": 32,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.0
+        },
+        {
+          "name": "MaxPowerRate",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "release.lance_start"
+        }
+      ]
+    },
+    {
+      "address": "0x17a456571c0",
+      "class": "MasterSkillPart",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillPart",
+          "value": 47414031
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "SkillType",
+          "offset": 32,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "0a000000"
+        },
+        {
+          "name": "Power",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 3350.625
+        },
+        {
+          "name": "MaxPower",
+          "offset": 40,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 6701.25
+        },
+        {
+          "name": "RefParamDiffForMax",
+          "offset": 44,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 140
+        },
+        {
+          "name": "OverwriteTargetType",
+          "offset": 48,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "Value1",
+          "offset": 52,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "Value2",
+          "offset": 56,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "StrValue1",
+          "offset": 64,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "StrValue2",
+          "offset": 72,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "ExitConditionType",
+          "offset": 80,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "ExitConditionValue1",
+          "offset": 84,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "ExitConditionValue2",
+          "offset": 88,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "VsDpRate",
+          "offset": 92,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 1.0
+        },
+        {
+          "name": "VsHpRate",
+          "offset": 96,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 1.0
+        },
+        {
+          "name": "DamageRateRate",
+          "offset": 100,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 13.800000190734863
+        },
+        {
+          "name": "ElementList",
+          "offset": 104,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "BuffLimitType",
+          "offset": 112,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "BuffCategory",
+          "offset": 116,
+          "type": 17,
+          "declared": "MasterSkillPart",
+          "raw4": "00000000"
+        },
+        {
+          "name": "SpecialStatusTypeList",
+          "offset": 120,
+          "type": 29,
+          "declared": "MasterSkillPart"
+        },
+        {
+          "name": "RefParamPower",
+          "offset": 128,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 1
+        },
+        {
+          "name": "RefParamWisdom",
+          "offset": 132,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamDexterity",
+          "offset": 136,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 1
+        },
+        {
+          "name": "RefParamSpirit",
+          "offset": 140,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamLuck",
+          "offset": 144,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "RefParamToughness",
+          "offset": 148,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 152,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": "release.lance_start"
+        },
+        {
+          "name": "Condition",
+          "offset": 160,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "TargetCondition",
+          "offset": 168,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "IsHideIcon",
+          "offset": 176,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        },
+        {
+          "name": "MaxPower2",
+          "offset": 180,
+          "type": 12,
+          "declared": "MasterSkillPart",
+          "value": 0.0
+        },
+        {
+          "name": "RefParamDiffForMax2",
+          "offset": 184,
+          "type": 8,
+          "declared": "MasterSkillPart",
+          "value": 0
+        },
+        {
+          "name": "HitCondition",
+          "offset": 192,
+          "type": 14,
+          "declared": "MasterSkillPart",
+          "text": ""
+        },
+        {
+          "name": "IgnoreRemove",
+          "offset": 200,
+          "type": 2,
+          "declared": "MasterSkillPart",
+          "value": false
+        }
+      ]
+    },
+    {
+      "address": "0x17a1881a480",
+      "class": "MasterSkillGrowth",
+      "fields": [
+        {
+          "name": "Id",
+          "offset": 16,
+          "type": 10,
+          "declared": "MasterSkillGrowth",
+          "value": 56414031
+        },
+        {
+          "name": "Label",
+          "offset": 24,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "STezukaSkill02"
+        },
+        {
+          "name": "PowerRate",
+          "offset": 32,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.05000000074505806
+        },
+        {
+          "name": "MaxPowerRate",
+          "offset": 36,
+          "type": 12,
+          "declared": "MasterSkillGrowth",
+          "value": 0.019999999552965164
+        },
+        {
+          "name": "ReleaseLabel",
+          "offset": 40,
+          "type": 14,
+          "declared": "MasterSkillGrowth",
+          "text": "release.lance_start"
+        }
+      ]
+    },
+    {
+      "address": "0x179ee2c8ea0",
+      "class": "List`1",
+      "fields": [
+        {
+          "name": "_items",
+          "offset": 16,
+          "type": 29,
+          "declared": "List`1"
+        },
+        {
+          "name": "_size",
+          "offset": 24,
+          "type": 8,
+          "declared": "List`1",
+          "value": 12
+        },
+        {
+          "name": "_version",
+          "offset": 28,
+          "type": 8,
+          "declared": "List`1",
+          "value": 12
+        },
+        {
+          "name": "_syncRoot",
+          "offset": 32,
+          "type": 28,
+          "declared": "List`1"
+        }
+      ]
+    },
+    {
+      "address": "0x17a164c0b80",
+      "class": "BattlePassiveSkill",
+      "fields": [
+        {
+          "name": "domain",
+          "offset": 16,
+          "type": 18,
+          "declared": "BattlePassiveSkill",
+          "object": {
+            "address": "0x17a169f8dc0",
+            "class": "DomainPassiveSkill"
+          }
+        },
+        {
+          "name": "battleAssetPool",
+          "offset": 24,
+          "type": 18,
+          "declared": "BattlePassiveSkill",
+          "object": {
+            "address": "0x1827967b280",
+            "class": "BattleAssetLoaderPool"
+          }
+        },
+        {
+          "name": "<domainSkillOverwrite>k__BackingField",
+          "offset": 32,
+          "type": 18,
+          "declared": "BattlePassiveSkill"
+        },
+        {
+          "name": "<skill1>k__BackingField",
+          "offset": 40,
+          "type": 18,
+          "declared": "BattlePassiveSkill"
+        },
+        {
+          "name": "<skill2>k__BackingField",
+          "offset": 48,
+          "type": 18,
+          "declared": "BattlePassiveSkill"
+        },
+        {
+          "name": "<rootSkill>k__BackingField",
+          "offset": 56,
+          "type": 18,
+          "declared": "BattlePassiveSkill"
+        },
+        {
+          "name": "<skillTitleText>k__BackingField",
+          "offset": 64,
+          "type": 14,
+          "declared": "BattlePassiveSkill",
+          "text": ""
+        },
+        {
+          "name": "<skillLevel>k__BackingField",
+          "offset": 72,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<maxSkillLevel>k__BackingField",
+          "offset": 76,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<limitCount>k__BackingField",
+          "offset": 80,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<usedCount>k__BackingField",
+          "offset": 84,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<hideMiniCutIn>k__BackingField",
+          "offset": 88,
+          "type": 2,
+          "declared": "BattlePassiveSkill",
+          "value": false
+        },
+        {
+          "name": "<additionalActivationRate>k__BackingField",
+          "offset": 92,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<additionalActivationRateForSlash>k__BackingField",
+          "offset": 96,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<additionalActivationRateForStab>k__BackingField",
+          "offset": 100,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        },
+        {
+          "name": "<additionalActivationRateForStrike>k__BackingField",
+          "offset": 104,
+          "type": 8,
+          "declared": "BattlePassiveSkill",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "address": "0x17a169f8dc0",
+      "class": "DomainPassiveSkill",
+      "fields": [
+        {
+          "name": "master",
+          "offset": 16,
+          "type": 18,
+          "declared": "DomainPassiveSkill",
+          "object": {
+            "address": "0x17841bd5630",
+            "class": "MasterPassiveSkill"
+          }
+        },
+        {
+          "name": "masterSkillEffectBuff",
+          "offset": 24,
+          "type": 18,
+          "declared": "DomainPassiveSkill",
+          "object": {
+            "address": "0x17a18824f40",
+            "class": "MasterSkillEffectBuff"
+          }
+        },
+        {
+          "name": "<passiveSkillReasonType>k__BackingField",
+          "offset": 32,
+          "type": 17,
+          "declared": "DomainPassiveSkill",
+          "raw4": "01000000"
+        },
+        {
+          "name": "<reasonMasterLabel>k__BackingField",
+          "offset": 40,
+          "type": 14,
+          "declared": "DomainPassiveSkill",
+          "text": "Passive.Condition_AttackUp11"
+        },
+        {
+          "name": "_allSkillPartList",
+          "offset": 48,
+          "type": 21,
+          "declared": "DomainPassiveSkill",
+          "object": {
+            "address": "0x179ee24f4e0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "_skillPartCache",
+          "offset": 56,
+          "type": 21,
+          "declared": "DomainPassiveSkill"
+        },
+        {
+          "name": "_skillDescriptionList",
+          "offset": 64,
+          "type": 21,
+          "declared": "DomainPassiveSkill"
+        }
+      ]
+    }
+  ],
+  "lists": {
+    "1623170794240": [
+      1623170794192,
+      1623170794144
+    ],
+    "1623170794288": [
+      1623879109920,
+      1623879106960
+    ],
+    "1623170794576": [
+      1623877137504,
+      0,
+      0
+    ],
+    "1623198452496": [
+      0,
+      0,
+      1659920397856,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "1623198568096": [
+      0,
+      0,
+      1623871720320,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "player": 1623322208608,
+  "enemy": 1623876814144
+}
