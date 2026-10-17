@@ -13,6 +13,7 @@ TITLES = dict(EFFECT_NAMES, MindEye='心眼', Fragile='脆弱', Funnel='连击',
     SkillLimitCountUp='技能次数增加', AdditionalTurn='追加回合',
     AdditionalElementOnlyNormal='普攻附加属性', ZoneUpEternal='场地强化')
 TITLES.update(AttackUpIncludeNormal='加攻（含普攻）', AttackUpOnlyNormal='普攻加攻',
+              FearOfDevil='大灾厄', Misfortune='灾厄', BIYamawakiServant='魔界骑兵',
               Zone='场地', RiceFieldZone='稻场', SandStormZone='沙暴场地', ResistUp='抗性提升', ResistDown='抗性降低',
               ResistDownOverwrite='抗性覆盖', CriticalRateDown='暴击率降低', CriticalDamageDown='暴伤降低')
 ELEMENT_NAMES = dict(Fire='火', Ice='冰', Thunder='雷', Light='光', Dark='暗', Slash='斩', Stab='突', Strike='打')
@@ -20,6 +21,10 @@ ELEMENT_NAMES = dict(Fire='火', Ice='冰', Thunder='雷', Light='光', Dark='�
 
 def status_value(kind, values):
     """Only decode verified fixed-point fields; retain all other values in details."""
+    if kind in ('FearOfDevil','Misfortune'):
+        return '全属性 -'+('100' if kind=='FearOfDevil' else '20')+'（同类取最高）'
+    if kind=='BIYamawakiServant' and isinstance(values.get('rateValueInt'),int):
+        return f'技能加攻 +{values["rateValueInt"]/100:g}%'
     if kind == 'BuffCharge':
         dp, hp = values.get('amountOnDpDamageInt'), values.get('amountOnHpDamageInt')
         damage = '技能伤害提升（数值待核实）'

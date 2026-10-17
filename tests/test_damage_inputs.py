@@ -19,6 +19,7 @@ class DamageInputTests(unittest.TestCase):
         self.assertEqual(player['token'],0)
         self.assertEqual(player['reinforced_mode_turn'],3)
         self.assertIn('Passive.Condition_AttackUp11',player['passive_labels'])
+        self.assertEqual([p['label'] for p in player['passive_audit']],player['passive_labels'])
         self.assertEqual(enemy['_borderRefParam'],610)
         self.assertEqual(enemy['_defenseRefParam'],610)
         skill=player['selected_skill']

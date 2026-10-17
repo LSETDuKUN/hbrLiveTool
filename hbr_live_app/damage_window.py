@@ -2,18 +2,43 @@
 import json
 import tkinter as tk
 from tkinter import ttk
-from .damage_math import DamageInputs, calculate, skill_base
+from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_reduction
+from .damage_probability import distribution
+from .components import RoundedCard, RoundedButton
+from .passive_audit import audit_text
 from .damage_autofill import autofill, WEIGHTS, style_elements
 
-FIELDS = (
-    ('base', '基础伤害（可空）'), ('attack', '有效加攻合计 %'), ('charge', '充能加攻 %'),
-    ('mind_eye', '心眼 %'), ('defense_down', '有效减防 %'), ('fragile', '脆弱 %'),
-    ('weapon_bonus', '武器弱点加成 %'), ('element_bonus', '元素弱点加成 %'),
-    ('weakness_deepen', '弱点加深 %'), ('resistance', '抗性 %'),
-    ('critical_bonus', '暴击额外伤害 %'), ('chain', '连击权重合计 %'),
-    ('destruction', '破坏率 %'), ('od', 'OD 倍率'), ('token_bonus', 'Token 增伤 %'),
-    ('dp_bonus', '对 DP 特攻 %'), ('hp_bonus', '对 HP 特攻 %'),
-    ('health_factor', '血量条件倍率'), ('down_factor', '倒地条件倍率'), ('other_factor', '其他独立倍率'))
+GROUPS = (
+    ('基础伤害', '#bdb1d4', (('base','基础伤害（可空）'),)),
+    ('加攻乘区', '#f5aacb', (('attack','普通加攻 %'),('element_attack','元素加攻 %'),
+        ('mind_eye','心眼 %'),('field','场地 %'),('charge','充能 %'))),
+    ('连击乘区', '#83e5ed', (('chain','追加 Hit 权重合计 %'),)),
+    ('暴击乘区', '#ffd398', (('critical_bonus','普通爆伤（含基础50）%'),('element_critical_bonus','元素爆伤 %'))),
+    ('减防乘区', '#e9a5b8', (('defense_down','普通减防 %'),('element_defense_down','元素减防 %'),('fragile','脆弱 %'))),
+    ('弱点与抗性', '#b8b0f3', (('weapon_bonus','武器弱点加成 %'),('element_bonus','元素弱点加成 %'),
+        ('weakness_deepen','弱点加深 %'),('resistance','抗性 %'))),
+    ('破坏率与 OD', '#83e5ed', (('destruction','当前破坏率 %'),('od','OD 倍率'))),
+    ('技能独立修正', '#a5e9b4', (('token_bonus','Token 增伤 %'),('dp_bonus','对 DP 特攻 %'),('hp_bonus','对 HP 特攻 %'),
+        ('health_factor','血量条件倍率'),('down_factor','倒地条件倍率'),('other_factor','其他独立倍率'))))
+FIELDS = tuple(pair for _,_,fields in GROUPS for pair in fields)
+BG, CARD, FG, DIM = '#342e4b', '#4a405e', '#fff6ff', '#d8cbe9'
+
+
+def scroll_page(parent):
+    frame=ttk.Frame(parent);canvas=tk.Canvas(frame,bg=BG,highlightthickness=0)
+    bar=ttk.Scrollbar(frame,command=canvas.yview);bar.pack(side='right',fill='y')
+    canvas.pack(fill='both',expand=True);canvas.configure(yscrollcommand=bar.set)
+    body=ttk.Frame(canvas,padding=12);item=canvas.create_window(0,0,anchor='nw',window=body)
+    body.bind('<Configure>',lambda e:canvas.configure(scrollregion=canvas.bbox('all')))
+    canvas.bind('<Configure>',lambda e:canvas.itemconfigure(item,width=e.width))
+    # Binding on the toplevel covers descendants without a global mouse binding.
+    def wheel(event):
+        if frame.winfo_ismapped() and str(event.widget).startswith(str(frame)):
+            canvas.yview_scroll(-int(event.delta/120),'units')
+    parent.winfo_toplevel().bind('<MouseWheel>',wheel,add='+')
+    return frame,body
+
+
 NAMES = dict(attack='加攻（含充能／适用心眼）', defense='减防（含适用脆弱）', affinity='相性',
              critical='暴伤', chain='连击', destruction='破坏率', od='OD', token='Token',
              specialization='DP/HP 特攻', health='血量条件', down='倒地条件', other='其他')
@@ -22,7 +47,22 @@ NAMES = dict(attack='加攻（含充能／适用心眼）', defense='减防（�
 class DamageWindow(tk.Toplevel):
     def __init__(self, parent, snapshot):
         super().__init__(parent)
-        self.title('伤害试算 · 实验版');self.geometry('900x760')
+        self.title('伤害试算 · 星屑战斗手帐');self.geometry('1000x850')
+        self.configure(bg=BG);self.minsize(820,650)
+        self.option_add('*Font',('Microsoft YaHei UI',10))
+        style=ttk.Style(self)
+        for name in ('Frame','Label','Checkbutton','Radiobutton','Notebook'):
+            style.configure('Damage.T'+name,background=BG,foreground=FG)
+        style.configure('Damage.TEntry',fieldbackground=CARD,foreground=FG,insertcolor=FG)
+        style.configure('Damage.TLabelframe',background=CARD,borderwidth=0)
+        style.configure('Damage.TLabelframe.Label',background=CARD,foreground='#f5aacb')
+        style.configure('Damage.TButton',background='#493752',foreground=FG,padding=6)
+        style.map('Damage.TButton',background=[('active','#624763')])
+        style.configure('Damage.TCombobox',fieldbackground=CARD,background=CARD,foreground=FG)
+        style.map('Damage.TCombobox',fieldbackground=[('readonly',CARD)],foreground=[('readonly',FG)])
+        style.configure('Damage.TNotebook.Tab',background=CARD,foreground=DIM,padding=(12,8))
+        style.map('Damage.TNotebook.Tab',background=[('selected','#493752')],foreground=[('selected','#f5aacb')])
+        self.plot_data=None;self.plot_damage=None
         self.snapshot = snapshot
         self.loaded_snapshot={};self.fill_notes='尚未自动填充'
         selectors=ttk.Frame(self,padding=8);selectors.pack(fill='x')
@@ -30,28 +70,45 @@ class DamageWindow(tk.Toplevel):
         self.enemy_box=ttk.Combobox(selectors,state='readonly',width=22);self.enemy_box.pack(side='left',padx=6)
         ttk.Button(selectors,text='刷新角色/敌人列表',command=self.reload_choices).pack(side='left')
         ttk.Button(selectors,text='自动填充（覆盖表单）',command=self.fill).pack(side='left',padx=6)
-        modes_bar=ttk.Frame(self,padding=(8,0,8,6));modes_bar.pack(fill='x')
+        modes_bar=tk.Frame(self,bg=BG,padx=8,pady=6);modes_bar.pack(fill='x')
         self.mode_choices={}
         for key,label in [('transcend','雷超越'),('high_boost','高阶增幅')]:
             ttk.Label(modes_bar,text=label).pack(side='left',padx=(8,2))
             var=tk.StringVar(self,value='自动');self.mode_choices[key]=var
             ttk.Combobox(modes_bar,textvariable=var,values=['自动','启用','禁用'],state='readonly',width=6).pack(side='left')
         ttk.Label(modes_bar,text='修改后点击自动填充；仅影响试算').pack(side='left',padx=10)
+        compute_button=RoundedButton(modes_bar,text='计算',command=self.compute,bg='#edb6d9',fg='#382d49',font=('Microsoft YaHei UI',11,'bold'))
+        compute_button.configure(width=100);compute_button.pack(side='right')
         tabs = ttk.Notebook(self); tabs.pack(fill='both', expand=True)
-        form = ttk.Frame(tabs, padding=12); tabs.add(form, text='乘区试算')
-        skill_form=ttk.Frame(tabs,padding=12);tabs.add(skill_form,text='技能与属性（可修改）')
+        form_page,form = scroll_page(tabs); tabs.add(form_page, text='乘区试算')
+        skill_page,skill_form=scroll_page(tabs);tabs.add(skill_page,text='技能与属性（可修改）')
+        probability=ttk.Frame(tabs,padding=12);tabs.add(probability,text='浮动概率曲线')
         data = ttk.Frame(tabs, padding=12); tabs.add(data, text='当前内存参数')
-        ttk.Label(form, text='自动填充只取当前已施加效果；填充后可修改，实时采样不会覆盖你的修改。\n'
-                  '未计入项目请查看“当前内存参数”页；尚不预测逐 Hit、破盾或预施加效果。',
+        audit_page=ttk.Frame(tabs,padding=12);tabs.add(audit_page,text='天赋与被动审查')
+        audit_bar=ttk.Scrollbar(audit_page);audit_bar.pack(side='right',fill='y')
+        self.audit=tk.Text(audit_page,wrap='word',yscrollcommand=audit_bar.set)
+        self.audit.pack(fill='both',expand=True);audit_bar.configure(command=self.audit.yview)
+        ttk.Button(audit_page,text='刷新已加载天赋与被动',command=self.refresh).pack(anchor='w',pady=6)
+        ttk.Label(form, text='自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
+                  '未确认条件请查看天赋审查与参数页；尚不完整模拟逐 Hit、破盾与后续施加效果。',
                   wraplength=840).pack(anchor='w', pady=(0,8))
-        grid = ttk.Frame(form); grid.pack(fill='x')
+        grid = tk.Frame(form,bg=BG); grid.pack(fill='x')
         self.values = {};defaults = DamageInputs()
-        for idx,(key,title) in enumerate(FIELDS):
-            row,col=idx//2,(idx%2)*2
-            ttk.Label(grid,text=title).grid(row=row,column=col,sticky='w',padx=5,pady=4)
-            value=getattr(defaults,key)
-            var=tk.StringVar(self,value='' if value is None else str(value));self.values[key]=var
-            ttk.Entry(grid,textvariable=var,width=15).grid(row=row,column=col+1,sticky='ew',padx=(4,20))
+        self.factor_labels={}
+        grid.columnconfigure(0,weight=1);grid.columnconfigure(1,weight=1)
+        tones=['#514864','#60465e','#3e5a66','#665542','#604650','#514968','#3d5965','#425c53']
+        for idx,(title,color,fields) in enumerate(GROUPS):
+            tone=tones[idx]
+            shell=RoundedCard(grid,background=tone)
+            shell.grid(row=idx//2,column=idx%2,sticky='new',padx=5,pady=6)
+            card=shell.content
+            tk.Label(card,text=title,bg=tone,fg=color,font=('Microsoft YaHei UI',11,'bold')).grid(row=0,column=0,columnspan=2,sticky='w',pady=(0,6))
+            card.columnconfigure(1,weight=1)
+            for row,(key,title) in enumerate(fields,1):
+                tk.Label(card,text=title,bg=tone,fg=FG).grid(row=row,column=0,sticky='w',pady=5)
+                value=getattr(defaults,key)
+                var=tk.StringVar(self,value='' if value is None else str(value));self.values[key]=var
+                ttk.Entry(card,textvariable=var,width=13,style='Damage.TEntry').grid(row=row,column=1,sticky='e',padx=(10,0))
         self.pool=tk.StringVar(self,value='hp')
         options=ttk.Frame(form);options.pack(fill='x',pady=8)
         for pool in ('dp','hp'):
@@ -67,8 +124,8 @@ class DamageWindow(tk.Toplevel):
         self.skill_title=ttk.Label(skill_form,text='尚未自动填充');self.skill_title.pack(anchor='w',pady=8)
         self.params={};pg=ttk.Frame(skill_form);pg.pack(fill='x')
         names=[('min_power','最小威力'),('max_power','最大威力'),('difference','属性差阈值'),('level','技能等级'),
-               ('enemy','敌方防御参考值'),('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
-               ('critical_rate_bonus','已识别暴击率加成 %（供核对）'),('morale_level','士气等级（每层六维 +5）')]
+               ('enemy','敌方防御参考值'),('calamity','灾厄属性下降（通常20）'),('fear_of_devil','大灾厄属性下降（通常100）'),('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
+               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),('morale_level','士气等级（每层六维 +5）')]
         from .damage_inputs import STATS
         names += [(key,STATS[key]) for key in WEIGHTS]+[('weight_'+key,STATS[key]+'权重') for key in WEIGHTS]
         for idx,(key,label) in enumerate(names):
@@ -82,9 +139,78 @@ class DamageWindow(tk.Toplevel):
         scrollbar=ttk.Scrollbar(data);scrollbar.pack(side='right',fill='y')
         self.raw=tk.Text(data,wrap='word',yscrollcommand=scrollbar.set)
         self.raw.pack(fill='both',expand=True);scrollbar.configure(command=self.raw.yview)
+        ttk.Label(probability,text='每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。').pack(anchor='w')
+        ttk.Label(probability,text='假定其余倍率不变。未模拟逐段破盾、破坏率增长和衰减；曲线不等同于完整实战击杀概率。',wraplength=900).pack(anchor='w',pady=5)
+        self.hit_weights=tk.StringVar(self,value='')
+        ttk.Label(probability,text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）').pack(anchor='w')
+        ttk.Entry(probability,textvariable=self.hit_weights).pack(fill='x',pady=5)
+        self.hit_source=ttk.Label(probability,text='尚无权重，不假定为单 Hit');self.hit_source.pack(anchor='w')
+        ttk.Button(probability,text='重新计算曲线与伤害',command=self.compute).pack(anchor='w',pady=6)
+        self.prob_summary=ttk.Label(probability,text='',wraplength=880);self.prob_summary.pack(anchor='w')
+        self.plot=tk.Canvas(probability,bg=CARD,highlightthickness=0,height=370)
+        self.plot.pack(fill='both',expand=True,pady=10)
+        self.plot.bind('<Configure>',lambda e:self.draw_plot())
+        self.plot.bind('<Motion>',self.hover_plot)
+        self.plot_hint=ttk.Label(probability,text='横轴：伤害倍率；纵轴：概率密度（面积为概率）');self.plot_hint.pack(anchor='w')
+        self.theme_widgets(self)
         self.reload_choices();self.refresh()
         if self.loaded_snapshot.get('connected') and self.player_box.current()>=0 and self.enemy_box.current()>=0:self.fill()
         else:self.compute()
+
+    def theme_widgets(self, widget):
+        # Scope ttk styles to this window; do not restyle the dashboard globally.
+        name=widget.winfo_class()
+        if name in ('TFrame','TLabel','TCheckbutton','TRadiobutton','TNotebook','TEntry','TButton','TCombobox'):
+            widget.configure(style='Damage.'+name)
+        elif name=='Text':widget.configure(bg=CARD,fg=FG,insertbackground=FG,relief='flat',padx=10,pady=8)
+        for child in widget.winfo_children():self.theme_widgets(child)
+
+    def update_probability(self, damage):
+        self.plot_data=None;self.plot_damage=damage
+        try:
+            raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
+            weights=[float(w) for w in raw.split(',') if w.strip()]
+            data=distribution(weights);self.plot_data=data
+            scale=damage if damage is not None else 1
+            unit='伤害' if damage is not None else '倍率'
+            text=f"{data['hits']} Hit · 中央 90% {unit}区间：{data['low']*scale:,.4g} – {data['high']*scale:,.4g} · 浮动标准差 {data['sigma']:.2%}"
+            if hasattr(self,'filled_chain') and float(self.values['chain'].get())!=self.filled_chain:
+                text+='\n连击合计已修改：请同步修改上方追击权重，曲线仍按当前权重列表计算。'
+            self.prob_summary.configure(text=text)
+        except ValueError as exc:self.prob_summary.configure(text='曲线未生成：'+str(exc))
+        self.draw_plot()
+
+    def draw_plot(self):
+        if not hasattr(self,'plot'):return
+        c=self.plot;c.delete('all');data=self.plot_data
+        if not data:
+            c.create_text(25,40,anchor='w',text='填入已确认的各 Hit 权重后显示概率曲线',fill=DIM);return
+        w=max(300,c.winfo_width());h=max(220,c.winfo_height());l,r,t,b=60,w-24,35,h-48
+        peak=max(data['density']);scale=self.plot_damage if self.plot_damage is not None else 1
+        c.create_text(l,15,anchor='w',fill=DIM,text='概率密度（每单位伤害倍率）')
+        for i in range(5):
+            y=b-(b-t)*i/4;c.create_line(l,y,r,y,fill='#49415e')
+            c.create_text(l-8,y,anchor='e',text=f'{peak*i/4:.1f}',fill=DIM)
+        for i in range(5):
+            x=l+(r-l)*i/4;factor=.9+.05*i
+            c.create_text(x,b+20,text=f'{factor*scale:,.4g}',fill=DIM)
+        points=[]
+        for x,y in zip(data['x'][::4],data['density'][::4]):
+            if .9<=x<=1.1:points.extend((l+(x-.9)/.2*(r-l),b-y/peak*(b-t)))
+        c.create_polygon([l,b]+points+[r,b],fill='#314959',outline='')
+        c.create_line(points,fill='#83e5ed',width=2)
+        for value in (data['low'],1,data['high']):
+            x=l+(value-.9)/.2*(r-l)
+            c.create_line(x,t,x,b,fill='#f5aacb' if value==1 else '#9383ac',dash=(3,4))
+
+    def hover_plot(self,event):
+        if not self.plot_data:return
+        width=max(300,self.plot.winfo_width())
+        factor=.9+(event.x-60)/(width-84)*.2
+        if not .9<=factor<=1.1:return
+        d=self.plot_data;idx=max(0,min(len(d['x'])-1,round((factor-d['x'][0])/d['step'])))
+        scale=self.plot_damage if self.plot_damage is not None else 1
+        self.plot_hint.configure(text=f'伤害倍率 {factor:.4f} · 对应伤害 {factor*scale:,.4g} · 密度 {d["density"][idx]:.3f}（密度不是单点概率）')
 
     def reload_choices(self):
         data=self.snapshot()
@@ -128,7 +254,7 @@ class DamageWindow(tk.Toplevel):
         if self.mode_choices['high_boost'].get()=='自动':modes.pop('high_boost')
         modes.update(ghost=automatic['ghost'],gidou=automatic['gidou'])
         modes['lightning_style']='Thunder' in style_elements(player.get('style_label',''))
-        filled=autofill(player,enemy,data.get('field_state'),modes=modes)
+        filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
         filled['notes'].append('模式判断：'+str(modes)+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
@@ -137,6 +263,9 @@ class DamageWindow(tk.Toplevel):
         self.pool.set(filled['values']['target_pool'])
         for k,var in self.params.items():
             v=filled['params'].get(k);var.set('' if v is None else f'{v:g}')
+        self.hit_weights.set(', '.join(f'{w:.8g}' for w in filled.get('hit_weights',[])))
+        self.hit_source.configure(text=filled.get('hit_note','权重未确认'))
+        self.filled_chain=filled['values']['chain']
         self.use_skill.set(True);self.skill_title.configure(text=filled['skill'])
         self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
         self.refresh();self.compute()
@@ -151,8 +280,12 @@ class DamageWindow(tk.Toplevel):
             values.update(base=float(base) if base else None,target_pool=self.pool.get(),
                           **{k:v.get() for k,v in self.flags.items()})
             result=calculate(DamageInputs(**values))
+            if values['absorbed']:
+                self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='吸收情景不输出伤害概率曲线')
+            else:self.update_probability(result['damage'])
             text='弱点条件：'+('满足' if result['weak'] else '不满足（不计心眼／脆弱）')+'\n'
             text+='  ×  '.join(f'{NAMES[k]} {v:.4g}' for k,v in result['factors'].items())+'\n\n'
+            if self.use_skill.get():text+=f'敌方属性下降采用最高值：{enemy_attribute_reduction({k:v.get() for k,v in self.params.items()},self.flags["critical"].get()):g} 点\n'
             if result['multiplier'] is not None:text+=f"总倍率：{result['multiplier']:.6g}\n"
             if result['damage'] is not None:
                 text+=f"未衰减试算伤害：{result['damage']:,.2f}\n"
@@ -161,20 +294,23 @@ class DamageWindow(tk.Toplevel):
             text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
         except (ValueError, OverflowError) as exc:
             text='无法计算：'+str(exc)
+            self.plot_data=None;self.draw_plot();self.prob_summary.configure(text=text)
         self.result.configure(state='normal');self.result.delete('1.0','end');self.result.insert('end',text)
         self.result.configure(state='disabled')
 
     def refresh(self):
         from .damage_inputs import STATS
         data=self.snapshot()
+        self.audit.configure(state='normal');self.audit.delete('1.0','end')
+        self.audit.insert('end',audit_text(data.get('players',[])));self.audit.configure(state='disabled')
         lines=[self.fill_notes,'\n已连接战斗' if data.get('connected') else '\n未连接：如有数据，属于保留快照']
         for player in data.get('players',[]):
-            inputs=player['inputs'];skill=inputs.get('selected_skill',{})
+            inputs=player.get('inputs',player.get('combat_inputs',{}));skill=inputs.get('selected_skill',{})
             lines.append('\n'+str(player.get('name') or '角色')+' · '+str(skill.get('name') or '预选未读到'))
             lines.append(' / '.join(f'{STATS[k]} {v}' for k,v in inputs.get('stats',{}).items()))
             lines.append('Token：'+str(inputs.get('token','未读到')))
         for enemy in data.get('enemies',[]):
-            inputs=enemy['inputs']
+            inputs=enemy.get('inputs',enemy.get('combat_inputs',{}))
             lines.append('\n'+str(enemy.get('name') or '敌人')+
                          ' · 边界参考 '+str(inputs.get('_borderRefParam','未读到'))+
                          ' / 防御参考 '+str(inputs.get('_defenseRefParam','未读到')))

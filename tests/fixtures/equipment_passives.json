@@ -1,0 +1,142 @@
+{
+  "Passive.Start_DarkEnhanceRing02": {
+    "category": "Passive",
+    "id": 57003403,
+    "label": "Passive.Start_DarkEnhanceRing02",
+    "name": "暗属性攻击+6％",
+    "desc": "自身暗属性技能攻击力+6%",
+    "info": "暗属性技能攻击力提升",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "DarkBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_DarkEnhanceRing02",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+          "Dark"
+        ],
+        "power": [
+          0.06,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_HPAttackUpRangeByHitEarring03": {
+    "category": "Passive",
+    "id": 57005103,
+    "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+    "name": "对HP技能攻击力提升",
+    "desc": "对HP技能攻击力最多+15%（连击数越少效果越大）",
+    "info": "对HP技能攻击力提升",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.05,
+          0.15
+        ],
+        "value": [
+          10.0,
+          1.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  }
+}

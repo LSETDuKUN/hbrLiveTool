@@ -115,7 +115,7 @@ class AutofillTests(unittest.TestCase):
         field=status('Zone',195);field.update(element_key='Thunder',element_type=3)
         result=autofill(p,e,dict(statuses=[field]),lookup)
         v=result['values']
-        self.assertEqual(v['attack'],105);self.assertEqual(v['hp_bonus'],65)
+        self.assertEqual(v['attack'],10);self.assertEqual(v['field'],95);self.assertEqual(v['hp_bonus'],65)
         self.assertEqual(v['critical_bonus'],100);self.assertEqual(v['chain'],36)
         self.assertEqual(v['charge'],30);self.assertEqual(v['destruction'],250)
         self.assertEqual(v['element_bonus'],300);self.assertEqual(v['resistance'],50)

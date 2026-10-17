@@ -13,14 +13,14 @@ GROUPS = (
 BACKGROUNDS = dict(boost='#493448', funnel='#253f46', charge='#2d4438', critical='#493f2d',
                    debuff='#493039', resist='#38324f', negative='#47342f')
 KINDS = {
-    'boost': {'AttackUp','AttackUpIncludeNormal','AttackUpOnlyNormal','MindEye'},
+    'boost': {'AttackUp','AttackUpIncludeNormal','AttackUpOnlyNormal','MindEye','BIYamawakiServant'},
     'funnel': {'Funnel'},
     'charge': {'BuffCharge'},
     'critical': {'CriticalRateUp','CriticalDamageUp','CriticalRateDown','CriticalDamageDown'},
     'debuff': {'DefenseDown','Fragile'},
     'resist': {'ResistUp','ResistDown','ResistDownOverwrite'},
     'negative': {'AttackDown','ConfusionRandom','StunRandom','SuperStun','Misfortune',
-                 'ImprisonRandom','BindRandom','VirusRandom','IllusionRandom','Fatigue','Restraint','RestraintRandom'}}
+                 'ImprisonRandom','BindRandom','VirusRandom','IllusionRandom','Fatigue','Restraint','RestraintRandom','FearOfDevil'}}
 
 
 def group_statuses(state):

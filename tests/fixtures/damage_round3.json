@@ -1,0 +1,82 @@
+{
+  "servants": [
+    {
+      "label": "SpecialStatus.BIYamawakiServant",
+      "name": "BIYamawakiServant",
+      "value": "",
+      "values": {
+        "rateValueInt": 4000
+      },
+      "source": "Passive.BIYamawakiServant_Self01",
+      "source_name": "Passive.BIYamawakiServant_Self01",
+      "element_type": null,
+      "element_key": null,
+      "element_name": null,
+      "source_effect": {},
+      "buff_limit_type": 0,
+      "remaining": 0,
+      "duration": "永久",
+      "duration_kind": "permanent",
+      "hidden": false,
+      "pending_add": false,
+      "pending_remove": false
+    },
+    {
+      "label": "SpecialStatus.BIYamawakiServant",
+      "name": "BIYamawakiServant",
+      "value": "",
+      "values": {
+        "rateValueInt": 4000
+      },
+      "source": "Passive.BIYamawakiServant_Self05",
+      "source_name": "Passive.BIYamawakiServant_Self05",
+      "element_type": null,
+      "element_key": null,
+      "element_name": null,
+      "source_effect": {},
+      "buff_limit_type": 0,
+      "remaining": 0,
+      "duration": "永久",
+      "duration_kind": "permanent",
+      "hidden": false,
+      "pending_add": false,
+      "pending_remove": false
+    }
+  ],
+  "enemy_statuses": [
+    {
+      "label": "SpecialStatus.FearOfDevil",
+      "name": "FearOfDevil",
+      "value": "",
+      "values": {},
+      "source": "BIYamawakiSkill55b",
+      "source_name": "魔界骑兵启动",
+      "element_type": null,
+      "element_key": null,
+      "element_name": null,
+      "source_effect": {
+        "elements": [],
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "EnemyTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        },
+        "target_condition": "",
+        "condition": "",
+        "hit_condition": ""
+      },
+      "buff_limit_type": 0,
+      "remaining": 1,
+      "duration": "剩余 1 回合",
+      "duration_kind": "turn",
+      "hidden": false,
+      "pending_add": false,
+      "pending_remove": false
+    }
+  ]
+}

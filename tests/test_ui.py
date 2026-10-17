@@ -47,6 +47,30 @@ class DashboardTests(unittest.TestCase):
         window.refresh()
         window.destroy()
 
+    def test_damage_probability_plot_and_scoped_dark_theme(self):
+        self.app.open_damage_calculator();window=self.app.damage_window
+        window.values['base'].set('100');window.hit_weights.set('1, 1')
+        window.compute();self.root.update_idletasks()
+        self.assertEqual(window.plot_data['hits'],2)
+        self.assertIn('中央 90%',window.prob_summary.cget('text'))
+        self.assertTrue(any(window.plot.type(item)=='polygon' for item in window.plot.find_all()))
+        self.assertEqual(window.raw.cget('background'),'#4a405e')
+        from hbr_live_app.components import RoundedCard
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+        cards=[w for w in descendants(window) if isinstance(w,RoundedCard)]
+        self.assertEqual(len(cards),8)
+        self.assertTrue(all(c.find_withtag('shell') for c in cards))
+        self.assertIn('运行时已加载',window.audit.get('1.0','end'))
+        self.assertIn('element_attack',window.values);self.assertIn('field',window.values)
+        window.flags['absorbed'].set(True);window.compute()
+        self.assertIsNone(window.plot_data)
+        window.flags['absorbed'].set(False);window.hit_weights.set('bad');window.compute()
+        self.assertIsNone(window.plot_data);self.assertIn('曲线未生成',window.prob_summary.cget('text'))
+        window.destroy()
+
     def test_six_portraits_stay_fixed_on_swap_and_details_start_collapsed(self):
         players=[dict(actor_id=i+1,actor_position=i,actor=f'角色{i}',style_label='',statuses_available=True,statuses=[]) for i in range(6)]
         panel=self.app.player_panel

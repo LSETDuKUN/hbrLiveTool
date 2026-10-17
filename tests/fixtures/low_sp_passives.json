@@ -1,0 +1,355 @@
+{
+  "Passive.ConsumeSpAttackUp01": {
+    "category": "Passive",
+    "id": 100340601,
+    "label": "Passive.ConsumeSpAttackUp01",
+    "name": "邪恶军团是最强的说！",
+    "desc": "友方使用消耗SP不大于8的技能时\n使用者的技能攻击力+100%",
+    "info": "消耗SP不大于8的友方：技能攻击力+100%",
+    "timing": "OnPlayerTurnStart",
+    "condition": "CountBC(IsPlayer()==1&&IsAttackNormal()==0 && ConsumeSp()<=8)>0",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.ConsumeSpAttackUp01",
+        "skill_type": "AttackUp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+          1.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsAttackNormal()==0 && ConsumeSp()<=8",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2025-04-24 18:00:00+00:00",
+    "card_form": "",
+    "ct": "SSR",
+    "lb": 1,
+    "max": 4,
+    "pc": 10,
+    "image": "YBungoEvil_R3_Thumbnail.webp",
+    "style": "邪恶军团开始进军的说！",
+    "team": "31C",
+    "chara": "丰后 弥生 — Yayoi Bungo — ぶんちゃん BunChan"
+  },
+  "Passive.ConsumeSpAttackUp03": {
+    "category": "Passive",
+    "id": 100310803,
+    "label": "Passive.ConsumeSpAttackUp03",
+    "name": "你们几个，动手吧！",
+    "desc": "友方使用消耗SP不大于8的技能时\n使用者的技能攻击力+100%",
+    "info": "消耗SP不大于8的友方：技能攻击力+100%",
+    "timing": "OnPlayerTurnStart",
+    "condition": "CountBC(IsPlayer()==1&&IsAttackNormal()==0 && ConsumeSp()<=8)>0",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.ConsumeSpAttackUp03",
+        "skill_type": "AttackUp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+          1.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsAttackNormal()==0 && ConsumeSp()<=8",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2026-06-03 05:00:00+00:00",
+    "card_form": "",
+    "ct": "SSR",
+    "lb": 3,
+    "max": 4,
+    "pc": 20,
+    "image": "BIYamawakiEvil_R3_Thumbnail.webp",
+    "style": "高傲魔王的凯旋",
+    "team": "31C",
+    "chara": "山胁・冯・伊瓦尔 — Bon Ivar Yamawaki — ワッキー Wakkii"
+  },
+  "skill": {
+    "id": 46003116,
+    "label": "BIYamawakiSkill55",
+    "name": "超级大爆炸",
+    "desc": "增加自身连击数（大量伤害）3次 对全体敌方发动暗属性10连击\n只能在处于山胁大人的仆人状态的友方为6名或以上时使用",
+    "hit_count": 10,
+    "target_type": "All",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 23,
+    "is_adv": false,
+    "use_count": [
+      -4
+    ],
+    "sp_cost": 0,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "CountBC(IsPlayer() && SpecialStatusCountByType(155) >= 1)>=6",
+    "passive": null,
+    "parts": [
+      {
+        "label": "BIYamawakiSkill55",
+        "skill_type": "AttackSkill",
+        "target_type": "All",
+        "type": "Slash",
+        "elements": [
+          "Dark"
+        ],
+        "power": [
+          11765.625,
+          23531.25
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 4.5
+        },
+        "diff_for_max": 173,
+        "parameters": {
+          "str": 1,
+          "wis": 0,
+          "dex": 1,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.05,
+          0.02
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "label": "BIYamawakiSkill55_2",
+        "skill_type": "Funnel",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          3.0,
+          0.0
+        ],
+        "value": [
+          0.25,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 1.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [
+          {
+            "id": 1,
+            "type": "Before",
+            "power_ratio": 0.0
+          }
+        ],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "Default",
+          "exitCond": "Count",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "hits": [
+      {
+        "id": 1,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 2,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 3,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 4,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 5,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 6,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 7,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 8,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 9,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 10,
+        "type": "Main",
+        "power_ratio": 0.55
+      }
+    ],
+    "in_date": "2026-06-03 05:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "BIYamawakiEvil_R3_Thumbnail.webp",
+    "style": "高傲魔王的凯旋",
+    "role": "Attacker",
+    "team": "31C",
+    "chara": "山胁・冯・伊瓦尔 — Bon Ivar Yamawaki — ワッキー Wakkii"
+  }
+}

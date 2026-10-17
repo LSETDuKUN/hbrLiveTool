@@ -22,14 +22,27 @@ def read_inputs(reader, actor):
     result['reinforced_mode_turn'] = reader.get(actor, '_reinforcedModeTurn')
     passive_list = reader.prop(actor, 'passiveSkillList')
     if passive_list and reader.r.cls(passive_list) == 'List`1':
-        labels=[]
+        from .passive_audit import audit_entry
+        labels=[];audit=[]
         for passive in members(reader.r, passive_list):
             if reader.r.cls(passive) != 'BattlePassiveSkill': continue
             domain_passive=reader.get(passive,'domain')
             if domain_passive:
                 label=reader.prop(domain_passive,'reasonMasterLabel')
-                if label:labels.append(label)
+                if label:
+                    labels.append(label)
+                    master_passive=reader.get(domain_passive,'master')
+                    runtime={}
+                    if master_passive and reader.r.cls(master_passive)=='MasterPassiveSkill':
+                        for key,field in [('name','Name'),('condition','Condition'),('description','Description'),('master_label','Label')]:
+                            value=reader.get(master_passive,field)
+                            if value is not None:runtime[key]=value
+                    for key,field in [('used_count','usedCount'),('limit_count','limitCount')]:
+                        value=reader.prop(passive,field)
+                        if value is not None:runtime[key]=value
+                    audit.append(audit_entry(label,runtime))
         result['passive_labels']=labels
+        result['passive_audit']=audit
     pointer = reader.prop(actor, 'frontSkillList')
     index = reader.prop(actor, 'selectedCommandIndex')
     if not pointer or reader.r.cls(pointer) != 'List`1':
@@ -44,7 +57,7 @@ def read_inputs(reader, actor):
     if not domain: return result
     master = reader.get(domain, 'master')
     selected = dict(label=reader.get(master, 'Label'), name=reader.get(master, 'Name'),
-                    level=reader.prop(skill, 'skillLevel'), parts=[])
+                    level=reader.prop(skill, 'skillLevel'),base_sp_cost=reader.get(master,'Sp'), parts=[])
     # Do not attach _allyAim: it may be a previous command's cached target.
     for name in ('_allSkillPartList', '_skillPartList'):
         pointer = reader.get(domain, name)
