@@ -58,6 +58,8 @@ def read_inputs(reader, actor):
     master = reader.get(domain, 'master')
     selected = dict(label=reader.get(master, 'Label'), name=reader.get(master, 'Name'),
                     level=reader.prop(skill, 'skillLevel'),base_sp_cost=reader.get(master,'Sp'), parts=[])
+    hit_count=reader.get(master,'HitCount')
+    if isinstance(hit_count,int) and 0<hit_count<=256:selected['hit_count']=hit_count
     # Do not attach _allyAim: it may be a previous command's cached target.
     for name in ('_allSkillPartList', '_skillPartList'):
         pointer = reader.get(domain, name)

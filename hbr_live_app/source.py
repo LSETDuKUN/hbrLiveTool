@@ -8,6 +8,7 @@ from .events import ActionLedger
 from .turns import TurnReader, CommandLedger
 from .formation import FormationReader
 from .enemy_reader import EnemyReader
+from .overdrive import read_overdrive
 
 
 def members(r, address):
@@ -156,6 +157,7 @@ def run(stop, paused, emit, outdir):
             if turn_warning:
                 emit(('status', turn_warning))
             previous_context = None
+            previous_od = None
             while not stop.is_set():
                 if paused.is_set():
                     enemy_reader.observations.invalidate()
@@ -214,9 +216,10 @@ def run(stop, paused, emit, outdir):
                     state.update(status_reader.sample(state['address']))
                 gauge = status_reader.element_gauge(module)
                 fields = status_reader.sample_fields(module)
-                if states != previous or events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields:
+                od_state=read_overdrive(status_reader,module)
+                if states != previous or events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields or od_state != previous_od:
                     packet = dict(time=time.time(), enemies=states, events=events, turn_context=context,
-                                  player_states=player_states, element_gauge=gauge, field_state=fields)
+                                  player_states=player_states, element_gauge=gauge, field_state=fields,od_state=od_state)
                     emit(('snapshot', packet))
                     log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     log.flush()
@@ -225,6 +228,7 @@ def run(stop, paused, emit, outdir):
                     previous_players = player_states
                     previous_gauge = gauge
                     previous_fields = fields
+                    previous_od = od_state
                 if time.monotonic() - heartbeat >= 1:
                     emit(('heartbeat', time.time()))
                     heartbeat = time.monotonic()

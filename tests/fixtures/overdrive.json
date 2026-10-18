@@ -1,0 +1,524 @@
+{
+  "module": 4096,
+  "objects": [
+    {
+      "address": "0x1cde4437f30",
+      "class": "BattleOverDriveManager",
+      "fields": [
+        {
+          "name": "_state",
+          "offset": 16,
+          "type": 17,
+          "declared": "BattleOverDriveManager",
+          "raw4": "05000000"
+        },
+        {
+          "name": "onStateChangeCallback",
+          "offset": 24,
+          "type": 21,
+          "declared": "BattleOverDriveManager",
+          "object": {
+            "address": "0x1cde4437e10",
+            "class": "Action`3"
+          }
+        },
+        {
+          "name": "<isForbiddenPush>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "BattleOverDriveManager",
+          "value": false
+        },
+        {
+          "name": "<prohibitFromInvoking>k__BackingField",
+          "offset": 33,
+          "type": 2,
+          "declared": "BattleOverDriveManager",
+          "value": false
+        },
+        {
+          "name": "minNegativePoint",
+          "offset": 36,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": -30000
+        },
+        {
+          "name": "minDefaultPoint",
+          "offset": 40,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 0
+        },
+        {
+          "name": "_currentPoint",
+          "offset": 44,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 7000
+        },
+        {
+          "name": "onPointChangeCallback",
+          "offset": 48,
+          "type": 21,
+          "declared": "BattleOverDriveManager",
+          "object": {
+            "address": "0x1cde4437ea0",
+            "class": "Action`2"
+          }
+        },
+        {
+          "name": "<minActivateLevel>k__BackingField",
+          "offset": 56,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 1
+        },
+        {
+          "name": "_currentStockCount",
+          "offset": 60,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 8
+        },
+        {
+          "name": "onStockCountChangeCallback",
+          "offset": 64,
+          "type": 21,
+          "declared": "BattleOverDriveManager",
+          "object": {
+            "address": "0x1cde4437cf0",
+            "class": "Action`1"
+          }
+        },
+        {
+          "name": "<activatedTurn>k__BackingField",
+          "offset": 72,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 1
+        },
+        {
+          "name": "<consumedPoint>k__BackingField",
+          "offset": 76,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 10000
+        },
+        {
+          "name": "activatedLevel",
+          "offset": 80,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 1
+        },
+        {
+          "name": "onResetCallback",
+          "offset": 88,
+          "type": 18,
+          "declared": "BattleOverDriveManager",
+          "object": {
+            "address": "0x1cde4437c60",
+            "class": "Action"
+          }
+        },
+        {
+          "name": "<isAutoActivation>k__BackingField",
+          "offset": 96,
+          "type": 2,
+          "declared": "BattleOverDriveManager",
+          "value": false
+        },
+        {
+          "name": "maxBonusTurn",
+          "offset": 100,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 3
+        },
+        {
+          "name": "<healSpDownRateByOverDrive>k__BackingField",
+          "offset": 104,
+          "type": 12,
+          "declared": "BattleOverDriveManager",
+          "value": 0.0
+        },
+        {
+          "name": "<intervalTurnCount>k__BackingField",
+          "offset": 108,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 0
+        },
+        {
+          "name": "isFinishedIntervalTurn",
+          "offset": 112,
+          "type": 2,
+          "declared": "BattleOverDriveManager",
+          "value": true
+        },
+        {
+          "name": "onIntervalTurnChangeCallback",
+          "offset": 120,
+          "type": 21,
+          "declared": "BattleOverDriveManager",
+          "object": {
+            "address": "0x1cde4437d80",
+            "class": "Action`1"
+          }
+        },
+        {
+          "name": "expectedPoint",
+          "offset": 128,
+          "type": 8,
+          "declared": "BattleOverDriveManager",
+          "value": 7000
+        }
+      ]
+    },
+    {
+      "address": "0x1d65111f7e0",
+      "class": "BattleInfoManager",
+      "fields": [
+        {
+          "name": "<squadTurn>k__BackingField",
+          "offset": 16,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 1
+        },
+        {
+          "name": "<prevSquadTurn>k__BackingField",
+          "offset": 20,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "<maxExtraTurn>k__BackingField",
+          "offset": 24,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "<extraTurn>k__BackingField",
+          "offset": 28,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "<isExtraTurn>k__BackingField",
+          "offset": 32,
+          "type": 2,
+          "declared": "BattleInfoManager",
+          "value": false
+        },
+        {
+          "name": "<maxOverDriveTurn>k__BackingField",
+          "offset": 36,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 1
+        },
+        {
+          "name": "<overDriveTurn>k__BackingField",
+          "offset": 40,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 1
+        },
+        {
+          "name": "<isOverDriveTurn>k__BackingField",
+          "offset": 44,
+          "type": 2,
+          "declared": "BattleInfoManager",
+          "value": true
+        },
+        {
+          "name": "<isOverDriveBeforeEnemyTurn>k__BackingField",
+          "offset": 45,
+          "type": 2,
+          "declared": "BattleInfoManager",
+          "value": true
+        },
+        {
+          "name": "<overDriveCount>k__BackingField",
+          "offset": 48,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 1
+        },
+        {
+          "name": "<additionalTurnCharacters>k__BackingField",
+          "offset": 56,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1ce0fc1b7e0",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "<isAdditionalTurn>k__BackingField",
+          "offset": 64,
+          "type": 2,
+          "declared": "BattleInfoManager",
+          "value": false
+        },
+        {
+          "name": "<countDownValue>k__BackingField",
+          "offset": 68,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": -1
+        },
+        {
+          "name": "<executingSpecialCommandSkillLabel>k__BackingField",
+          "offset": 72,
+          "type": 14,
+          "declared": "BattleInfoManager"
+        },
+        {
+          "name": "<specialCommandListForRestore>k__BackingField",
+          "offset": 80,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d678d67210",
+            "class": "List`1"
+          }
+        },
+        {
+          "name": "turnDamage",
+          "offset": 88,
+          "type": 10,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "turnDamageByCharacter",
+          "offset": 96,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1fa20",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "_maxTurnDamage",
+          "offset": 104,
+          "type": 10,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "maxTurnDamageByCharacter",
+          "offset": 112,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1f9c0",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "actionDamage",
+          "offset": 120,
+          "type": 10,
+          "declared": "BattleInfoManager",
+          "value": 5498
+        },
+        {
+          "name": "_maxActionDamage",
+          "offset": 128,
+          "type": 10,
+          "declared": "BattleInfoManager",
+          "value": 2118986
+        },
+        {
+          "name": "dpDamagedForHealEpCharacterLabelList",
+          "offset": 136,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d67713d460",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "hpGaugeBrokenCharacterLabelList",
+          "offset": 144,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d67713d410",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "dpBrokenWithoutBreakDownCharacterLabelList",
+          "offset": 152,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d67713d3c0",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "dpGaugeBrokenCharacterLabelList",
+          "offset": 160,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d67713d370",
+            "class": "HashSet`1"
+          }
+        },
+        {
+          "name": "<healCount>k__BackingField",
+          "offset": 168,
+          "type": 8,
+          "declared": "BattleInfoManager",
+          "value": 0
+        },
+        {
+          "name": "<anySkillUsedCharacterList>k__BackingField",
+          "offset": 176,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1f660",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<healSkillUsedCharacterList>k__BackingField",
+          "offset": 184,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1f5a0",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<exSkillUsedCharacterList>k__BackingField",
+          "offset": 192,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1f540",
+            "class": "Dictionary`2"
+          }
+        },
+        {
+          "name": "<advanceSkillUsedCharacterList>k__BackingField",
+          "offset": 200,
+          "type": 21,
+          "declared": "BattleInfoManager",
+          "object": {
+            "address": "0x1d653e1f480",
+            "class": "Dictionary`2"
+          }
+        }
+      ]
+    },
+    {
+      "address": "0x1000",
+      "class": "BattleModule",
+      "fields": [
+        {
+          "name": "<overDriveManager>k__BackingField",
+          "offset": 72,
+          "type": 18,
+          "object": {
+            "address": "0x1cde4437f30",
+            "class": "BattleOverDriveManager"
+          }
+        },
+        {
+          "name": "<battleInfoManager>k__BackingField",
+          "offset": 64,
+          "type": 18,
+          "object": {
+            "address": "0x1d65111f7e0",
+            "class": "BattleInfoManager"
+          }
+        }
+      ]
+    }
+  ],
+  "accessory": {
+    "category": "Passive",
+    "id": 57005203,
+    "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+    "name": "增加超频条提升量",
+    "desc": "超频条提升量最多+15%（连击数越多效果越大）",
+    "info": "增加超频条提升量",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+        "skill_type": "OverDrivePointUpByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.05,
+          0.15
+        ],
+        "value": [
+          1.0,
+          10.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  }
+}

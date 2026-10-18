@@ -1,0 +1,418 @@
+{
+  "Passive.Start_ThunderEnhanceRing02": {
+    "category": "Passive",
+    "id": 57003203,
+    "label": "Passive.Start_ThunderEnhanceRing02",
+    "name": "雷属性攻击+6％",
+    "desc": "自身雷属性技能攻击力+6%",
+    "info": "雷属性技能攻击力提升",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "ThunderBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_ThunderEnhanceRing02",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+          "Thunder"
+        ],
+        "power": [
+          0.06,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_DPAttackUpRangeByHitEarring03": {
+    "category": "Passive",
+    "id": 57005003,
+    "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+    "name": "对DP技能攻击力提升",
+    "desc": "对DP技能攻击力最多+15%（连击数越少效果越大）",
+    "info": "对DP技能攻击力提升",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.05,
+          0.15
+        ],
+        "value": [
+          10.0,
+          1.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_DamageRateUpByHitEarring03": {
+    "category": "Passive",
+    "id": 57005303,
+    "label": "Passive.Start_DamageRateUpByHitEarring03",
+    "name": "增加破坏率提升量",
+    "desc": "破坏率提升量最多+15%（连击数越多效果越大）",
+    "info": "增加破坏率提升量",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_DamageRateUpByHitEarring03",
+        "skill_type": "DamageRateUpByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.05,
+          0.15
+        ],
+        "value": [
+          1.0,
+          10.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_DamageRateUp_10": {
+    "category": "Passive",
+    "id": 57008005,
+    "label": "Passive.Start_DamageRateUp_10",
+    "name": "增加破坏率提升量",
+    "desc": "破坏率提升量+10%",
+    "info": "增加破坏率提升量",
+    "timing": "OnPlayerTurnStart",
+    "condition": "",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_DamageRateUp_10",
+        "skill_type": "DamageRateUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.1,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-09-05 18:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_OverDrivePointUpByHitEarring03": {
+    "category": "Passive",
+    "id": 57005203,
+    "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+    "name": "增加超频条提升量",
+    "desc": "超频条提升量最多+15%（连击数越多效果越大）",
+    "info": "增加超频条提升量",
+    "timing": "OnPlayerTurnStart",
+    "condition": "IsFront()",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+        "skill_type": "OverDrivePointUpByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.05,
+          0.15
+        ],
+        "value": [
+          1.0,
+          10.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  },
+  "Passive.Start_SkillEnhance": {
+    "category": "Passive",
+    "id": 57008004,
+    "label": "Passive.Start_SkillEnhance",
+    "name": "技能升攻+10%",
+    "desc": "自身技能攻击力+10%",
+    "info": "属性技能攻击力提升",
+    "timing": "OnPlayerTurnStart",
+    "condition": "",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.Start_SkillEnhance",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.1,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-09-05 18:00:00+00:00",
+    "card_form": ""
+  }
+}

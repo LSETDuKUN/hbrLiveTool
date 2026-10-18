@@ -29,7 +29,8 @@ class RoundThreeTests(unittest.TestCase):
         p,e,lookup=setup()
         p['statuses']=fixture['servants'];e['statuses']=fixture['enemy_statuses']
         r=autofill(p,e,lookup=lookup)
-        self.assertEqual(r['values']['attack'],40)
+        self.assertEqual(r['values']['servant_mind_eye'],40)
+        self.assertEqual(r['values']['attack'],0)
         self.assertEqual(r['params']['fear_of_devil'],100)
         self.assertIn('40%',status_value('BIYamawakiServant',dict(rateValueInt=4000)))
         self.assertIn('100',status_value('FearOfDevil',{}))

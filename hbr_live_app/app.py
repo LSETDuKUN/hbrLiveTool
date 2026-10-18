@@ -76,7 +76,7 @@ class App:
                 players=[dict(p,name=p.get('actor'), inputs=p.get('combat_inputs', {})) for p in self.model.players],
                 enemies=[dict(e,inputs=e.get('combat_inputs', {}))
                          for e in self.model.enemies.values() if e.get('active')],field_state=self.model.field_state,
-                         element_gauge=self.model.element_gauge)
+                         element_gauge=self.model.element_gauge,od_state=self.model.od_state)
         self.damage_window = DamageWindow(self.root, snapshot)
 
     def _restore_geometry(self):
@@ -141,6 +141,8 @@ class App:
         self.total_label.pack(fill='x')
         self.summary = self.label(hero, '尚未连接  ·  等待第一笔行动', DIM)
         self.summary.pack(anchor='w')
+        self.od_label=self.label(hero,'OD · 等待采样',CYAN)
+        self.od_label.pack(anchor='w')
         self.current_damage_card = RoundedCard(damage_summary)
         self.current_damage_card.grid(row=0,column=1,sticky='nsew',padx=(6,0))
         self.label(self.current_damage_card.content, 'TurnDamage · 当前指令伤害', DIM, 10).pack(anchor='w')
@@ -391,6 +393,8 @@ class App:
         current = self.model.turn_context
         prefix = f'Turn {current["turn"]}  ·  ' if current else ''
         self.summary.configure(text=f'{prefix}{len(batches)} 组指令 · 本场累计 {self.model.total:,}')
+        from .overdrive import od_label
+        self.od_label.configure(text=od_label(self.model.od_state))
         self.enemy_keys = list(self.model.enemies)
         self.render_enemy()
         self.player_panel.update_state(self.model.players, self.model.element_gauge)

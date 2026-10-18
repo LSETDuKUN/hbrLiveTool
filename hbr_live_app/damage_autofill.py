@@ -11,7 +11,10 @@ WEIGHTS = dict(power='str',dexterity='dex',toughness='con',spirit='spr',wisdom='
 def catalog_skill(label):
     try:
         from hbr_data.store import Catalog
-        _,rows,_=Catalog().query("SELECT raw_json FROM skills WHERE region='cn' AND label=?",(label,),limit=50)
+        catalog=Catalog()
+        _,rows,_=catalog.query("SELECT raw_json FROM skill_catalog WHERE region='cn' AND label=?",(label,),limit=50)
+        if not rows:
+            _,rows,_=catalog.query("SELECT raw_json FROM skills WHERE region='cn' AND label=?",(label,),limit=50)
         candidates={}
         for row in rows:
             s=json.loads(row[0]); candidates[json.dumps(s.get('parts',[]),sort_keys=True)]=s
@@ -28,13 +31,22 @@ def style_elements(label):
     except (OSError,ValueError,RuntimeError,sqlite3.Error):return []
 
 
-def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party=None):
-    from .passive_audit import low_sp_predictions, equipment_bonuses, LOW_SP
+def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party=None, _compare_pools=True):
+    from .passive_audit import low_sp_predictions, accessory_effects, LOW_SP
     values=vars(DamageInputs()).copy(); notes=[]; skipped=[]
+    values['destruction_bonus']=0
     values['critical_rate_bonus']=0
     values['element_critical_rate_bonus']=0
     inputs=player.get('combat_inputs',player.get('inputs',{}))
     selected=inputs.get('selected_skill',{}); db=lookup(selected.get('label','')) if selected.get('label') else {}
+    db=dict(db)
+    live_hits=selected.get('hit_count')
+    if isinstance(live_hits,int) and 0<live_hits<=256:
+        if db.get('hit_count') not in (None,live_hits):
+            skipped.append(f'游戏段数 {live_hits} 与资料库 {db["hit_count"]} 不同：采用游戏段数，分布需核对')
+        db['hit_count']=live_hits
+        notes.append(f'本体段数 {live_hits}：游戏读取')
+    else:notes.append('本体段数：本地资料库（游戏字段未读到）；逐段伤害分布：本地资料库，可手动修改')
     attacks=[p for p in db.get('parts',[]) if p.get('skill_type') in
              ('AttackSkill','AttackNormal','TokenAttack','PenetrationCriticalAttack','AttackByOwnDpRate','DamageRateChangeAttackSkill')]
     raw=[p for p in selected.get('parts',[]) if p.get('skill_type_raw')==10]
@@ -43,6 +55,9 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     if live is None and len(raw)==1:live=raw[0]
     live=live or {}
     def pick(key, fallback):
+        if live.get(key) is not None:
+            notes.append(f'{key}：游戏 {live[key]}' + (f'（资料库 {fallback}，存在差异）' if fallback is not None and live[key]!=fallback else ''))
+        else:notes.append(f'{key}：资料库补充 {fallback}' if fallback is not None else f'{key}：未读到')
         return live[key] if live.get(key) is not None else fallback
     power=part.get('power',[None,None]); mult=part.get('multipliers',{})
     params=dict(min_power=pick('Power',power[0]),max_power=pick('MaxPower',power[1]),
@@ -57,10 +72,28 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     for pool in ('dp','hp'):
         rate=pick('Vs'+pool.capitalize()+'Rate',mult.get(pool))
         if isinstance(rate,(int,float)) and rate>=1: values[pool+'_bonus']=(rate-1)*100
+    dp_scaling=part.get('skill_type')=='AttackByOwnDpRate'
+    if dp_scaling:
+        endpoints=part.get('value') or [None,None]
+        params.update(own_dp=player.get('dp'),own_dp_max=player.get('dp_max'),
+                      dp_zero_factor=pick('Value1',endpoints[0]),dp_full_factor=pick('Value2',endpoints[1]))
+        if all(params[k] is not None for k in ('own_dp','own_dp_max','dp_zero_factor','dp_full_factor')):
+            from .destruction import dp_factor
+            try:
+                values['health_factor']=dp_factor(*(params[k] for k in ('own_dp','own_dp_max','dp_zero_factor','dp_full_factor')))
+                notes.append(f'自身 DP 线性技能倍率 ×{values["health_factor"]:g}：0 DP / 满 DP 端点，超过满 DP 按满值')
+            except ValueError as exc:skipped.append(str(exc))
+        else:skipped.append('自身 DP 线性技能参数缺失，请补充后计算；不猜测当前 DP 比例')
+    params['enemy_dp']=enemy.get('dp')
+    params['enemy_hp']=enemy.get('hp')
     values['target_pool']='dp' if enemy.get('dp',0)>0 else 'hp'
     pool=values['target_pool']; elements=part.get('elements',[]); element=elements[0] if len(elements)==1 else None
     physical=part.get('type')
     modes=modes or {}
+    if modes.get('od_active') is True and modes.get('od_level') in (1,2,3):
+        values['od']=1+modes['od_level']*.1
+        notes.append(f'当前 OD Lv.{modes["od_level"]}：伤害倍率 {values["od"]:g}')
+    elif modes.get('od_active') is not False:skipped.append('OD 状态或发动等级未确认：暂用倍率 1，可手动修改')
     ghost=modes.get('ghost',False) and player.get('style_label')=='STezuka03'
     skill_attack=bool(part) and part.get('skill_type')!='AttackNormal'
     burst=bool(modes.get('transcend') and modes.get('lightning_style') and element=='Thunder')
@@ -116,7 +149,9 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         if rank>=4:values['critical_rate_bonus']+=30
         if rank>=5:values['critical_bonus']+=30
         notes.append(f'雷之印等级 {rank}：最多一份；技能加攻30%、等级4暴击率30%、等级5爆伤30%按门槛计入')
-        if rank>=3:notes.append('雷之印破坏率增长 +10%：未模拟逐 Hit 增长，不直接加到当前破坏率')
+        if rank>=3:
+            values['destruction_bonus']+=10
+            notes.append('雷之印破坏率增长 +10%（不加到当前破坏率）')
     high=[s for s in active_player if s.get('label')=='SpecialStatus.HighBoost']
     high_enabled=modes.get('high_boost',bool(high))
     if high_enabled and skill_attack:
@@ -126,14 +161,18 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     if servants and skill_attack:
         amounts=[s.get('values',{}).get('rateValueInt') for s in servants]
         amount=max((v/100 for v in amounts if isinstance(v,(float,int)) and v>0),default=40)
-        values['attack']+=amount
-        notes.append(f'魔界骑兵 / BIYamawakiServant +{amount:g}%：最多一份，优先读取 rateValueInt，缺失时使用本地资料 40%')
+        values['servant_mind_eye']+=amount
+        notes.append(f'仆人心眼 / BIYamawakiServant +{amount:g}%：仅弱点生效，可与普通心眼相加；最多一份，缺失时使用本地资料 40%')
     active_enemy=[s for s in enemy.get('statuses',[]) if applicable(s)]
     params['calamity']=20 if any(s.get('label')=='SpecialStatus.Misfortune' for s in active_enemy) else 0
     params['fear_of_devil']=100 if any(s.get('label')=='SpecialStatus.FearOfDevil' for s in active_enemy) else 0
     notes.append('敌方属性修正：灾厄20 / 大灾厄100 / 暴击50只取最高；暴击50仅用于伤害，不用于减益预计算')
-    equipment,handled_equipment,equipment_notes=equipment_bonuses(player,db,element,skill_attack)
-    for key,value in equipment:values[key]+=value
+    equipment_details=[]
+    equipment,handled_equipment,equipment_notes=accessory_effects(player,db,element,skill_attack,details=equipment_details)
+    params['od_gain_bonus']=0
+    for key,value in equipment:
+        if key=='od_gain_bonus':params[key]+=value
+        else:values[key]+=value
     notes.extend(equipment_notes)
     for state,enemy_side in [(player,False),(enemy,True)]:
         if not state.get('statuses_available',False):skipped.append(('敌方' if enemy_side else '角色')+'状态未完整读取')
@@ -147,6 +186,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
             if not enemy_side:
                 if kind in ('AttackUp','AttackUpIncludeNormal','Morale'):
                     key='attack';value=amount/100 if amount is not None else None
+                elif kind=='DamageRateUp':
+                    key='destruction_bonus';value=rate/100 if rate is not None else None
                 elif kind=='BuffCharge':
                     key='charge';value=amount/100 if amount is not None else None
                     skipped.append('充能附带暴击率的运行时尺度尚未核实；当前按勾选的暴击情景计算')
@@ -182,6 +223,21 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         else:entries.append((s,'attack',100))
     # A confirmed flat self funnel with a Before hit applies to this very attack.
     for buff in db.get('parts',[]) if skill_attack else []:
+        if (buff.get('skill_type')!='DamageRateUp' or buff.get('target_type') not in ('Self','AllyFront')
+                or any(buff.get(k) for k in ('cond','target_condition','hit_condition'))
+                or not buff.get('hits') or not all(h.get('type')=='Before' for h in buff['hits'])
+                or any(buff.get('growth',[]))):continue
+        if buff.get('target_type')=='AllyFront' and player.get('actor_position',player.get('position')) not in (0,1,2):continue
+        effect=buff.get('effect',{})
+        if effect.get('exitCond')!='Count' or effect.get('limitType') not in ('Default','None','Only'):continue
+        rate=(buff.get('power') or [None])[0]
+        if not isinstance(rate,(int,float)) or rate<0:continue
+        if any(k=='destruction_bonus' and s.get('source') in (selected.get('label'),buff.get('label')) for s,k,v in entries):continue
+        entries.append((dict(label='SpecialStatus.DamageRateUp',source=selected.get('label'),
+                             source_name='预选技能命中前破坏率提升',element_type=0,duration_kind='count',
+                             buff_limit_type=4 if effect.get('limitType')=='Only' else 0),
+                        'destruction_bonus',rate*100))
+    for buff in db.get('parts',[]) if skill_attack else []:
         if (buff.get('skill_type')!='Funnel' or buff.get('target_type')!='Self'
             or any(buff.get(k) for k in ('cond','target_condition','hit_condition'))
             or not buff.get('hits') or not all(h.get('type')=='Before' for h in buff['hits'])
@@ -209,6 +265,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
             notes.append('attack +300% ← 鬼道天赋（攻击前预测；同源实际 Buff 出现后不重复加）')
     if modes.get('transcend') and modes.get('lightning_style'):
         values['attack']+=300
+        values['destruction_bonus']+=10
+        notes.append('雷风格超越：破坏率增长 +10%')
         notes.append('attack +300% ← 雷风格超越；既存 Buff/Debuff 不再次乘 1.2')
     if burst:
         virtual('CriticalDamageUp','critical_bonus',100,'雷属性爆发：单独发动爆伤')
@@ -233,10 +291,23 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     import math
     values['resistance']=(1-math.prod(resistance_factors))*100
     dr=enemy.get('enemy_progress',{}).get('damage_rate')
-    if isinstance(dr,(int,float)) and dr>=100:values['destruction']=dr;notes.append(f'当前破坏率 {dr:g}%（不预测后续 Hit 增长）')
+    if isinstance(dr,(int,float)) and dr>=100:values['destruction']=dr;notes.append(f'当前破坏率 {dr:g}%：作为递推起点')
     else:skipped.append('破坏率未读到，暂用 100%')
     notes.append('暴击为用户可修改的情景，暴击率不直接乘伤害；未加入预选技能附带的减防。')
-    skipped.append('未作为状态读取的饰品/被动不自动猜测；Token/血量特殊倍率与逐 Hit 破坏率增长未预测')
+    skipped.append('未作为状态读取的饰品/被动不自动猜测；Token/血量特殊倍率未预测')
+    params['destruction_bonus']=values.pop('destruction_bonus')
+    params['skill_dr']=pick('DamageRateRate',mult.get('dr'))
+    progress=enemy.get('enemy_progress',{})
+    params['enemy_dr']=progress.get('destruction_coefficient')
+    params['max_dr']=progress.get('destruction_max')
+    super_element=modes.get('super_break_element') or ('Thunder' if modes.get('transcend') else None)
+    if element and element==super_element and isinstance(params['max_dr'],(int,float)):
+        params['max_dr']+=300
+        notes.append('爆发情景：破坏率上限预加 300 个百分点；其他上限效果请核对')
+    notes.append('max_dr 为本技能可增长到的上限；已有破坏率高于它时保持原值、不再增长')
+    if any(s.get('label') in ('SpecialStatus.DamageRateResistUp','SpecialStatus.DamageRateResistDown') for s in active_enemy):
+        params['enemy_dr']=None
+        skipped.append('敌方存在破坏抗性状态：换算未验证，请手填最终有效破坏系数后启用递推')
     params['critical_rate_bonus']=values.pop('critical_rate_bonus')
     params['element_critical_rate_bonus']=values.pop('element_critical_rate_bonus')
     notes.append('暴击率栏仅列已识别加成，不含未确认的基础率/充能；用于核对，不是期望伤害概率。')
@@ -247,9 +318,28 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         count=db.get('hit_count',0)
         hit_weights=[1/count]*count if isinstance(count,int) and 0<count<=100 else []
         hit_note='仅有 Hit 数：暂按等权（可修改）' if count!=1 else '单 Hit'
+    params['main_hits']=len(hit_weights) or None
+    exact_hits=(bool(hit_weights) and hit_note=='本地技能逐 Hit 权重'
+                and db.get('hit_count',len(hit_weights))==len(hit_weights))
+    if hit_weights and not exact_hits:
+        skipped.append('本体逐 Hit 分配缺失或与段数不符：不自动启用破坏率递推')
     if hit_weights:
         total=sum(hit_weights);hit_weights=[w/total for w in hit_weights]+chain_weights
     if values['chain'] and not chain_weights:
         hit_weights=[];hit_note='连击逐 Hit 权重未确认，请手动填写完整权重'
-    return dict(values=values,params=params,notes=notes,skipped=list(dict.fromkeys(skipped)),
+    result=dict(dp_scaling=dp_scaling,pool_simulation=bool(enemy.get('dp',0)>0 and not progress.get('dp_extra')),
+                destruction_ready=exact_hits and bool(hit_weights) and all(params.get(k) is not None for k in ('skill_dr','enemy_dr','max_dr')),
+                equipment_notes=equipment_notes,equipment_details=equipment_details,
+                equipment_owned=list(set(inputs.get('passive_labels',[])) | {p['label'] for p in inputs.get('passive_audit',[])}
+                                     | {s.get('source') for s in player.get('statuses',[]) if s.get('source')}),
+                values=values,params=params,notes=notes,skipped=list(dict.fromkeys(skipped)),
                 hit_weights=hit_weights,hit_note=hit_note,skill=selected.get('name','未选技能'))
+    result['hp_adjustments']={}
+    if _compare_pools and enemy.get('dp',0)>0:
+        hp=autofill(player,dict(enemy,dp=0),fields,lookup,modes,party,_compare_pools=False)['values']
+        for key in ('attack','element_attack','charge','defense_down','element_defense_down'):
+            delta=hp[key]-values[key]
+            if delta:
+                result['hp_adjustments'][key]=delta
+                notes.append(f'跨池 HP 阶段：{key} 相对 DP 阶段调整 {delta:+g} 个百分点（当前状态）')
+    return result

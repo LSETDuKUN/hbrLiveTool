@@ -7,10 +7,21 @@ from unittest.mock import patch
 from PIL import Image
 from hbr_data.assets import AssetStore, asset_urls, sync_portraits, asset_lock
 from hbr_data.details import skill_detail
-from hbr_data.cards import ratios, effect_category, group_effects
+from hbr_data.cards import ratios, effect_category, group_effects, destruction_summary
 
 
 class DetailTests(unittest.TestCase):
+    def test_destruction_summary_preserves_separate_parts_and_unknowns(self):
+        skill = skill_detail({"parts": [
+            {"skill_type": "AttackSkill", "multipliers": {"dr": 13.8}},
+            {"skill_type": "DefenseDown", "multipliers": {"dr": 99}},
+            {"skill_type": "AttackSkill", "multipliers": {"dr": 0}},
+            {"skill_type": "AttackSkill"}]})
+        self.assertEqual(destruction_summary(skill.effects),
+                         "效果 1：×13.8；效果 3：×0；效果 4：未提供")
+        self.assertEqual(destruction_summary(skill.effects[:1]), "×13.8")
+        self.assertEqual(destruction_summary(skill.effects[1:2]), "")
+
     def test_missing_hit_distribution_is_not_inferred(self):
         skill = skill_detail({"name":"X","hit_count":2,"parts":[{"power":[100,200],"parameters":{"str":2,"dex":1}}]})
         self.assertEqual(skill.hits,())

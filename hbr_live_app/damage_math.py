@@ -54,6 +54,7 @@ class DamageInputs:
     element_attack: float = 0
     field: float = 0
     mind_eye: float = 0
+    servant_mind_eye: float = 0
     defense_down: float = 0
     element_defense_down: float = 0
     fragile: float = 0
@@ -95,11 +96,11 @@ def calculate(i: DamageInputs):
                 * (1-i.resistance/100))
     weak = not i.absorbed and (affinity > 1 or (i.penetration_critical and i.critical))
     factors = dict(
-        attack=1+(i.attack+i.element_attack+i.field+i.charge+(i.mind_eye if weak else 0))/100,
+        attack=1+(i.attack+i.element_attack+i.field+i.charge+(i.mind_eye+i.servant_mind_eye if weak else 0))/100,
         defense=1+(i.defense_down+i.element_defense_down+(i.fragile if weak else 0))/100,
         affinity=affinity,
         critical=1+(i.critical_bonus+i.element_critical_bonus)/100 if i.critical else 1,
-        chain=1+i.chain/100, destruction=i.destruction/100, od=i.od,
+        chain=1+i.chain/100, destruction=i.destruction/100 if i.target_pool=='hp' else 1, od=i.od,
         token=1+i.token_bonus/100,
         specialization=1+(i.dp_bonus if i.target_pool == 'dp' else i.hp_bonus)/100,
         health=i.health_factor, down=i.down_factor, other=i.other_factor)

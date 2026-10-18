@@ -107,7 +107,9 @@ class EnemyReader:
                 pass
         # Optional state fields are metadata-validated independently; missing
         # fields degrade individual conditions rather than the entire card.
-        for name, key, kind in [('enemyChargeStep', 'charge_step', 8), ('_damageRate', 'damage_rate', 12)]:
+        for name, key, kind in [('enemyChargeStep', 'charge_step', 8), ('_damageRate', 'damage_rate', 12),
+                               ('<damageRateValue>k__BackingField', 'destruction_coefficient', 8),
+                               ('<maxDamageRate>k__BackingField', 'destruction_max', 8)]:
             try:
                 off = self.offsets(enemy, 'BattleEnemyData', {name: ('BattleEnemyData', kind)})[name]
                 if kind == 8:

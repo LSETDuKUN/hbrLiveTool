@@ -8,7 +8,11 @@ import sqlite3
 from functools import lru_cache
 
 LOW_SP = {'Passive.ConsumeSpAttackUp01','Passive.ConsumeSpAttackUp03'}
-EQUIPMENT = {'Passive.Start_DarkEnhanceRing02','Passive.Start_HPAttackUpRangeByHitEarring03'}
+EQUIPMENT = ({f'Passive.Start_{e}EnhanceRing{i:02}' for e in ('Fire','Ice','Thunder','Light','Dark') for i in range(5)}
+             | {f'Passive.Start_{pool}AttackUpRangeByHitEarring{i:02}' for pool in ('DP','HP') for i in (1,2,3)}
+             | {'Passive.Start_SkillEnhance'})
+DR_EQUIPMENT = {f'Passive.Start_DamageRateUpByHitEarring{i:02}' for i in (1,2,3)} | {'Passive.Start_DamageRateUp_10'}
+OD_EQUIPMENT = {f'Passive.Start_OverDrivePointUpByHitEarring{i:02}' for i in (1,2,3)}
 
 
 @lru_cache(maxsize=512)
@@ -43,7 +47,7 @@ def audit_entry(label, runtime=None):
                 condition=runtime.get('condition',record.get('condition','')),
                 timing=record.get('timing','未确认'),description=runtime.get('description') or record.get('desc',''),
                 parts=record.get('parts',[]),catalog_found=bool(record),
-                classification='已支持装备条件' if label in EQUIPMENT else '已支持低 SP 条件' if label in LOW_SP else
+                classification='已支持装备条件' if label in EQUIPMENT | OD_EQUIPMENT | DR_EQUIPMENT else '已支持低 SP 条件' if label in LOW_SP else
                 '条件待核对' if runtime.get('condition') or record.get('condition') else '效果/时机待核对',
                 runtime=runtime)
 
@@ -94,50 +98,81 @@ def low_sp_predictions(player, party, selected, skill, skill_attack):
     return additions,notes
 
 
-def equipment_bonuses(player, skill, element, skill_attack):
-    """Verified equipment only; real final values supersede pre-action estimates."""
-    result=[];notes=[];handled=set()
+def accessory_effects(player, skill, element, skill_attack=True, details=None):
+    """Owned effects only. Inspect source parts, never infer an equipped tier."""
+    import math
+    result=[];handled=set();notes=[]
     inputs=player.get('combat_inputs',player.get('inputs',{}))
-    labels=set(inputs.get('passive_labels',[])) | {p['label'] for p in inputs.get('passive_audit',[])}
     states=player.get('statuses',[])
-    labels.update(s.get('source') for s in states)
-    for label in sorted(labels & EQUIPMENT):
-        handled.add(label)
-        if not skill_attack:continue
-        ring=label=='Passive.Start_DarkEnhanceRing02'
-        if ring and element!='Dark':continue
-        key='element_attack' if ring else 'hp_bonus'
-        actual=[]
-        for s in states:
-            if s.get('source')!=label or s.get('effective') is False or s.get('pending_add') or s.get('pending_remove'):continue
-            if s.get('duration_kind') in ('turn','count') and s.get('remaining',1)<=0:continue
-            value=s.get('values',{}).get('amountOnHpDamageInt')
-            if isinstance(value,(int,float)) and value>=0:actual.append(value/100)
-        if actual:
-            result.append((key,max(actual)))
-            notes.append(f'{label}：采用实际装备状态 {max(actual):g}%，不重复预加');continue
-        position=player.get('actor_position',player.get('position'))
-        if position not in (0,1,2):
-            notes.append(label+'：前排条件未满足或未确认，暂未预加');continue
+    labels=set(inputs.get('passive_labels',[])) | {p['label'] for p in inputs.get('passive_audit',[])}
+    labels.update(s.get('source') for s in states if s.get('source'))
+    supported=EQUIPMENT | DR_EQUIPMENT | OD_EQUIPMENT
+    for label in sorted(labels):
+        if label not in supported:
+            if any(x in label for x in ('Ring','Earring','Necklace','Accessory')):
+                notes.append(label+'：饰品效果尚未确认，未自动预加')
+            continue
         record=passive_record(label)
-        if record.get('timing')!='OnPlayerTurnStart' or record.get('condition')!='IsFront()':
+        if not record:
+            notes.append(label+'：装备资料未确认，仅保留实际状态解析')
+            continue
+        handled.add(label)
+        if not skill_attack and label in EQUIPMENT:continue
+        if record.get('timing')!='OnPlayerTurnStart' or record.get('condition') not in ('','IsFront()'):
             notes.append(label+'：装备触发规则未匹配');continue
         for part in record.get('parts',[]):
             if part.get('target_type')!='Self' or any(part.get(k) for k in ('cond','target_condition','hit_condition')):continue
-            if ring and part.get('skill_type')=='AttackUp' and part.get('elements')==['Dark']:
-                value=part['power'][0]*100
-            elif not ring and part.get('skill_type')=='AttackUpRangeByHit' and part.get('multipliers',{}).get('dp')==0 and part.get('multipliers',{}).get('hp')==1:
-                hits=skill.get('hit_count')
-                if not isinstance(hits,int) or hits<=0:
-                    notes.append(label+'：技能主 Hit 数未确认，未猜测 HP 特攻');continue
-                low,high=part['power'];at_low,at_high=part['value']
-                if at_low<=at_high:continue
-                fraction=max(0,min(1,(hits-at_high)/(at_low-at_high)))
-                value=(high+(low-high)*fraction)*100
-                notes.append(f'攻击饰品按 {hits} 个主 Hit 计算（不计追加连击）：{value:g}%')
+            kind=part.get('skill_type');elements=part.get('elements') or []
+            if elements and elements!=[element]:
+                notes.append(record.get('name',label)+'：技能属性不匹配，未计入');continue
+            mult=part.get('multipliers') or {}
+            if kind=='AttackUp' and elements and mult.get('dp')==mult.get('hp')==1:key='element_attack'
+            elif kind=='AttackUp' and label=='Passive.Start_SkillEnhance' and not elements and mult.get('dp')==mult.get('hp')==1:key='attack'
+            elif kind=='AttackUpRangeByHit' and (mult.get('dp'),mult.get('hp')) in ((1,0),(0,1)):
+                key='dp_bonus' if mult['dp'] else 'hp_bonus'
+            elif kind in ('DamageRateUp','DamageRateUpByHit'):key='destruction_bonus'
+            elif kind=='OverDrivePointUpByHit':key='od_gain_bonus'
             else:continue
-            result.append((key,value));notes.append(f'{record.get("name",label)}：攻击前预填 {value:g}% ← {label}')
+            field='amountOnDpDamageInt' if key=='dp_bonus' else 'amountOnHpDamageInt' if key in ('hp_bonus','element_attack','attack') else 'rateValueInt'
+            matching=[s for s in states if s.get('source')==label]
+            actual=[s.get('values',{}).get(field) for s in matching
+                    if s.get('effective') is not False and not s.get('pending_add') and not s.get('pending_remove')
+                    and (s.get('duration_kind') not in ('turn','count') or s.get('remaining',1)>0)]
+            actual=[v/100 for v in actual if isinstance(v,(int,float)) and math.isfinite(v) and v>=0]
+            if actual:
+                value=max(actual);origin='实际状态（不重复预加）'
+            elif matching:
+                notes.append(label+'：实际状态未生效或数值未确认，未替换为预测值');continue
+            else:
+                if record.get('condition')=='IsFront()' and player.get('actor_position',player.get('position')) not in (0,1,2):
+                    notes.append(label+'：前排条件未满足或未确认，暂未预加');continue
+                power=part.get('power',[])
+                if len(power)!=2 or not all(isinstance(v,(int,float)) and math.isfinite(v) for v in power):continue
+                value=power[0]*100
+                if kind in ('AttackUpRangeByHit','DamageRateUpByHit','OverDrivePointUpByHit'):
+                    hits=skill.get('hit_count');endpoints=part.get('value',[])
+                    if not isinstance(hits,int) or hits<1:
+                        notes.append(label+'：主 Hit 数未确认，未猜测饰品增幅');continue
+                    if len(endpoints)!=2 or endpoints[0]==endpoints[1]:continue
+                    fraction=max(0,min(1,(hits-endpoints[0])/(endpoints[1]-endpoints[0])))
+                    value=100*(power[0]+(power[1]-power[0])*fraction)
+                origin='攻击前预填'
+            if not math.isfinite(value) or value<0:continue
+            result.append((key,value))
+            if details is not None:
+                details.append(dict(label=label,key=key,value=value,name=record.get('name',label),origin=origin))
+            notes.append(f'{record.get("name",label)} → {key} +{value:g}% · {origin} ← {label}')
     return result,handled,notes
+
+
+def equipment_bonuses(player, skill, element, skill_attack):
+    effects,handled,notes=accessory_effects(player,skill,element,skill_attack)
+    return [(k,v) for k,v in effects if k not in ('destruction_bonus','od_gain_bonus')],handled,notes
+
+
+def od_gain_bonus(player,skill):
+    effects,_,notes=accessory_effects(player,skill,None,False)
+    return sum(v for k,v in effects if k=='od_gain_bonus'),notes
 
 
 def audit_text(players):

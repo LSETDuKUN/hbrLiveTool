@@ -24,7 +24,7 @@ def status_value(kind, values):
     if kind in ('FearOfDevil','Misfortune'):
         return '全属性 -'+('100' if kind=='FearOfDevil' else '20')+'（同类取最高）'
     if kind=='BIYamawakiServant' and isinstance(values.get('rateValueInt'),int):
-        return f'技能加攻 +{values["rateValueInt"]/100:g}%'
+        return f'弱点技能增伤 +{values["rateValueInt"]/100:g}%（可与心眼叠加）'
     if kind == 'BuffCharge':
         dp, hp = values.get('amountOnDpDamageInt'), values.get('amountOnHpDamageInt')
         damage = '技能伤害提升（数值待核实）'

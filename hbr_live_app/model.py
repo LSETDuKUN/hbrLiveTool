@@ -11,8 +11,10 @@ class BattleModel:
         self.players = []
         self.element_gauge = None
         self.field_state = None
+        self.od_state = None
 
     def update(self, packet):
+        if 'od_state' in packet:self.od_state=packet['od_state']
         if 'field_state' in packet:
             self.field_state = packet['field_state']
         if 'element_gauge' in packet:
@@ -60,4 +62,5 @@ class BattleModel:
                 'player_states': self.players,
                 'element_gauge': self.element_gauge,
                 'field_state': self.field_state,
+                'od_state': self.od_state,
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}

@@ -6,13 +6,66 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_pool_simulation_and_skill_dp_controls(self):
+        self.app.open_damage_calculator();w=self.app.damage_window
+        w.values['base'].set('100');w.flags['critical'].set(False)
+        w.hit_weights.set('.25,.25,.25,.25');w.use_destruction.set(True);w.use_pool_simulation.set(True)
+        for k,v in dict(main_hits=4,skill_dr=12,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
+        w.compute()
+        self.assertIn('丢弃破盾溢出 10.00',w.destruction_report.get('1.0','end'))
+        self.assertIsNone(w.plot_data)
+        self.assertIn('固定权重曲线不适用',w.prob_summary.cget('text'))
+        w.use_dp_scaling.set(True)
+        for k,v in dict(own_dp=50,own_dp_max=100,dp_zero_factor=1.75,dp_full_factor=1).items():w.params[k].set(str(v))
+        w.compute();self.assertEqual(float(w.values['health_factor'].get()),1.375)
+        w.destroy()
+
+    def test_accessory_edits_apply_deltas_once_and_preserve_manual_changes(self):
+        self.app.open_damage_calculator();window=self.app.damage_window
+        editor=window.equipment_editor
+        detail=dict(label='Passive.Start_HPAttackUpRangeByHitEarring03',key='hp_bonus',value=5,name='攻击耳坠',origin='预填')
+        editor.load([detail],[detail['label']])
+        window.values['hp_bonus'].set('55')
+        row=next(r for r in editor.rows if r['key']=='hp_bonus')
+        row['value'].set('6');window.compute()
+        self.assertEqual(float(window.values['hp_bonus'].get()),56)
+        window.compute();self.assertEqual(float(window.values['hp_bonus'].get()),56)
+        window.values['hp_bonus'].set('66')
+        row['enabled'].set(False);window.compute()
+        self.assertEqual(float(window.values['hp_bonus'].get()),60)
+        row['enabled'].set(True);row['value'].set('nan');window.compute()
+        self.assertIn('饰品增益',window.result.get('1.0','end'))
+        self.assertEqual(float(window.values['hp_bonus'].get()),60)
+        row['value'].set('6');window.compute()
+        self.assertEqual(float(window.values['hp_bonus'].get()),66)
+        window.destroy()
+
+    def test_destruction_recurrence_updates_damage_plot_and_details(self):
+        self.app.open_damage_calculator();window=self.app.damage_window
+        window.values['base'].set('100');window.flags['critical'].set(False)
+        window.hit_weights.set('.1, .9');window.use_destruction.set(True)
+        for key,value in dict(main_hits=2,skill_dr=10,enemy_dr=4,destruction_bonus=50,max_dr=500).items():
+            window.params[key].set(str(value))
+        window.compute();self.root.update_idletasks()
+        self.assertIn('127.00',window.result.get('1.0','end'))
+        self.assertIn('160%',window.destruction_report.get('1.0','end'))
+        from hbr_live_app.damage_probability import distribution
+        self.assertAlmostEqual(window.plot_data['sigma'],distribution([.1,1.17])['sigma'])
+        window.values['chain'].set('25');window.compute()
+        self.assertIn('连击合计',window.result.get('1.0','end'))
+        self.assertIsNone(window.plot_data)
+        window.destroy()
+
     def test_damage_autofill_uses_current_snapshot_without_overwriting_edits(self):
         from unittest.mock import patch
         from test_damage_autofill import setup
         p,e,lookup=setup();p.update(actor='测试角色');e.update(hp=100,active=True,name='测试敌人')
         p['combat_inputs']['selected_skill']['parts']=[dict(Label='test',skill_type_raw=10)]
         self.app.model.players=[dict(actor_id=3,actor='辅助',actor_position=0),p]
-        self.app.model.enemies[2]=e;self.app.connected=True
+        self.app.model.update(dict(enemies=[e],events=[]));self.app.connected=True
+        self.app.model.od_state=dict(available=True,active=True,level=2,percent=12.34)
+        self.app.render()
+        self.assertIn('12.34%',self.app.od_label.cget('text'))
         # A synthetic skill has no catalog entry, so feed its source explicitly.
         from hbr_live_app.damage_autofill import autofill
         with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f,**kw:autofill(p,e,f,lookup,**kw)):
@@ -20,11 +73,14 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(set(window.mode_choices),{'transcend','high_boost'})
             self.assertEqual(window.player_box.current(),1)
             self.assertEqual(window.params['orb'].get(),'5')
+            self.assertEqual(window.values['od'].get(),'1.2')
             self.assertEqual(window.values['destruction'].get(),'250')
             self.assertTrue(window.use_skill.get())
             window.values['attack'].set('123')
             window.refresh();self.assertEqual(window.values['attack'].get(),'123')
             window.fill();self.assertEqual(window.values['attack'].get(),'0')
+            self.app.model.od_state=dict(available=True,active=False,level=0,percent=99.99)
+            window.fill();self.assertEqual(window.values['od'].get(),'1')
             p['statuses']=[dict(label='SpecialStatus.HighBoost',duration_kind='turn',remaining=0)]
             window.fill();self.assertEqual(window.values['attack'].get(),'0')
             window.mode_choices['high_boost'].set('启用')

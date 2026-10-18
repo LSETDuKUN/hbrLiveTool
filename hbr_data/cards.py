@@ -62,6 +62,17 @@ def group_effects(effects):
             if any(effect_category(effect) == category for effect in effects)]
 
 
+def destruction_summary(effects):
+    """Keep separate attack parts separate; zero is known, None is unknown."""
+    attacks = [effect for effect in effects if effect_category(effect) == "伤害"]
+    values = ["未提供" if effect.destruction_multiplier is None else
+              "×" + number(effect.destruction_multiplier) for effect in attacks]
+    if len(values) == 1:
+        return values[0]
+    return "；".join(f"效果 {effect.index+1}：{value}"
+                     for effect, value in zip(attacks, values))
+
+
 class DetailCards(tk.Frame):
     def __init__(self,parent):
         super().__init__(parent,bg=BG)
@@ -141,6 +152,10 @@ class DetailCards(tk.Frame):
         if any(effect_category(effect) == "伤害" for effect in skill.effects):
             self.row(frame,"技能 Hit 数",number(skill.hit_count) if skill.hit_count is not None and skill.hit_count>=0 else "来源未定义")
         self.row(frame,"SP 消耗",number(skill.sp_cost))
+        destruction = destruction_summary(skill.effects)
+        if destruction:
+            self.row(frame,"技能破坏倍率",destruction)
+            self.label(frame,"技能来源系数；实际破坏率增量还需结合敌人系数、增益与命中段数。",9,DIM)
         if skill.hits and any(effect_category(effect) == "伤害" for effect in skill.effects):
             self.hit_rows(frame,skill.hits,"技能伤害逐 Hit")
         elif any(effect_category(effect) == "伤害" for effect in skill.effects) and (skill.hit_count or 0) > 0:

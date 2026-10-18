@@ -1,9 +1,12 @@
 """Manual, inspectable first step toward battle damage prediction."""
 import json
+import math
 import tkinter as tk
 from tkinter import ttk
 from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_reduction
 from .damage_probability import distribution
+from .destruction import apply_to_result, dp_factor, simulate_pools
+from .equipment_editor import EquipmentEditor
 from .components import RoundedCard, RoundedButton
 from .passive_audit import audit_text
 from .damage_autofill import autofill, WEIGHTS, style_elements
@@ -11,7 +14,7 @@ from .damage_autofill import autofill, WEIGHTS, style_elements
 GROUPS = (
     ('基础伤害', '#bdb1d4', (('base','基础伤害（可空）'),)),
     ('加攻乘区', '#f5aacb', (('attack','普通加攻 %'),('element_attack','元素加攻 %'),
-        ('mind_eye','心眼 %'),('field','场地 %'),('charge','充能 %'))),
+        ('mind_eye','心眼 %'),('servant_mind_eye','仆人心眼（另加）%'),('field','场地 %'),('charge','充能 %'))),
     ('连击乘区', '#83e5ed', (('chain','追加 Hit 权重合计 %'),)),
     ('暴击乘区', '#ffd398', (('critical_bonus','普通爆伤（含基础50）%'),('element_critical_bonus','元素爆伤 %'))),
     ('减防乘区', '#e9a5b8', (('defense_down','普通减防 %'),('element_defense_down','元素减防 %'),('fragile','脆弱 %'))),
@@ -19,7 +22,7 @@ GROUPS = (
         ('weakness_deepen','弱点加深 %'),('resistance','抗性 %'))),
     ('破坏率与 OD', '#83e5ed', (('destruction','当前破坏率 %'),('od','OD 倍率'))),
     ('技能独立修正', '#a5e9b4', (('token_bonus','Token 增伤 %'),('dp_bonus','对 DP 特攻 %'),('hp_bonus','对 HP 特攻 %'),
-        ('health_factor','血量条件倍率'),('down_factor','倒地条件倍率'),('other_factor','其他独立倍率'))))
+        ('health_factor','技能资源比例倍率'),('down_factor','倒地条件倍率'),('other_factor','其他独立倍率'))))
 FIELDS = tuple(pair for _,_,fields in GROUPS for pair in fields)
 BG, CARD, FG, DIM = '#342e4b', '#4a405e', '#fff6ff', '#d8cbe9'
 
@@ -82,6 +85,11 @@ class DamageWindow(tk.Toplevel):
         tabs = ttk.Notebook(self); tabs.pack(fill='both', expand=True)
         form_page,form = scroll_page(tabs); tabs.add(form_page, text='乘区试算')
         skill_page,skill_form=scroll_page(tabs);tabs.add(skill_page,text='技能与属性（可修改）')
+        destruction_page,destruction_form=scroll_page(tabs);tabs.add(destruction_page,text='逐段破坏率')
+        equipment_page,equipment_form=scroll_page(tabs);tabs.add(equipment_page,text='饰品效果')
+        self.equipment_editor=EquipmentEditor(equipment_form);self.equipment_editor.pack(fill='x')
+        ttk.Button(equipment_form,text='应用修改并计算',command=self.compute).pack(anchor='w',pady=8)
+        self.equipment_text=tk.Text(equipment_form,height=10,wrap='word');self.equipment_text.pack(fill='both',expand=True)
         probability=ttk.Frame(tabs,padding=12);tabs.add(probability,text='浮动概率曲线')
         data = ttk.Frame(tabs, padding=12); tabs.add(data, text='当前内存参数')
         audit_page=ttk.Frame(tabs,padding=12);tabs.add(audit_page,text='天赋与被动审查')
@@ -122,10 +130,35 @@ class DamageWindow(tk.Toplevel):
         self.use_skill=tk.BooleanVar(self,value=False)
         ttk.Checkbutton(skill_form,text='计算时使用以下技能参数生成基础伤害（取消则使用手填基础伤害）',variable=self.use_skill).pack(anchor='w')
         self.skill_title=ttk.Label(skill_form,text='尚未自动填充');self.skill_title.pack(anchor='w',pady=8)
-        self.params={};pg=ttk.Frame(skill_form);pg.pack(fill='x')
+        self.params={}
+        self.dp_panel=ttk.LabelFrame(skill_form,text='本技能 · 自身 DP 线性倍率',padding=8)
+        self.use_dp_scaling=tk.BooleanVar(self,value=False)
+        ttk.Checkbutton(self.dp_panel,text='按技能端点及自身 DP 自动计算独立倍率',variable=self.use_dp_scaling).pack(anchor='w')
+        for key,label in [('own_dp','自身当前 DP'),('own_dp_max','自身 DP 上限'),('dp_zero_factor','0 DP 时倍率'),('dp_full_factor','满 DP 时倍率')]:
+            row=ttk.Frame(self.dp_panel);row.pack(fill='x',pady=4)
+            ttk.Label(row,text=label,width=22).pack(side='left')
+            var=tk.StringVar(self,value='');self.params[key]=var;ttk.Entry(row,textvariable=var,width=16).pack(side='left')
+        pg=ttk.Frame(skill_form);pg.pack(fill='x')
         names=[('min_power','最小威力'),('max_power','最大威力'),('difference','属性差阈值'),('level','技能等级'),
                ('enemy','敌方防御参考值'),('calamity','灾厄属性下降（通常20）'),('fear_of_devil','大灾厄属性下降（通常100）'),('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
-               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),('morale_level','士气等级（每层六维 +5）')]
+               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),('morale_level','士气等级（每层六维 +5）'),
+               ('od_gain_bonus','OD 饰品获取量增幅 %')]
+        self.use_destruction=tk.BooleanVar(self,value=False)
+        ttk.Checkbutton(destruction_form,text='启用逐段破坏率递推（参数完整时自动启用，可取消）',variable=self.use_destruction).pack(anchor='w')
+        ttk.Label(destruction_form,text='各段先结算伤害，再增加破坏率。可启用逐段 DP→HP；破盾段不增长破坏率且溢出不转入 HP。\n敌人系数沿用 DamageRateValue（例如 4），不是属性抗性百分比；有破坏抗性状态时需核对最终有效系数。',wraplength=850).pack(anchor='w',pady=8)
+        for key,label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
+            row=ttk.Frame(destruction_form);row.pack(fill='x',pady=5)
+            ttk.Label(row,text=label,width=28).pack(side='left')
+            var=tk.StringVar(self,value='');self.params[key]=var
+            ttk.Entry(row,textvariable=var,width=18).pack(side='left')
+        self.use_pool_simulation=tk.BooleanVar(self,value=False)
+        ttk.Checkbutton(destruction_form,text='逐段处理 DP → HP（破盾段溢出丢弃）',variable=self.use_pool_simulation).pack(anchor='w',pady=6)
+        for key,label in [('enemy_dp','敌人剩余 DP'),('enemy_hp','敌人剩余 HP（可空）')]:
+            row=ttk.Frame(destruction_form);row.pack(fill='x',pady=4)
+            ttk.Label(row,text=label,width=28).pack(side='left')
+            var=tk.StringVar(self,value='');self.params[key]=var;ttk.Entry(row,textvariable=var,width=18).pack(side='left')
+        ttk.Button(destruction_form,text='计算逐段伤害',command=self.compute).pack(anchor='w',pady=8)
+        self.destruction_report=tk.Text(destruction_form,height=22,wrap='word');self.destruction_report.pack(fill='both',expand=True)
         from .damage_inputs import STATS
         names += [(key,STATS[key]) for key in WEIGHTS]+[('weight_'+key,STATS[key]+'权重') for key in WEIGHTS]
         for idx,(key,label) in enumerate(names):
@@ -140,7 +173,7 @@ class DamageWindow(tk.Toplevel):
         self.raw=tk.Text(data,wrap='word',yscrollcommand=scrollbar.set)
         self.raw.pack(fill='both',expand=True);scrollbar.configure(command=self.raw.yview)
         ttk.Label(probability,text='每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。').pack(anchor='w')
-        ttk.Label(probability,text='假定其余倍率不变。未模拟逐段破盾、破坏率增长和衰减；曲线不等同于完整实战击杀概率。',wraplength=900).pack(anchor='w',pady=5)
+        ttk.Label(probability,text='启用递推时按各段实际破坏率调整权重；未模拟跨 DP 破盾与衰减，曲线不等同于完整实战击杀概率。',wraplength=900).pack(anchor='w',pady=5)
         self.hit_weights=tk.StringVar(self,value='')
         ttk.Label(probability,text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）').pack(anchor='w')
         ttk.Entry(probability,textvariable=self.hit_weights).pack(fill='x',pady=5)
@@ -165,12 +198,12 @@ class DamageWindow(tk.Toplevel):
         elif name=='Text':widget.configure(bg=CARD,fg=FG,insertbackground=FG,relief='flat',padx=10,pady=8)
         for child in widget.winfo_children():self.theme_widgets(child)
 
-    def update_probability(self, damage):
+    def update_probability(self, damage, effective_weights=None):
         self.plot_data=None;self.plot_damage=damage
         try:
             raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
             weights=[float(w) for w in raw.split(',') if w.strip()]
-            data=distribution(weights);self.plot_data=data
+            data=distribution(effective_weights if effective_weights is not None else weights);self.plot_data=data
             scale=damage if damage is not None else 1
             unit='伤害' if damage is not None else '倍率'
             text=f"{data['hits']} Hit · 中央 90% {unit}区间：{data['low']*scale:,.4g} – {data['high']*scale:,.4g} · 浮动标准差 {data['sigma']:.2%}"
@@ -253,7 +286,11 @@ class DamageWindow(tk.Toplevel):
         # Let autofill apply its complete status/expiry/condition filtering in auto mode.
         if self.mode_choices['high_boost'].get()=='自动':modes.pop('high_boost')
         modes.update(ghost=automatic['ghost'],gidou=automatic['gidou'])
+        od=data.get('od_state') or {}
+        modes.update(od_active=od.get('active') if od.get('available') else None,od_level=od.get('level'))
         modes['lightning_style']='Thunder' in style_elements(player.get('style_label',''))
+        if gauge.get('full') and (gauge.get('element')!=3 or modes.get('transcend')):
+            modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(gauge.get('element'))
         filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
         filled['notes'].append('模式判断：'+str(modes)+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
@@ -265,6 +302,16 @@ class DamageWindow(tk.Toplevel):
             v=filled['params'].get(k);var.set('' if v is None else f'{v:g}')
         self.hit_weights.set(', '.join(f'{w:.8g}' for w in filled.get('hit_weights',[])))
         self.hit_source.configure(text=filled.get('hit_note','权重未确认'))
+        self.use_destruction.set(filled.get('destruction_ready',False))
+        self.use_pool_simulation.set(filled.get('pool_simulation',False) and filled.get('destruction_ready',False))
+        self.hp_adjustments=filled.get('hp_adjustments',{})
+        self.use_dp_scaling.set(filled.get('dp_scaling',False))
+        if filled.get('dp_scaling'):self.dp_panel.pack(fill='x',pady=8,before=self.skill_title)
+        else:self.dp_panel.pack_forget()
+        self.equipment_editor.load(filled.get('equipment_details',[]),filled.get('equipment_owned',[]))
+        self.equipment_text.configure(state='normal');self.equipment_text.delete('1.0','end')
+        self.equipment_text.insert('end','饰品贡献已计入相应乘区，不需要再次相加。\n按运行时已装备被动匹配；实际状态优先于预填。\n\n'+'\n\n'.join(filled.get('equipment_notes') or ['未读到可确认的饰品效果']))
+        self.equipment_text.configure(state='disabled')
         self.filled_chain=filled['values']['chain']
         self.use_skill.set(True);self.skill_title.configure(text=filled['skill'])
         self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
@@ -272,6 +319,12 @@ class DamageWindow(tk.Toplevel):
 
     def compute(self):
         try:
+            if self.use_pool_simulation.get() and not self.use_destruction.get():
+                raise ValueError('跨 DP/HP 计算需要先启用逐段递推并补齐参数')
+            self.equipment_editor.apply({**self.values,**self.params})
+            if self.use_dp_scaling.get():
+                factor=dp_factor(*(float(self.params[k].get()) for k in ('own_dp','own_dp_max','dp_zero_factor','dp_full_factor')))
+                self.values['health_factor'].set(f'{factor:.10g}')
             values={k:float(v.get()) for k,v in self.values.items() if k!='base'}
             base=self.values['base'].get().strip()
             if self.use_skill.get():
@@ -279,18 +332,59 @@ class DamageWindow(tk.Toplevel):
                 base=str(computed);self.values['base'].set(f'{computed:.8g}')
             values.update(base=float(base) if base else None,target_pool=self.pool.get(),
                           **{k:v.get() for k,v in self.flags.items()})
-            result=calculate(DamageInputs(**values))
+            inputs=DamageInputs(**values)
+            result=calculate(inputs);detail=None
+            self.destruction_report.configure(state='normal');self.destruction_report.delete('1.0','end')
+            self.destruction_report.configure(state='disabled')
+            if self.use_destruction.get():
+                raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
+                weights=[float(w) for w in raw.split(',') if w.strip()]
+                count=float(self.params['main_hits'].get())
+                if not math.isfinite(count) or not count.is_integer():raise ValueError('本体 Hit 数必须为整数')
+                args=[float(self.params[k].get()) for k in ('skill_dr','enemy_dr','destruction_bonus','max_dr')]
+                if self.use_pool_simulation.get():
+                    hp=self.params['enemy_hp'].get().strip()
+                    detail=simulate_pools(inputs,weights,int(count),*args,float(self.params['enemy_dp'].get()),float(hp) if hp else None,
+                                          hp_adjustments=getattr(self,'hp_adjustments',{}))
+                    result.update(damage=detail['damage'],minimum=None,maximum=None,multiplier=None,
+                                  note='逐段跨池基准情景；破盾溢出丢弃，不计入 HP。未模拟多层盾、动态增减益及伤害衰减。')
+                else:
+                    result,detail=apply_to_result(result,inputs,weights,int(count),*args)
+                lines=[f"破坏率：{inputs.destruction:g}% → {detail['final']:g}%"]
+                lines.append(f"理论增量 {detail['theoretical_increment']:.3f} 个百分点（不计上限终值 {detail['theoretical_final']:.3f}%）\n实际增量 {detail['actual_increment']:.3f} 个百分点 · 被上限截去 {detail['clipped']:.3f} 个百分点")
+                if detail.get('segmented'):
+                    lines.append(f"DP 扣除 {detail['dp_damage']:,.2f} · HP 扣除 {detail['hp_damage']:,.2f} · 丢弃破盾溢出 {detail['overflow']:,.2f}")
+                for row in detail['rows']:
+                    if detail.get('segmented'):
+                        suffix=f" · {row['pool'].upper()} 原伤害 {row['raw_damage']:,.2f} / 扣除 {row['applied_damage']:,.2f} / 丢弃溢出 {row['overflow']:,.2f}"
+                    else:
+                        share=(result['damage']*row['damage_weight']/detail['weighted']) if result['damage'] is not None else None
+                        suffix=f" · 基准伤害 {share:,.2f}" if share is not None else ''
+                    lines.append(f"{row['hit']:>2} {row['kind']} · 破坏率 {row['before']:.3f}% → {row['after']:.3f}% · 理论 +{row['theoretical_increment']:.3f} / 实际 +{row['increment']:.3f} 个百分点"+suffix)
+                self.destruction_report.configure(state='normal');self.destruction_report.insert('end','\n'.join(lines));self.destruction_report.configure(state='disabled')
             if values['absorbed']:
                 self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='吸收情景不输出伤害概率曲线')
-            else:self.update_probability(result['damage'])
+            elif detail and detail.get('segmented'):
+                self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='跨池时浮动会改变破盾段，固定权重曲线不适用；当前展示无浮动逐段基准。')
+            else:self.update_probability(result['damage'],detail['weights'] if detail else None)
             text='弱点条件：'+('满足' if result['weak'] else '不满足（不计心眼／脆弱）')+'\n'
+            if detail and detail.get('segmented'):text+='跨池各段分别采用 DP/HP 特攻，下面单池乘区仅供参考。\n'
             text+='  ×  '.join(f'{NAMES[k]} {v:.4g}' for k,v in result['factors'].items())+'\n\n'
             if self.use_skill.get():text+=f'敌方属性下降采用最高值：{enemy_attribute_reduction({k:v.get() for k,v in self.params.items()},self.flags["critical"].get()):g} 点\n'
             if result['multiplier'] is not None:text+=f"总倍率：{result['multiplier']:.6g}\n"
+            od_gain=self.params['od_gain_bonus'].get().strip()
+            if od_gain:
+                gain=float(od_gain)
+                if not math.isfinite(gain) or gain<0:raise ValueError('OD 获取增幅必须为有限非负数')
+                text+=f'OD 饰品获取倍率：×{1+gain/100:g}（例如原获取 20% → {20*(1+gain/100):g}%；不影响伤害）\n'
             if result['damage'] is not None:
                 text+=f"未衰减试算伤害：{result['damage']:,.2f}\n"
-                text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
-                text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
+                if result['minimum'] is not None:
+                    text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
+                    text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
+                else:text+='跨池结果为无浮动基准；浮动可能改变破盾段，本模式不输出固定权重概率区间。\n'
+            if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见专页）\n"
+            else:text+='逐段递推未启用：沿用固定破坏率，请核对逐段破坏率页的缺失参数。\n'
             text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
         except (ValueError, OverflowError) as exc:
             text='无法计算：'+str(exc)
