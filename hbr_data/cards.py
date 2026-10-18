@@ -1,9 +1,10 @@
 """Rounded, scrollable record and skill cards; no JSON syntax in normal details."""
 import tkinter as tk
 from tkinter import ttk
+from hbr_live_app import theme
 from hbr_live_app.components import RoundedCard
 
-BG, CARD, FG, DIM, PINK = "#201d32", "#302b46", "#f7f0ff", "#bdb1d4", "#f5aacb"
+BG, CARD, FG, DIM, PINK = theme.BG, theme.CARD, theme.FG, theme.DIM, theme.PINK
 WORDS = {"str":"力量","dex":"灵巧","wis":"智慧","spr":"精神","luk":"运气","con":"体力",
          "Attacker":"攻击手","Breaker":"破盾手","Blaster":"破坏手","Buffer":"增益手","Debuffer":"减益手","Healer":"治疗者","Defender":"守护者",
          "Slash":"斩","Stab":"突","Strike":"打","Fire":"火","Ice":"冰","Thunder":"雷","Light":"光","Dark":"暗",
@@ -90,7 +91,7 @@ class DetailCards(tk.Frame):
 
     def label(self,parent,text,size=10,color=FG,bold=False):
         label = tk.Label(parent,text=text,bg=parent.cget("bg"),fg=color,justify="left",anchor="w",
-                         font=("Microsoft YaHei UI",size,"bold" if bold else "normal"))
+                         font=theme.ui(round(size*1.5),"bold" if bold else "normal"))
         label.pack(fill="x",pady=3)
         label.bind("<Configure>",lambda e:label.configure(wraplength=max(100,e.width-8)) if str(label.cget("wraplength")) != str(max(100,e.width-8)) else None)
         return label
@@ -105,7 +106,7 @@ class DetailCards(tk.Frame):
         line = tk.Frame(parent,bg=parent.cget("bg"))
         line.pack(fill="x",pady=2)
         tk.Label(line,text=title,bg=line.cget("bg"),fg=DIM,anchor="nw",width=12,
-                 font=("Microsoft YaHei UI",9)).pack(side="left",anchor="n")
+                 font=theme.ui(13)).pack(side="left",anchor="n")
         self.label(line,value,10,FG,True)
 
     def fold(self,parent,title,fill):
@@ -125,7 +126,9 @@ class DetailCards(tk.Frame):
             else:
                 content.pack_forget()
         button = tk.Button(panel,text="▸  "+title,command=toggle,bg=parent.cget("bg"),fg=PINK,
-                           relief="flat",anchor="w",font=("Microsoft YaHei UI",9,"bold"))
+                           relief="flat",anchor="w",font=theme.ui(13,"bold"),cursor="hand2",
+                           activebackground=parent.cget("bg"),activeforeground=theme.FG,borderwidth=0,
+                           highlightthickness=0)
         button.pack(fill="x")
 
     def hit_rows(self,parent,hits,title="逐 Hit 倍率"):

@@ -108,8 +108,10 @@ def mono(size=12, weight='normal'):
 def install(root):
     """Apply the shared ttk look once for the widget-level dashboard."""
     style = ttk.Style(root)
-    if style.theme_use() not in ('clam', 'alt', 'default'):
-        for theme in ('clam', 'alt', 'default'):
+    # Only replace the native Windows theme; a window that installed its own
+    # derived theme (hbr_data uses 'quest') must keep it.
+    if style.theme_use() in ('vista', 'winnative', 'xpnative', 'aqua', 'default'):
+        for theme in ('clam', 'alt'):
             if theme in style.theme_names():
                 try:
                     style.theme_use(theme)
