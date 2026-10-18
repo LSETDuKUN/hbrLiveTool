@@ -1,17 +1,20 @@
 """Presentation groups only: never add incompatible effect values together."""
 import tkinter as tk
+
+from . import theme
 from .statuses import status_line
 
 GROUPS = (
-    ('boost', '加攻 · 心眼', '#f5aacb'),
-    ('funnel', '连击珠', '#83e5ed'),
-    ('charge', '充能 / 蓄力', '#a5e9b4'),
-    ('critical', '暴击 · 爆伤', '#ffd398'),
-    ('debuff', '减防 · 脆弱', '#e9a5b8'),
-    ('resist', '抗性 · 弱点', '#b8b0f3'),
-    ('negative', '其他已识别减益', '#eda49e'))
-BACKGROUNDS = dict(boost='#493448', funnel='#253f46', charge='#2d4438', critical='#493f2d',
-                   debuff='#493039', resist='#38324f', negative='#47342f')
+    ('boost', '加攻 · 心眼', theme.PINK),
+    ('funnel', '连击珠', theme.CYAN),
+    ('charge', '充能 / 蓄力', theme.MINT),
+    ('critical', '暴击 · 爆伤', theme.GOLD),
+    ('debuff', '减防 · 脆弱', theme.ROSE),
+    ('resist', '抗性 · 弱点', theme.LAVENDER),
+    ('negative', '其他已识别减益', theme.ROSE))
+BACKGROUNDS = dict(boost=theme.PINK_DEEP, funnel=theme.CYAN_DEEP, charge=theme.MINT_DEEP,
+                   critical=theme.GOLD_DEEP, debuff=theme.ROSE_DEEP, resist=theme.LAVENDER_DEEP,
+                   negative=theme.NEUTRAL_DEEP)
 KINDS = {
     'boost': {'AttackUp','AttackUpIncludeNormal','AttackUpOnlyNormal','MindEye','BIYamawakiServant'},
     'funnel': {'Funnel'},
@@ -58,7 +61,7 @@ def effect_line(status):
 
 class StatusGroups(tk.Frame):
     def __init__(self, parent, details, enemy=False):
-        super().__init__(parent,bg='#302b46')
+        super().__init__(parent, bg=parent.cget('bg'))
         self.details = details
         self.enemy = enemy
         self.previous = None
@@ -76,7 +79,7 @@ class StatusGroups(tk.Frame):
         for child in self.winfo_children():child.destroy()
         groups, other = group_statuses(self.state)
         if not self.state.get('statuses_available'):
-            self.row('状态暂不可读', '#bdb1d4')
+            self.row('状态暂不可读', theme.MUTED)
             if self.enemy:self.base_resistances()
             return
         shown = False
@@ -84,22 +87,27 @@ class StatusGroups(tk.Frame):
             items = groups[key]
             if not items:continue
             shown = True
-            block = tk.Frame(self,bg=BACKGROUNDS[key],padx=6,pady=5)
+            block = tk.Frame(self,bg=BACKGROUNDS[key])
             block.pack(fill='x',pady=3)
-            self.row(title, color, bold=True, parent=block)
+            accent = tk.Frame(block,bg=color,width=3)
+            accent.pack(side='left',fill='y')
+            body = tk.Frame(block,bg=BACKGROUNDS[key])
+            body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
+            self.row(title, color, bold=True, parent=body)
             # Each applied effect remains separate, including different durations.
             for status in items:
-                self.row(effect_line(status), '#f7f0ff', callback=lambda s=status:self.details(s), parent=block)
+                self.row(effect_line(status), theme.FG, callback=lambda s=status:self.details(s), parent=body)
         if not shown:
-            self.row('主要乘区暂无已确认状态', '#bdb1d4')
+            self.row('主要乘区暂无已确认状态', theme.MUTED)
         if self.enemy:
             self.base_resistances()
         if other:
             tk.Button(self,text=('▾' if self.expanded else '▸')+f' 暂被覆盖 / 其他效果 · {len(other)} 项',
-                command=self.toggle,bg='#302b46',fg='#bdb1d4',relief='flat',anchor='w').pack(fill='x',pady=3)
+                command=self.toggle,bg=self.cget('bg'),fg=theme.DIM,relief='flat',anchor='w',
+                activebackground=self.cget('bg'),activeforeground=theme.FG,font=theme.ui(11)).pack(fill='x',pady=3)
             if self.expanded:
                 for status in other:
-                    self.row(effect_line(status), '#bdb1d4', callback=lambda s=status:self.details(s))
+                    self.row(effect_line(status), theme.MUTED, callback=lambda s=status:self.details(s))
 
     def toggle(self):
         self.expanded = not self.expanded
@@ -107,15 +115,19 @@ class StatusGroups(tk.Frame):
 
     def base_resistances(self):
         from .resistances import resistance_lines
-        block=tk.Frame(self,bg=BACKGROUNDS['resist'],padx=6,pady=5)
+        block=tk.Frame(self,bg=BACKGROUNDS['resist'])
         block.pack(fill='x',pady=3)
-        self.row('抗性 · 弱点参考', '#b8b0f3',bold=True,parent=block)
-        for text in resistance_lines(self.state):self.row(text,'#f7f0ff',parent=block)
+        accent=tk.Frame(block,bg=theme.LAVENDER,width=3)
+        accent.pack(side='left',fill='y')
+        body=tk.Frame(block,bg=BACKGROUNDS['resist'])
+        body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
+        self.row('抗性 · 弱点参考', theme.LAVENDER, bold=True, parent=body)
+        for text in resistance_lines(self.state):self.row(text, theme.FG, parent=body)
 
     def row(self,text,color,bold=False,callback=None,parent=None):
         parent = self if parent is None else parent
         label=tk.Label(parent,text=text,bg=parent.cget('bg'),fg=color,anchor='w',justify='left',wraplength=250,
-            font=('Microsoft YaHei UI',-12,'bold' if bold else 'normal'),cursor='hand2' if callback else '')
-        label.pack(fill='x',padx=4,pady=(4 if bold else 1,1))
+            font=theme.ui(11,'bold' if bold else 'normal'),cursor='hand2' if callback else '')
+        label.pack(fill='x',padx=2,pady=(4 if bold else 1,1))
         label.bind('<Configure>',lambda e:label.configure(wraplength=max(80,e.width-8)))
         if callback:label.bind('<Button-1>',lambda e:callback())

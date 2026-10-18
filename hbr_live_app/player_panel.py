@@ -1,39 +1,62 @@
 """Six stable portrait slots; live position changes only update highlights."""
 import tkinter as tk
+
+from . import theme
+from .components import RoundedCard, RoundedButton
 from .portraits import Portraits
 from .statuses import status_details
 from .status_groups import StatusGroups
 
-BG, CARD, FG, DIM = '#201d32', '#302b46', '#f7f0ff', '#bdb1d4'
+SURFACE = theme.SURFACE
+CARD = theme.CARD
+FG = theme.FG
+DIM = theme.DIM
 
 
 class PlayerPanel(tk.Frame):
     def __init__(self, parent, show_details):
-        super().__init__(parent, bg=BG)
+        super().__init__(parent, bg=parent.cget('bg'))
         self.show_details = show_details
-        self.portraits = Portraits(self)
+        self.portraits = Portraits(self, size=66)
         self.order = []
         self.tiles = {}
         self.players = {}
         self.selected = None
         self.previous_gauge = None
-        self.gauge = tk.Label(self, bg=BG, fg='#ffd398', anchor='w',wraplength=280)
-        self.gauge.pack(fill='x',pady=4)
-        self.strip = tk.Frame(self,bg=BG)
-        self.strip.pack(fill='x',pady=8)
-        for col in range(3):self.strip.columnconfigure(col,weight=1,uniform='portraits')
-        self.hint = tk.Label(self,text='点击头像查看状态 · 亮框为前排',bg=BG,fg=DIM,anchor='w')
-        self.hint.pack(fill='x',pady=(0,8))
-        self.detail = tk.Frame(self,bg=CARD,padx=10,pady=8)
-        self.caption = tk.Label(self.detail,bg=CARD,fg=FG,anchor='w',justify='left',wraplength=260)
+        self.configure(bg=parent.cget('bg'))
+        self.gauge = tk.Label(self, bg=self.cget('bg'), fg=theme.GOLD, anchor='w',
+                              font=theme.ui(11), wraplength=320)
+        self.gauge.pack(fill='x', pady=(0, 6))
+        self.strip = tk.Frame(self, bg=self.cget('bg'))
+        self.strip.pack(fill='both', expand=True)
+        for col in range(3):
+            self.strip.columnconfigure(col, weight=1, uniform='portraits')
+        for row in range(2):
+            self.strip.rowconfigure(row, weight=1, uniform='portraits')
+        self.hint = tk.Label(self, text='点击头像查看状态 · 亮框为前排', bg=self.cget('bg'), fg=DIM,
+                             anchor='w', font=theme.ui(10))
+        self.hint.pack(fill='x', pady=(8, 4))
+        self.detail = tk.Frame(self, bg=self.cget('bg'))
+        self.detail_card = RoundedCard(self.detail, background=CARD, outline=theme.LINE,
+                                       pad=(14, 12), stretch=True)
+        self.detail_card.pack(fill='both', expand=True)
+        body = self.detail_card.content
+        self.caption = tk.Label(body, bg=CARD, fg=FG, anchor='w', justify='left', font=theme.ui(12),
+                                wraplength=260)
         self.caption.pack(fill='x')
-        tk.Button(self.detail,text='完整详情',bg=CARD,fg=DIM,relief='flat',command=self.details).pack(anchor='e')
-        self.groups = StatusGroups(self.detail,self.status_details)
-        self.groups.pack(fill='x')
-        self.detail.bind('<Configure>',lambda e:self.caption.configure(wraplength=max(120,e.width-24)))
+        head = tk.Frame(body, bg=CARD)
+        head.pack(fill='x', pady=(6, 2))
+        self.pools = tk.Label(head, bg=CARD, fg=theme.CYAN, anchor='w', font=theme.ui(11))
+        self.pools.pack(side='left')
+        RoundedButton(head, '完整详情', self.details, theme.CARD_HI, DIM, theme.ui(11),
+                      height=28).pack(side='right')
+        self.groups = StatusGroups(body, self.status_details)
+        self.groups.pack(fill='x', pady=(4, 0))
+        self.detail.bind('<Configure>', lambda e: self.caption.configure(wraplength=max(120, e.width - 24)))
 
     def reset(self):
-        for tile in self.tiles.values():tile['frame'].destroy()
+        for tile in self.tiles.values():
+            tile['frame'].destroy()
         self.tiles.clear();self.order=[];self.selected=None;self.players={}
         self.previous_gauge=None
         self.gauge.configure(text='')
@@ -49,26 +72,38 @@ class PlayerPanel(tk.Frame):
         for key in self.order:
             p=self.players.get(key)
             if key not in self.tiles:
-                frame=tk.Frame(self.strip,bg=CARD,highlightthickness=2,highlightbackground='#50415f',padx=8,pady=6)
-                index=self.order.index(key);frame.grid(row=index//3,column=index%3,sticky='nsew',padx=4,pady=4)
-                portrait=tk.Label(frame,bg=CARD,cursor='hand2')
-                portrait.pack()
-                badge=tk.Label(frame,bg=CARD,fg=DIM,font=('Microsoft YaHei UI',-11))
-                badge.pack()
-                for widget in (frame,portrait,badge):widget.bind('<Button-1>',lambda e,k=key:self.select(k))
-                self.tiles[key]=dict(frame=frame,portrait=portrait,badge=badge,signature=None)
+                frame=RoundedCard(self.strip, background=CARD, outline=theme.LINE,
+                                  radius=18, pad=(10, 10), stretch=True)
+                index=self.order.index(key);frame.grid(row=index//3,column=index%3,sticky='nsew',padx=5,pady=5)
+                holder=tk.Frame(frame.content,bg=CARD)
+                holder.pack(expand=True)
+                portrait=tk.Label(holder,bg=CARD,cursor='hand2')
+                portrait.pack(pady=(0, 6))
+                name=tk.Label(holder,bg=CARD,fg=theme.FG,font=theme.ui(11,'bold'),
+                              anchor='center',wraplength=120,justify='center')
+                name.pack(fill='x')
+                badge=tk.Label(holder,bg=CARD,fg=DIM,font=theme.ui(10))
+                badge.pack(pady=(3, 0))
+                for widget in (holder,frame,portrait,name,badge):
+                    widget.configure(cursor='hand2')
+                    widget.bind('<Button-1>',lambda e,k=key:self.select(k))
+                self.tiles[key]=dict(frame=frame,portrait=portrait,name=name,badge=badge,signature=None)
             tile=self.tiles[key]
             signature=None if not p else (p.get('style_label'),p.get('actor'),p.get('actor_position'),key==self.selected)
             if tile['signature']==signature:continue
             tile['signature']=signature
             pos=p.get('actor_position') if p else None
             front=pos in (0,1,2)
-            tile['frame'].configure(highlightbackground='#83e5ed' if front else '#50415f',
-                                    bg='#394758' if key==self.selected else CARD)
+            selected=key==self.selected
+            tile['frame'].configure(outline=theme.PINK if selected else (theme.CYAN if front else theme.LINE))
+            tile['frame'].draw()
             photo=self.portraits.get(p.get('style_label')) if p else None
-            tile['portrait'].configure(image=photo or '',text='' if photo else (p.get('actor','未知角色') if p else '暂不可读'))
+            tile['portrait'].configure(image=photo or '',text='' if photo else (p.get('actor','未知角色') if p else '暂不可读'),
+                                       fg=theme.MUTED,font=theme.ui(10))
+            tile['name'].configure(text=p.get('actor','') if p else '',
+                                   fg=theme.FG if p else theme.MUTED)
             tile['badge'].configure(text=('前排 · '+{1:'左',0:'中',2:'右'}[pos]) if front else '后排' if p else '暂不可读',
-                                     fg='#83e5ed' if front else DIM)
+                                     fg=theme.CYAN if front else theme.MUTED)
         if gauge != self.previous_gauge:
             self.previous_gauge=gauge
             text='' if not gauge else f'{gauge["name"]}元素量表 {gauge["value"]/gauge["maximum"]:.0%}'
@@ -83,12 +118,13 @@ class PlayerPanel(tk.Frame):
         p=self.players.get(self.selected)
         if not p:
             self.detail.pack_forget();return
-        self.detail.pack(fill='x',pady=6)
+        self.detail.pack(fill='x',pady=(8,0))
         pools=[]
         for pool in ('dp','hp'):
             value,maximum=p.get(pool),p.get(pool+'_max')
             pools.append(f'{pool.upper()} {value:,}'+(f' / {maximum:,}' if maximum else '') if value is not None else pool.upper()+' —')
-        self.caption.configure(text=p['actor']+' / '+p.get('style_name','')+'\n'+'   '.join(pools))
+        self.caption.configure(text=p['actor']+' / '+p.get('style_name',''))
+        self.pools.configure(text='   '.join(pools))
         self.groups.update_state(p)
 
     def status_details(self,status):

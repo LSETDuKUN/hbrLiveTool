@@ -177,7 +177,7 @@ class DetailCards(tk.Frame):
         self.fold(frame,"技能补充信息",meta)
 
     def render_effect(self, parent, effect, category):
-        area = tk.Frame(parent,bg="#39324f",padx=10,pady=8)
+        area = tk.Frame(parent,bg=theme.SURFACE,padx=10,pady=8)
         area.pack(fill="x",pady=5)
         self.label(area,f"来源效果 {effect.index+1} · {WORDS.get(effect.kind,effect.kind) or '未标类型'}",10,"#9ee4ef",True)
         if category == "伤害":

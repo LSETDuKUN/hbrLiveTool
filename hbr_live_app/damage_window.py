@@ -3,200 +3,350 @@ import json
 import math
 import tkinter as tk
 from tkinter import ttk
+
+from . import theme
+from .components import RoundedButton, RoundedCard, Segment, TabBar, ToggleChip
 from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_reduction
 from .damage_probability import distribution
 from .destruction import apply_to_result, dp_factor, simulate_pools
 from .equipment_editor import EquipmentEditor
-from .components import RoundedCard, RoundedButton
 from .passive_audit import audit_text
 from .damage_autofill import autofill, WEIGHTS, style_elements
 
 GROUPS = (
-    ('基础伤害', '#bdb1d4', (('base','基础伤害（可空）'),)),
-    ('加攻乘区', '#f5aacb', (('attack','普通加攻 %'),('element_attack','元素加攻 %'),
+    ('基础伤害', theme.DIM, (('base','基础伤害（可空）'),)),
+    ('连击乘区', theme.CYAN, (('chain','追加 Hit 权重合计 %'),)),
+    ('加攻乘区', theme.PINK, (('attack','普通加攻 %'),('element_attack','元素加攻 %'),
         ('mind_eye','心眼 %'),('servant_mind_eye','仆人心眼（另加）%'),('field','场地 %'),('charge','充能 %'))),
-    ('连击乘区', '#83e5ed', (('chain','追加 Hit 权重合计 %'),)),
-    ('暴击乘区', '#ffd398', (('critical_bonus','普通爆伤（含基础50）%'),('element_critical_bonus','元素爆伤 %'))),
-    ('减防乘区', '#e9a5b8', (('defense_down','普通减防 %'),('element_defense_down','元素减防 %'),('fragile','脆弱 %'))),
-    ('弱点与抗性', '#b8b0f3', (('weapon_bonus','武器弱点加成 %'),('element_bonus','元素弱点加成 %'),
+    ('技能独立修正', theme.MINT, (('token_bonus','Token 增伤 %'),('dp_bonus','对 DP 特攻 %'),('hp_bonus','对 HP 特攻 %'),
+        ('health_factor','技能资源比例倍率'),('down_factor','倒地条件倍率'),('other_factor','其他独立倍率'))),
+    ('暴击乘区', theme.GOLD, (('critical_bonus','普通爆伤（含基础50）%'),('element_critical_bonus','元素爆伤 %'))),
+    ('减防乘区', theme.ROSE, (('defense_down','普通减防 %'),('element_defense_down','元素减防 %'),('fragile','脆弱 %'))),
+    ('弱点与抗性', theme.LAVENDER, (('weapon_bonus','武器弱点加成 %'),('element_bonus','元素弱点加成 %'),
         ('weakness_deepen','弱点加深 %'),('resistance','抗性 %'))),
-    ('破坏率与 OD', '#83e5ed', (('destruction','当前破坏率 %'),('od','OD 倍率'))),
-    ('技能独立修正', '#a5e9b4', (('token_bonus','Token 增伤 %'),('dp_bonus','对 DP 特攻 %'),('hp_bonus','对 HP 特攻 %'),
-        ('health_factor','技能资源比例倍率'),('down_factor','倒地条件倍率'),('other_factor','其他独立倍率'))))
+    ('破坏率与 OD', theme.CYAN, (('destruction','当前破坏率 %'),('od','OD 倍率'))))
 FIELDS = tuple(pair for _,_,fields in GROUPS for pair in fields)
-BG, CARD, FG, DIM = '#342e4b', '#4a405e', '#fff6ff', '#d8cbe9'
-
-
-def scroll_page(parent):
-    frame=ttk.Frame(parent);canvas=tk.Canvas(frame,bg=BG,highlightthickness=0)
-    bar=ttk.Scrollbar(frame,command=canvas.yview);bar.pack(side='right',fill='y')
-    canvas.pack(fill='both',expand=True);canvas.configure(yscrollcommand=bar.set)
-    body=ttk.Frame(canvas,padding=12);item=canvas.create_window(0,0,anchor='nw',window=body)
-    body.bind('<Configure>',lambda e:canvas.configure(scrollregion=canvas.bbox('all')))
-    canvas.bind('<Configure>',lambda e:canvas.itemconfigure(item,width=e.width))
-    # Binding on the toplevel covers descendants without a global mouse binding.
-    def wheel(event):
-        if frame.winfo_ismapped() and str(event.widget).startswith(str(frame)):
-            canvas.yview_scroll(-int(event.delta/120),'units')
-    parent.winfo_toplevel().bind('<MouseWheel>',wheel,add='+')
-    return frame,body
-
+BG, CARD, FG, DIM = theme.BG, theme.CARD, theme.FG, theme.DIM
 
 NAMES = dict(attack='加攻（含充能／适用心眼）', defense='减防（含适用脆弱）', affinity='相性',
              critical='暴伤', chain='连击', destruction='破坏率', od='OD', token='Token',
              specialization='DP/HP 特攻', health='血量条件', down='倒地条件', other='其他')
 
 
+def scroll_page(parent):
+    frame = tk.Frame(parent, bg=BG)
+    canvas = tk.Canvas(frame, bg=BG, highlightthickness=0, bd=0)
+    bar = ttk.Scrollbar(frame, command=canvas.yview, style='Panel.Vertical.TScrollbar')
+    bar.pack(side='right', fill='y')
+    canvas.pack(fill='both', expand=True)
+    canvas.configure(yscrollcommand=bar.set)
+    body = tk.Frame(canvas, bg=BG)
+    item = canvas.create_window(0, 0, anchor='nw', window=body, width=1)
+    body.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
+    canvas.bind('<Configure>', lambda e: canvas.itemconfigure(item, width=e.width))
+    # Binding on the toplevel covers descendants without a global mouse binding.
+    def wheel(event):
+        if frame.winfo_ismapped() and str(event.widget).startswith(str(frame)):
+            canvas.yview_scroll(-int(event.delta/120), 'units')
+    frame.wheel = wheel
+    parent.winfo_toplevel().bind('<MouseWheel>', wheel, add='+')
+    return frame, body
+
+
 class DamageWindow(tk.Toplevel):
     def __init__(self, parent, snapshot):
         super().__init__(parent)
-        self.title('伤害试算 · 星屑战斗手帐');self.geometry('1000x850')
-        self.configure(bg=BG);self.minsize(820,650)
-        self.option_add('*Font',('Microsoft YaHei UI',10))
-        style=ttk.Style(self)
-        for name in ('Frame','Label','Checkbutton','Radiobutton','Notebook'):
-            style.configure('Damage.T'+name,background=BG,foreground=FG)
-        style.configure('Damage.TEntry',fieldbackground=CARD,foreground=FG,insertcolor=FG)
-        style.configure('Damage.TLabelframe',background=CARD,borderwidth=0)
-        style.configure('Damage.TLabelframe.Label',background=CARD,foreground='#f5aacb')
-        style.configure('Damage.TButton',background='#493752',foreground=FG,padding=6)
-        style.map('Damage.TButton',background=[('active','#624763')])
-        style.configure('Damage.TCombobox',fieldbackground=CARD,background=CARD,foreground=FG)
-        style.map('Damage.TCombobox',fieldbackground=[('readonly',CARD)],foreground=[('readonly',FG)])
-        style.configure('Damage.TNotebook.Tab',background=CARD,foreground=DIM,padding=(12,8))
-        style.map('Damage.TNotebook.Tab',background=[('selected','#493752')],foreground=[('selected','#f5aacb')])
-        self.plot_data=None;self.plot_damage=None
+        self.title('伤害试算 · 星屑战斗手帐')
+        self.geometry('1180x900')
+        self.configure(bg=BG)
+        self.minsize(980, 700)
+        self.option_add('*Font', theme.ui(12))
+        style = ttk.Style(self)
+        theme.dialog_style(style, 'Panel')
+        self.plot_data = None
+        self.plot_damage = None
         self.snapshot = snapshot
-        self.loaded_snapshot={};self.fill_notes='尚未自动填充'
-        selectors=ttk.Frame(self,padding=8);selectors.pack(fill='x')
-        self.player_box=ttk.Combobox(selectors,state='readonly',width=22);self.player_box.pack(side='left')
-        self.enemy_box=ttk.Combobox(selectors,state='readonly',width=22);self.enemy_box.pack(side='left',padx=6)
-        ttk.Button(selectors,text='刷新角色/敌人列表',command=self.reload_choices).pack(side='left')
-        ttk.Button(selectors,text='自动填充（覆盖表单）',command=self.fill).pack(side='left',padx=6)
-        modes_bar=tk.Frame(self,bg=BG,padx=8,pady=6);modes_bar.pack(fill='x')
-        self.mode_choices={}
-        for key,label in [('transcend','雷超越'),('high_boost','高阶增幅')]:
-            ttk.Label(modes_bar,text=label).pack(side='left',padx=(8,2))
-            var=tk.StringVar(self,value='自动');self.mode_choices[key]=var
-            ttk.Combobox(modes_bar,textvariable=var,values=['自动','启用','禁用'],state='readonly',width=6).pack(side='left')
-        ttk.Label(modes_bar,text='修改后点击自动填充；仅影响试算').pack(side='left',padx=10)
-        compute_button=RoundedButton(modes_bar,text='计算',command=self.compute,bg='#edb6d9',fg='#382d49',font=('Microsoft YaHei UI',11,'bold'))
-        compute_button.configure(width=100);compute_button.pack(side='right')
-        tabs = ttk.Notebook(self); tabs.pack(fill='both', expand=True)
-        form_page,form = scroll_page(tabs); tabs.add(form_page, text='乘区试算')
-        skill_page,skill_form=scroll_page(tabs);tabs.add(skill_page,text='技能与属性（可修改）')
-        destruction_page,destruction_form=scroll_page(tabs);tabs.add(destruction_page,text='逐段破坏率')
-        equipment_page,equipment_form=scroll_page(tabs);tabs.add(equipment_page,text='饰品效果')
-        self.equipment_editor=EquipmentEditor(equipment_form);self.equipment_editor.pack(fill='x')
-        ttk.Button(equipment_form,text='应用修改并计算',command=self.compute).pack(anchor='w',pady=8)
-        self.equipment_text=tk.Text(equipment_form,height=10,wrap='word');self.equipment_text.pack(fill='both',expand=True)
-        probability=ttk.Frame(tabs,padding=12);tabs.add(probability,text='浮动概率曲线')
-        data = ttk.Frame(tabs, padding=12); tabs.add(data, text='当前内存参数')
-        audit_page=ttk.Frame(tabs,padding=12);tabs.add(audit_page,text='天赋与被动审查')
-        audit_bar=ttk.Scrollbar(audit_page);audit_bar.pack(side='right',fill='y')
-        self.audit=tk.Text(audit_page,wrap='word',yscrollcommand=audit_bar.set)
-        self.audit.pack(fill='both',expand=True);audit_bar.configure(command=self.audit.yview)
-        ttk.Button(audit_page,text='刷新已加载天赋与被动',command=self.refresh).pack(anchor='w',pady=6)
-        ttk.Label(form, text='自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
-                  '未确认条件请查看天赋审查与参数页；尚不完整模拟逐 Hit、破盾与后续施加效果。',
-                  wraplength=840).pack(anchor='w', pady=(0,8))
-        grid = tk.Frame(form,bg=BG); grid.pack(fill='x')
-        self.values = {};defaults = DamageInputs()
-        self.factor_labels={}
-        grid.columnconfigure(0,weight=1);grid.columnconfigure(1,weight=1)
-        tones=['#514864','#60465e','#3e5a66','#665542','#604650','#514968','#3d5965','#425c53']
-        for idx,(title,color,fields) in enumerate(GROUPS):
-            tone=tones[idx]
-            shell=RoundedCard(grid,background=tone)
-            shell.grid(row=idx//2,column=idx%2,sticky='new',padx=5,pady=6)
-            card=shell.content
-            tk.Label(card,text=title,bg=tone,fg=color,font=('Microsoft YaHei UI',11,'bold')).grid(row=0,column=0,columnspan=2,sticky='w',pady=(0,6))
-            card.columnconfigure(1,weight=1)
-            for row,(key,title) in enumerate(fields,1):
-                tk.Label(card,text=title,bg=tone,fg=FG).grid(row=row,column=0,sticky='w',pady=5)
-                value=getattr(defaults,key)
-                var=tk.StringVar(self,value='' if value is None else str(value));self.values[key]=var
-                ttk.Entry(card,textvariable=var,width=13,style='Damage.TEntry').grid(row=row,column=1,sticky='e',padx=(10,0))
-        self.pool=tk.StringVar(self,value='hp')
-        options=ttk.Frame(form);options.pack(fill='x',pady=8)
-        for pool in ('dp','hp'):
-            ttk.Radiobutton(options,text='打 '+pool.upper(),variable=self.pool,value=pool).pack(side='left')
-        self.flags={}
-        for key,title in [('critical','暴击'),('penetration_critical','贯通暴击：强制弱点判定'),('absorbed','吸收')]:
-            var=tk.BooleanVar(self,value=getattr(defaults,key));self.flags[key]=var
-            ttk.Checkbutton(options,text=title,variable=var).pack(side='left',padx=6)
-        ttk.Button(form,text='计算',command=self.compute).pack(anchor='w')
-        self.result=tk.Text(form,height=10,wrap='word');self.result.pack(fill='both',expand=True,pady=8)
-        self.use_skill=tk.BooleanVar(self,value=False)
-        ttk.Checkbutton(skill_form,text='计算时使用以下技能参数生成基础伤害（取消则使用手填基础伤害）',variable=self.use_skill).pack(anchor='w')
-        self.skill_title=ttk.Label(skill_form,text='尚未自动填充');self.skill_title.pack(anchor='w',pady=8)
-        self.params={}
-        self.dp_panel=ttk.LabelFrame(skill_form,text='本技能 · 自身 DP 线性倍率',padding=8)
-        self.use_dp_scaling=tk.BooleanVar(self,value=False)
-        ttk.Checkbutton(self.dp_panel,text='按技能端点及自身 DP 自动计算独立倍率',variable=self.use_dp_scaling).pack(anchor='w')
-        for key,label in [('own_dp','自身当前 DP'),('own_dp_max','自身 DP 上限'),('dp_zero_factor','0 DP 时倍率'),('dp_full_factor','满 DP 时倍率')]:
-            row=ttk.Frame(self.dp_panel);row.pack(fill='x',pady=4)
-            ttk.Label(row,text=label,width=22).pack(side='left')
-            var=tk.StringVar(self,value='');self.params[key]=var;ttk.Entry(row,textvariable=var,width=16).pack(side='left')
-        pg=ttk.Frame(skill_form);pg.pack(fill='x')
-        names=[('min_power','最小威力'),('max_power','最大威力'),('difference','属性差阈值'),('level','技能等级'),
-               ('enemy','敌方防御参考值'),('calamity','灾厄属性下降（通常20）'),('fear_of_devil','大灾厄属性下降（通常100）'),('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
-               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),('morale_level','士气等级（每层六维 +5）'),
-               ('od_gain_bonus','OD 饰品获取量增幅 %')]
-        self.use_destruction=tk.BooleanVar(self,value=False)
-        ttk.Checkbutton(destruction_form,text='启用逐段破坏率递推（参数完整时自动启用，可取消）',variable=self.use_destruction).pack(anchor='w')
-        ttk.Label(destruction_form,text='各段先结算伤害，再增加破坏率。可启用逐段 DP→HP；破盾段不增长破坏率且溢出不转入 HP。\n敌人系数沿用 DamageRateValue（例如 4），不是属性抗性百分比；有破坏抗性状态时需核对最终有效系数。',wraplength=850).pack(anchor='w',pady=8)
-        for key,label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
-            row=ttk.Frame(destruction_form);row.pack(fill='x',pady=5)
-            ttk.Label(row,text=label,width=28).pack(side='left')
-            var=tk.StringVar(self,value='');self.params[key]=var
-            ttk.Entry(row,textvariable=var,width=18).pack(side='left')
-        self.use_pool_simulation=tk.BooleanVar(self,value=False)
-        ttk.Checkbutton(destruction_form,text='逐段处理 DP → HP（破盾段溢出丢弃）',variable=self.use_pool_simulation).pack(anchor='w',pady=6)
-        for key,label in [('enemy_dp','敌人剩余 DP'),('enemy_hp','敌人剩余 HP（可空）')]:
-            row=ttk.Frame(destruction_form);row.pack(fill='x',pady=4)
-            ttk.Label(row,text=label,width=28).pack(side='left')
-            var=tk.StringVar(self,value='');self.params[key]=var;ttk.Entry(row,textvariable=var,width=18).pack(side='left')
-        ttk.Button(destruction_form,text='计算逐段伤害',command=self.compute).pack(anchor='w',pady=8)
-        self.destruction_report=tk.Text(destruction_form,height=22,wrap='word');self.destruction_report.pack(fill='both',expand=True)
-        from .damage_inputs import STATS
-        names += [(key,STATS[key]) for key in WEIGHTS]+[('weight_'+key,STATS[key]+'权重') for key in WEIGHTS]
-        for idx,(key,label) in enumerate(names):
-            row,col=idx//2,(idx%2)*2
-            ttk.Label(pg,text=label).grid(row=row,column=col,sticky='w',padx=4,pady=5)
-            var=tk.StringVar(self,value='');self.params[key]=var
-            ttk.Entry(pg,textvariable=var,width=15).grid(row=row,column=col+1,padx=8)
-        ttk.Label(skill_form,text='权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。',wraplength=820).pack(anchor='w',pady=8)
-        ttk.Label(data,text='刷新获取当前已连接战斗的快照；原始参数并非预计算伤害。').pack(anchor='w')
-        ttk.Button(data,text='刷新参数快照',command=self.refresh).pack(anchor='w',pady=6)
-        scrollbar=ttk.Scrollbar(data);scrollbar.pack(side='right',fill='y')
-        self.raw=tk.Text(data,wrap='word',yscrollcommand=scrollbar.set)
-        self.raw.pack(fill='both',expand=True);scrollbar.configure(command=self.raw.yview)
-        ttk.Label(probability,text='每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。').pack(anchor='w')
-        ttk.Label(probability,text='启用递推时按各段实际破坏率调整权重；未模拟跨 DP 破盾与衰减，曲线不等同于完整实战击杀概率。',wraplength=900).pack(anchor='w',pady=5)
-        self.hit_weights=tk.StringVar(self,value='')
-        ttk.Label(probability,text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）').pack(anchor='w')
-        ttk.Entry(probability,textvariable=self.hit_weights).pack(fill='x',pady=5)
-        self.hit_source=ttk.Label(probability,text='尚无权重，不假定为单 Hit');self.hit_source.pack(anchor='w')
-        ttk.Button(probability,text='重新计算曲线与伤害',command=self.compute).pack(anchor='w',pady=6)
-        self.prob_summary=ttk.Label(probability,text='',wraplength=880);self.prob_summary.pack(anchor='w')
-        self.plot=tk.Canvas(probability,bg=CARD,highlightthickness=0,height=370)
-        self.plot.pack(fill='both',expand=True,pady=10)
-        self.plot.bind('<Configure>',lambda e:self.draw_plot())
-        self.plot.bind('<Motion>',self.hover_plot)
-        self.plot_hint=ttk.Label(probability,text='横轴：伤害倍率；纵轴：概率密度（面积为概率）');self.plot_hint.pack(anchor='w')
-        self.theme_widgets(self)
-        self.reload_choices();self.refresh()
-        if self.loaded_snapshot.get('connected') and self.player_box.current()>=0 and self.enemy_box.current()>=0:self.fill()
-        else:self.compute()
+        self.loaded_snapshot = {}
+        self.fill_notes = '尚未自动填充'
+        self.build_header()
+        self.build_selector()
+        self.build_pages()
+        self.reload_choices(); self.refresh()
+        if self.loaded_snapshot.get('connected') and self.player_box.current() >= 0 and self.enemy_box.current() >= 0:
+            self.fill()
+        else:
+            self.compute()
 
+    # ---- chrome ------------------------------------------------------------
+    def build_header(self):
+        head = tk.Frame(self, bg=BG)
+        head.pack(fill='x', padx=20, pady=(16, 10))
+        tk.Label(head, text='✦ 伤害试算', bg=BG, fg=theme.PINK,
+                 font=theme.ui(16, 'bold')).pack(side='left')
+        tk.Label(head, text='手填乘区 · 不影响战斗记录', bg=BG, fg=theme.MUTED,
+                 font=theme.ui(11)).pack(side='left', padx=12, pady=(4, 0))
+        self.compute_button = RoundedButton(head, text='计算', command=self.compute,
+                                            bg=theme.PINK, fg='#2a2036',
+                                            font=theme.ui(13, 'bold'), height=36)
+        self.compute_button.pack(side='right')
+
+    def build_selector(self):
+        bar = tk.Frame(self, bg=theme.SURFACE, padx=16, pady=12)
+        bar.pack(fill='x', padx=18, pady=(0, 10))
+        row = tk.Frame(bar, bg=theme.SURFACE)
+        row.pack(fill='x')
+        tk.Label(row, text='角色', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
+        self.player_box = ttk.Combobox(row, state='readonly', width=22, style='Panel.TCombobox')
+        self.player_box.pack(side='left', padx=(6, 14))
+        tk.Label(row, text='敌人', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
+        self.enemy_box = ttk.Combobox(row, state='readonly', width=22, style='Panel.TCombobox')
+        self.enemy_box.pack(side='left', padx=(6, 14))
+        RoundedButton(row, '刷新列表', self.reload_choices, theme.CARD_HI, theme.DIM,
+                      theme.ui(11), height=30).pack(side='left')
+        RoundedButton(row, '自动填充', self.fill, theme.mix(theme.CARD_HI, theme.CYAN, .26), theme.FG,
+                      theme.ui(11), height=30).pack(side='left', padx=8)
+        modes = tk.Frame(bar, bg=theme.SURFACE)
+        modes.pack(fill='x', pady=(10, 0))
+        self.mode_choices = {}
+        tk.Label(modes, text='模式', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
+        for key, label in [('transcend', '雷超越'), ('high_boost', '高阶增幅')]:
+            tk.Label(modes, text=label, bg=theme.SURFACE, fg=theme.MUTED,
+                     font=theme.ui(11)).pack(side='left', padx=(12, 4))
+            var = tk.StringVar(self, value='自动'); self.mode_choices[key] = var
+            ttk.Combobox(modes, textvariable=var, values=['自动', '启用', '禁用'], state='readonly',
+                         width=6, style='Panel.TCombobox').pack(side='left')
+        tk.Label(modes, text='修改后点击自动填充；仅影响试算', bg=theme.SURFACE, fg=theme.MUTED,
+                 font=theme.ui(10)).pack(side='left', padx=12)
+
+    def build_pages(self):
+        self.tab_names = ['乘区试算', '技能与属性', '逐段破坏率', '饰品效果', '浮动概率曲线', '当前内存参数', '天赋与被动审查']
+        self.tabs = TabBar(self, self.tab_names, self.show_page, bg=BG)
+        self.tabs.pack(fill='x', padx=14, pady=(0, 6))
+        self.pages = tk.Frame(self, bg=BG)
+        self.pages.pack(fill='both', expand=True, padx=12, pady=(0, 12))
+        self.page_widgets = {}
+        for name in self.tab_names:
+            frame, body = scroll_page(self.pages)
+            self.page_widgets[name] = (frame, body)
+        self.build_form_page(*self.page_widgets['乘区试算'])
+        self.build_skill_page(*self.page_widgets['技能与属性'])
+        self.build_destruction_page(*self.page_widgets['逐段破坏率'])
+        self.build_equipment_page(*self.page_widgets['饰品效果'])
+        self.build_probability_page(*self.page_widgets['浮动概率曲线'])
+        self.build_raw_page(*self.page_widgets['当前内存参数'])
+        self.build_audit_page(*self.page_widgets['天赋与被动审查'])
+        self.show_page(self.tab_names[0])
+
+    def show_page(self, name):
+        for page, (frame, _) in self.page_widgets.items():
+            if page == name:
+                frame.pack(fill='both', expand=True)
+            else:
+                frame.pack_forget()
+        self.tabs.current = name
+        self.tabs.draw()
+
+    def note(self, parent, text, size=11, color=None):
+        label = tk.Label(parent, text=text, bg=BG, fg=color or theme.MUTED, justify='left',
+                         anchor='w', font=theme.ui(size))
+        label.pack(fill='x', pady=(0, 6))
+        label.bind('<Configure>', lambda e: label.configure(wraplength=max(240, e.width - 8)))
+        return label
+
+    # ---- pages -------------------------------------------------------------
+    def build_form_page(self, frame, form):
+        self.note(form, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
+                        '未确认条件请查看天赋审查与参数页；尚不完整模拟逐 Hit、破盾与后续施加效果。', 11)
+        grid = tk.Frame(form, bg=BG)
+        grid.pack(fill='x')
+        self.values = {}
+        defaults = DamageInputs()
+        self.factor_labels = {}
+        grid.columnconfigure(0, weight=1, uniform='group')
+        grid.columnconfigure(1, weight=1, uniform='group')
+        for idx, (title, color, fields) in enumerate(GROUPS):
+            shell = RoundedCard(grid, background=theme.CARD, outline=theme.LINE, accent=color,
+                                pad=(16, 12), stretch=True)
+            shell.grid(row=idx//2, column=idx%2, sticky='nsew', padx=6, pady=6)
+            card = shell.content
+            head = tk.Frame(card, bg=theme.CARD)
+            head.pack(fill='x', pady=(0, 6))
+            tk.Label(head, text=title, bg=theme.CARD, fg=color,
+                     font=theme.ui(12, 'bold')).pack(side='left')
+            tk.Label(head, text=f'{len(fields)} 项', bg=theme.CARD, fg=theme.MUTED,
+                     font=theme.ui(10)).pack(side='right')
+            rows = tk.Frame(card, bg=theme.CARD)
+            rows.pack(fill='x')
+            rows.columnconfigure(1, weight=1)
+            for row, (key, label) in enumerate(fields):
+                tk.Label(rows, text=label, bg=theme.CARD, fg=theme.DIM,
+                         font=theme.ui(11), anchor='w').grid(row=row, column=0, sticky='w', pady=3)
+                value = getattr(defaults, key)
+                var = tk.StringVar(self, value='' if value is None else str(value))
+                self.values[key] = var
+                ttk.Entry(rows, textvariable=var, width=12, style='Panel.TEntry',
+                          justify='right').grid(row=row, column=1, sticky='e', padx=(10, 0), pady=3)
+        options = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
+        options.pack(fill='x', pady=10)
+        self.pool = tk.StringVar(self, value='hp')
+        tk.Label(options, text='打击池', bg=theme.SURFACE, fg=theme.DIM,
+                 font=theme.ui(11)).pack(side='left')
+        Segment(options, [('dp', '打 DP'), ('hp', '打 HP')], self.pool, accent=theme.CYAN).pack(
+            side='left', padx=(8, 18))
+        self.flags = {}
+        for key, title in [('critical', '暴击'), ('penetration_critical', '贯通暴击'), ('absorbed', '吸收')]:
+            var = tk.BooleanVar(self, value=getattr(defaults, key))
+            self.flags[key] = var
+            ToggleChip(options, title, var, accent=theme.GOLD).pack(side='left', padx=(0, 8))
+        result_head = tk.Frame(form, bg=BG)
+        result_head.pack(fill='x', pady=(2, 4))
+        tk.Label(result_head, text='试算结果', bg=BG, fg=theme.PINK,
+                 font=theme.ui(12, 'bold')).pack(side='left')
+        RoundedButton(result_head, '计算', self.compute, theme.PINK, '#2a2036',
+                      theme.ui(11), height=30).pack(side='right')
+        self.result = self.text_panel(form, height=12)
+
+    def text_panel(self, parent, height=10):
+        box = tk.Frame(parent, bg=theme.SURFACE, padx=2, pady=2)
+        box.pack(fill='both', expand=True, pady=(0, 8))
+        widget = tk.Text(box, height=height, **theme.text_widget_options(theme.SURFACE), wrap='word')
+        bar = ttk.Scrollbar(box, command=widget.yview)
+        widget.configure(yscrollcommand=bar.set)
+        bar.pack(side='right', fill='y')
+        widget.pack(fill='both', expand=True)
+        return widget
+
+    def field_row(self, parent, label, width=20):
+        row = tk.Frame(parent, bg=BG)
+        row.pack(fill='x', pady=4)
+        tk.Label(row, text=label, bg=BG, fg=theme.DIM, font=theme.ui(11), width=width,
+                 anchor='w').pack(side='left')
+        var = tk.StringVar(self, value='')
+        ttk.Entry(row, textvariable=var, width=16, style='Panel.TEntry',
+                  justify='right').pack(side='left')
+        return var
+
+    def build_skill_page(self, frame, form):
+        self.use_skill = tk.BooleanVar(self, value=False)
+        use_row = tk.Frame(form, bg=BG)
+        use_row.pack(fill='x', pady=(0, 4))
+        ToggleChip(use_row, '用技能参数生成基础伤害', self.use_skill, accent=theme.PINK).pack(side='left')
+        tk.Label(use_row, text='取消则使用手填基础伤害', bg=BG, fg=theme.MUTED,
+                 font=theme.ui(10)).pack(side='left', padx=10, pady=(4, 0))
+        self.skill_title = tk.Label(form, text='尚未自动填充', bg=BG, fg=theme.PINK,
+                                    font=theme.ui(12, 'bold'), anchor='w')
+        self.skill_title.pack(fill='x', pady=8)
+        self.dp_panel = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
+        self.use_dp_scaling = tk.BooleanVar(self, value=False)
+        ToggleChip(self.dp_panel, '按技能端点及自身 DP 自动计算独立倍率', self.use_dp_scaling,
+                   accent=theme.CYAN).pack(anchor='w')
+        grid = tk.Frame(self.dp_panel, bg=theme.SURFACE)
+        grid.pack(fill='x', pady=(6, 0))
+        grid.columnconfigure(0, weight=1); grid.columnconfigure(1, weight=1)
+        self.params = {}
+        for index, (key, label) in enumerate([('own_dp','自身当前 DP'),('own_dp_max','自身 DP 上限'),
+                                              ('dp_zero_factor','0 DP 时倍率'),('dp_full_factor','满 DP 时倍率')]):
+            cell = tk.Frame(grid, bg=theme.SURFACE)
+            cell.grid(row=index//2, column=index % 2, sticky='w', pady=3)
+            tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
+                     width=16, anchor='w').pack(side='left')
+            var = tk.StringVar(self, value=''); self.params[key] = var
+            ttk.Entry(cell, textvariable=var, width=14, style='Panel.TEntry',
+                      justify='right').pack(side='left', padx=(4, 0))
+        pg = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
+        pg.pack(fill='x', pady=8)
+        pg.columnconfigure(0, weight=1); pg.columnconfigure(1, weight=1)
+        names = [('min_power','最小威力'),('max_power','最大威力'),('difference','属性差阈值'),('level','技能等级'),
+               ('enemy','敌方防御参考值'),('calamity','灾厄属性下降（通常20）'),('fear_of_devil','大灾厄属性下降（通常100）'),
+               ('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
+               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),
+               ('morale_level','士气等级（每层六维 +5）'),
+               ('od_gain_bonus','OD 饰品获取量增幅 %')]
+        from .damage_inputs import STATS
+        names += [(key, STATS[key]) for key in WEIGHTS] + [('weight_'+key, STATS[key]+'权重') for key in WEIGHTS]
+        for idx, (key, label) in enumerate(names):
+            cell = tk.Frame(pg, bg=theme.SURFACE)
+            cell.grid(row=idx//2, column=idx % 2, sticky='w', padx=(0, 16), pady=2)
+            tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
+                     width=17, anchor='w').pack(side='left')
+            var = tk.StringVar(self, value=''); self.params[key] = var
+            ttk.Entry(cell, textvariable=var, width=14, style='Panel.TEntry',
+                      justify='right').pack(side='left', padx=(4, 0))
+        self.note(form, '权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。')
+
+    def build_destruction_page(self, frame, form):
+        self.use_destruction = tk.BooleanVar(self, value=False)
+        ToggleChip(form, '启用逐段破坏率递推（参数完整时自动启用）', self.use_destruction,
+                   accent=theme.PINK).pack(anchor='w')
+        self.note(form, '各段先结算伤害，再增加破坏率。可启用逐段 DP→HP；破盾段不增长破坏率且溢出不转入 HP。\n'
+                        '敌人系数沿用 DamageRateValue（例如 4），不是属性抗性百分比；有破坏抗性状态时需核对最终有效系数。')
+        for key, label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),
+                           ('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
+            self.params[key] = self.field_row(form, label, 20)
+        self.use_pool_simulation = tk.BooleanVar(self, value=False)
+        ToggleChip(form, '逐段处理 DP → HP（破盾段溢出丢弃）', self.use_pool_simulation,
+                   accent=theme.CYAN).pack(anchor='w', pady=8)
+        for key, label in [('enemy_dp','敌人剩余 DP'),('enemy_hp','敌人剩余 HP（可空）')]:
+            self.params[key] = self.field_row(form, label, 28)
+        RoundedButton(form, '计算逐段伤害', self.compute, theme.mix(theme.CARD_HI, theme.PINK, .3),
+                      theme.FG, theme.ui(11), height=32).pack(anchor='w', pady=8)
+        self.destruction_report = self.text_panel(form, height=16)
+
+    def build_equipment_page(self, frame, form):
+        self.equipment_editor = EquipmentEditor(form)
+        self.equipment_editor.pack(fill='x')
+        RoundedButton(form, '应用修改并计算', self.compute, theme.mix(theme.CARD_HI, theme.PINK, .3),
+                      theme.FG, theme.ui(11), height=32).pack(anchor='w', pady=8)
+        self.equipment_text = self.text_panel(form, height=12)
+
+    def build_probability_page(self, frame, probability):
+        self.note(probability, '每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。')
+        self.note(probability, '启用递推时按各段实际破坏率调整权重；未模拟跨 DP 破盾与衰减，曲线不等同于完整实战击杀概率。')
+        self.hit_weights = tk.StringVar(self, value='')
+        tk.Label(probability, text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）', bg=BG, fg=theme.DIM,
+                 font=theme.ui(11), anchor='w').pack(fill='x', pady=(6, 4))
+        weights_row = tk.Frame(probability, bg=BG)
+        weights_row.pack(fill='x')
+        ttk.Entry(weights_row, textvariable=self.hit_weights, style='Panel.TEntry').pack(
+            side='left', fill='x', expand=True)
+        RoundedButton(weights_row, '重新计算', self.compute, theme.mix(theme.CARD_HI, theme.CYAN, .28),
+                      theme.FG, theme.ui(11), height=32).pack(side='left', padx=8)
+        self.hit_source = tk.Label(probability, text='尚无权重，不假定为单 Hit', bg=BG, fg=theme.MUTED,
+                                   font=theme.ui(11), anchor='w')
+        self.hit_source.pack(fill='x', pady=6)
+        self.prob_summary = tk.Label(probability, text='', bg=BG, fg=theme.FG, font=theme.ui(11),
+                                     anchor='w', justify='left')
+        self.prob_summary.pack(fill='x', pady=(0, 8))
+        self.prob_summary.bind('<Configure>', lambda e: self.prob_summary.configure(
+            wraplength=max(300, e.width - 8)))
+        self.plot = tk.Canvas(probability, bg=theme.SURFACE, highlightthickness=0, bd=0, height=380)
+        self.plot.pack(fill='both', expand=True, pady=6)
+        self.plot.bind('<Configure>', lambda e: self.draw_plot())
+        self.plot.bind('<Motion>', self.hover_plot)
+        self.plot_hint = tk.Label(probability, text='横轴：伤害倍率；纵轴：概率密度（面积为概率）',
+                                  bg=BG, fg=theme.MUTED, font=theme.ui(10), anchor='w')
+        self.plot_hint.pack(fill='x')
+
+    def build_raw_page(self, frame, data):
+        self.note(data, '刷新获取当前已连接战斗的快照；原始参数并非预计算伤害。')
+        RoundedButton(data, '刷新参数快照', self.refresh, theme.CARD_HI, theme.FG,
+                      theme.ui(11), height=32).pack(anchor='w', pady=6)
+        self.raw = self.text_panel(data, height=30)
+
+    def build_audit_page(self, frame, audit_page):
+        self.note(audit_page, '只列出运行时确实持有的天赋与被动；不根据风格资料推测解锁状态。')
+        RoundedButton(audit_page, '刷新已加载天赋与被动', self.refresh, theme.CARD_HI, theme.FG,
+                      theme.ui(11), height=32).pack(anchor='w', pady=6)
+        self.audit = self.text_panel(audit_page, height=30)
+
+    # ---- behaviour ---------------------------------------------------------
     def theme_widgets(self, widget):
-        # Scope ttk styles to this window; do not restyle the dashboard globally.
-        name=widget.winfo_class()
+        # Scoped style names only; the dashboard keeps its own look.
+        name = widget.winfo_class()
         if name in ('TFrame','TLabel','TCheckbutton','TRadiobutton','TNotebook','TEntry','TButton','TCombobox'):
-            widget.configure(style='Damage.'+name)
-        elif name=='Text':widget.configure(bg=CARD,fg=FG,insertbackground=FG,relief='flat',padx=10,pady=8)
-        for child in widget.winfo_children():self.theme_widgets(child)
+            widget.configure(style='Panel.'+name)
+        for child in widget.winfo_children():
+            self.theme_widgets(child)
 
     def update_probability(self, damage, effective_weights=None):
         self.plot_data=None;self.plot_damage=damage
@@ -216,30 +366,36 @@ class DamageWindow(tk.Toplevel):
     def draw_plot(self):
         if not hasattr(self,'plot'):return
         c=self.plot;c.delete('all');data=self.plot_data
+        w=max(300,c.winfo_width());h=max(220,c.winfo_height());l,r,t,b=64,w-28,38,h-52
+        c.create_rectangle(0,0,w,h,fill=theme.SURFACE,outline='')
         if not data:
-            c.create_text(25,40,anchor='w',text='填入已确认的各 Hit 权重后显示概率曲线',fill=DIM);return
-        w=max(300,c.winfo_width());h=max(220,c.winfo_height());l,r,t,b=60,w-24,35,h-48
+            c.create_text(l,44,anchor='w',text='填入已确认的各 Hit 权重后显示概率曲线',fill=theme.MUTED,
+                          font=theme.ui(11));return
         peak=max(data['density']);scale=self.plot_damage if self.plot_damage is not None else 1
-        c.create_text(l,15,anchor='w',fill=DIM,text='概率密度（每单位伤害倍率）')
+        c.create_text(l,18,anchor='w',fill=theme.MUTED,text='概率密度（每单位伤害倍率）',font=theme.ui(10))
         for i in range(5):
-            y=b-(b-t)*i/4;c.create_line(l,y,r,y,fill='#49415e')
-            c.create_text(l-8,y,anchor='e',text=f'{peak*i/4:.1f}',fill=DIM)
+            y=b-(b-t)*i/4
+            c.create_line(l,y,r,y,fill=theme.LINE_SOFT)
+            c.create_text(l-10,y,anchor='e',text=f'{peak*i/4:.1f}',fill=theme.MUTED,font=theme.num(10))
         for i in range(5):
             x=l+(r-l)*i/4;factor=.9+.05*i
-            c.create_text(x,b+20,text=f'{factor*scale:,.4g}',fill=DIM)
+            c.create_text(x,b+18,text=f'{factor*scale:,.4g}',fill=theme.MUTED,font=theme.num(10))
         points=[]
         for x,y in zip(data['x'][::4],data['density'][::4]):
             if .9<=x<=1.1:points.extend((l+(x-.9)/.2*(r-l),b-y/peak*(b-t)))
-        c.create_polygon([l,b]+points+[r,b],fill='#314959',outline='')
-        c.create_line(points,fill='#83e5ed',width=2)
+        if points:
+            polygon=c.create_polygon([l,b]+points+[r,b],fill=theme.CYAN_DEEP,outline='')
+            c.itemconfigure(polygon,fill=theme.mix(theme.SURFACE,theme.CYAN,.18))
+            c.create_line(points,fill=theme.CYAN,width=2,smooth=False)
         for value in (data['low'],1,data['high']):
             x=l+(value-.9)/.2*(r-l)
-            c.create_line(x,t,x,b,fill='#f5aacb' if value==1 else '#9383ac',dash=(3,4))
+            c.create_line(x,t,x,b,fill=theme.PINK if value==1 else theme.mix(theme.SURFACE,theme.LAVENDER,.7),
+                          dash=(3,5))
 
     def hover_plot(self,event):
         if not self.plot_data:return
         width=max(300,self.plot.winfo_width())
-        factor=.9+(event.x-60)/(width-84)*.2
+        factor=.9+(event.x-64)/(width-92)*.2
         if not .9<=factor<=1.1:return
         d=self.plot_data;idx=max(0,min(len(d['x'])-1,round((factor-d['x'][0])/d['step'])))
         scale=self.plot_damage if self.plot_damage is not None else 1
@@ -389,7 +545,8 @@ class DamageWindow(tk.Toplevel):
         except (ValueError, OverflowError) as exc:
             text='无法计算：'+str(exc)
             self.plot_data=None;self.draw_plot();self.prob_summary.configure(text=text)
-        self.result.configure(state='normal');self.result.delete('1.0','end');self.result.insert('end',text)
+        self.result.configure(state='normal');self.result.delete('1.0','end')
+        self.result.insert('end',text)
         self.result.configure(state='disabled')
 
     def refresh(self):

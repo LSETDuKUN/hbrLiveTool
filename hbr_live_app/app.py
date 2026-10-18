@@ -8,7 +8,9 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
 
-from .components import RoundedCard, RoundedButton
+from . import theme
+from .theme import BG, CARD, CARD_HI, CYAN, DIM, FG, GOLD, LINE, MINT, PINK, ROSE, SURFACE
+from .components import RoundedCard, RoundedButton, Pill, ToggleChip, rounded
 from .model import BattleModel
 from .enemy_cards import EnemyCard
 from .turns import context_label
@@ -16,9 +18,7 @@ from .history import table_rows, DISPLAY_POSITIONS, POSITION_NAMES
 from .battle_table import BattleTable
 
 ROOT = Path(__file__).resolve().parent.parent
-BG, CARD, FG, DIM = '#201d32', '#302b46', '#f7f0ff', '#bdb1d4'
-PINK, CYAN, GOLD = '#f5aacb', '#83e5ed', '#ffd398'
-FONT = ('Microsoft YaHei UI', -14)
+FONT = theme.ui(13)
 
 
 class App:
@@ -80,131 +80,212 @@ class App:
         self.damage_window = DamageWindow(self.root, snapshot)
 
     def _restore_geometry(self):
-        default = (520, 850) if self.compact.get() else (1080, 900)
+        default = (500, 860) if self.compact.get() else (1180, 900)
         values = self.settings.get('bounds', [*default, 80, 60])
         try:
             w, h, x, y = map(int, values)
         except (TypeError, ValueError):
             w, h, x, y = *default, 80, 60
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        w, h = min(max(420 if self.compact.get() else 820, w), sw-30), min(max(650, h), sh-70)
+        w, h = min(max(440 if self.compact.get() else 900, w), sw-30), min(max(660, h), sh-70)
         x, y = max(0, min(x, sw-w-16)), max(0, min(y, sh-h-60))
         self.root.geometry(f'{w}x{h}+{x}+{y}')
 
     def style(self):
-        style = ttk.Style(self.root)
-        if style.theme_use() not in ('clam', 'quest'):
-            style.theme_use('clam')
-        style.configure('Live.Treeview', background=CARD, fieldbackground=CARD,
-                        foreground=FG, rowheight=68, borderwidth=0, font=FONT, indent=14)
-        style.configure('Live.Treeview.Heading', background='#493752', foreground=PINK,
-                        font=(*FONT, 'bold'), relief='flat')
-        style.map('Live.Treeview', background=[('selected', '#605077')], foreground=[('selected', '#ffffff')])
-        style.configure('Live.TCombobox', fieldbackground=CARD, foreground=FG, background=CARD)
-        style.map('Live.TCombobox', fieldbackground=[('readonly', CARD)], foreground=[('readonly', FG)])
+        theme.install(self.root)
 
-    def label(self, parent, text='', color=FG, size=10, **kwargs):
+    def label(self, parent, text='', color=FG, size=12, bold=False, **kwargs):
         return tk.Label(parent, text=text, bg=parent.cget('bg'), fg=color,
-                        font=('Microsoft YaHei UI', -round(size * 1.35)), **kwargs)
+                        font=theme.ui(size, 'bold' if bold else 'normal'), **kwargs)
 
+    # ---- construction ------------------------------------------------------
     def build(self):
+        self.build_header()
+        self.build_hero()
+        self.build_controls()
+        self.build_status()
+        self.build_toolbar()
+        self.build_field()
+        self.build_body()
+        self.build_history()
+        self.footer = self.label(self.root, '本地记录  ·  只读内存  ·  无需截图', theme.MUTED, 10, anchor='w')
+        self.footer.pack(side='bottom', fill='x', padx=26, pady=(4, 12), before=self.body)
+        self.root.bind('<Configure>', self.on_resize, add='+')
+        self.root.bind_all('<MouseWheel>', self.scroll_battle, add='+')
+
+    def build_header(self):
         head = tk.Frame(self.root, bg=BG)
-        head.pack(fill='x', padx=22, pady=(18, 8))
-        self.label(head, '✦  HBR LIVE', PINK, 19).pack(side='left')
-        self.subtitle = self.label(head, '星屑战斗手帐', DIM, 10)
-        self.subtitle.pack(side='left', padx=12)
-        menu_button = tk.Menubutton(head, text='设置 ⋯', bg=CARD, fg=FG, relief='flat', padx=12, font=FONT)
-        menu_button.pack(side='right')
-        menu = tk.Menu(menu_button, tearoff=False, bg=CARD, fg=FG)
-        menu_button.configure(menu=menu)
-        menu.add_checkbutton(label='紧凑模式', variable=self.compact, command=self.change_compact)
-        menu.add_checkbutton(label='保持置顶', variable=self.topmost,
-                             command=lambda: self.root.attributes('-topmost', self.topmost.get()))
+        head.pack(fill='x', padx=22, pady=(18, 12))
+        brand = tk.Frame(head, bg=BG)
+        brand.pack(side='left')
+        tk.Label(brand, text='✦', bg=BG, fg=PINK, font=theme.ui(19)).pack(side='left')
+        tk.Label(brand, text='HBR LIVE', bg=BG, fg=FG,
+                 font=(theme.num_family(), -19, 'bold')).pack(side='left', padx=(9, 0))
+        self.subtitle = self.label(brand, '星屑战斗手帐', DIM, 12)
+        self.subtitle.pack(side='left', padx=(12, 0), pady=(3, 0))
+        self.menu = tk.Menu(self.root, tearoff=False, bg=CARD, fg=FG, activebackground=CARD_HI,
+                            activeforeground=FG, bd=0, relief='flat')
+        self.menu.add_checkbutton(label='紧凑模式', variable=self.compact, command=self.change_compact)
+        self.menu.add_checkbutton(label='保持置顶', variable=self.topmost,
+                                  command=lambda: self.root.attributes('-topmost', self.topmost.get()))
         for value, title in ((1., '不透明'), (.9, '透明度 90%'), (.8, '透明度 80%')):
-            menu.add_radiobutton(label=title, variable=self.opacity, value=value,
-                                command=lambda: self.root.attributes('-alpha', self.opacity.get()))
-        menu.add_separator()
-        menu.add_command(label='导出本场摘要…', command=self.export)
-        menu.add_command(label='保存行动轴…', command=self.export_axis)
-        menu.add_command(label='打开记录文件夹', command=self.open_sessions)
-        menu.add_command(label='诊断日志', command=self.show_logs)
-        damage_summary = tk.Frame(self.root, bg=BG)
-        damage_summary.pack(fill='x', padx=18, pady=6)
-        damage_summary.columnconfigure(0,weight=1,uniform='damage')
-        damage_summary.columnconfigure(1,weight=1,uniform='damage')
-        self.hero = RoundedCard(damage_summary)
-        self.hero.grid(row=0,column=0,sticky='nsew',padx=(0,6))
+            self.menu.add_radiobutton(label=title, variable=self.opacity, value=value,
+                                      command=lambda: self.root.attributes('-alpha', self.opacity.get()))
+        self.menu.add_separator()
+        self.menu.add_command(label='导出本场摘要…', command=self.export)
+        self.menu.add_command(label='保存行动轴…', command=self.export_axis)
+        self.menu.add_command(label='打开记录文件夹', command=self.open_sessions)
+        self.menu.add_command(label='诊断日志', command=self.show_logs)
+        self.settings_button = RoundedButton(head, '设置 ⋯', self.drop_menu, CARD_HI, FG,
+                                             theme.ui(12), height=34)
+        self.settings_button.configure(width=96)
+        self.settings_button.pack(side='right')
+
+    def drop_menu(self):
+        button = self.settings_button
+        self.menu.tk_popup(button.winfo_rootx(), button.winfo_rooty() + button.winfo_height() + 4)
+
+    def build_hero(self):
+        summary = self.hero_row = tk.Frame(self.root, bg=BG)
+        summary.pack(fill='x', padx=18, pady=(0, 10))
+        self.hero_stacked = False
+        summary.columnconfigure(0, weight=3, uniform='damage')
+        summary.columnconfigure(1, weight=2, uniform='damage')
+        self.hero = RoundedCard(summary, background=theme.mix(CARD, PINK, .07),
+                                accent=PINK, pad=(20, 16), stretch=True, height=132)
+        self.hero.grid(row=0, column=0, sticky='nsew', padx=(0, 6))
         hero = self.hero.content
-        self.label(hero, 'TurnMaxDamage · 指令最大伤害', DIM, 10).pack(anchor='w')
-        self.total_label = tk.Label(hero, text='0', bg=CARD, fg=PINK,
-                                   font=('Segoe UI', -46, 'bold italic'), anchor='w')
-        self.total_label.pack(fill='x')
-        self.summary = self.label(hero, '尚未连接  ·  等待第一笔行动', DIM)
-        self.summary.pack(anchor='w')
-        self.od_label=self.label(hero,'OD · 等待采样',CYAN)
-        self.od_label.pack(anchor='w')
-        self.current_damage_card = RoundedCard(damage_summary)
-        self.current_damage_card.grid(row=0,column=1,sticky='nsew',padx=(6,0))
-        self.label(self.current_damage_card.content, 'TurnDamage · 当前指令伤害', DIM, 10).pack(anchor='w')
-        self.current_damage_label = self.label(self.current_damage_card.content, '0', CYAN, 22, anchor='w')
-        self.current_damage_label.pack(fill='x')
+        top = tk.Frame(hero, bg=self.hero.background)
+        top.pack(fill='x')
+        self.label(top, '指令最大伤害', PINK, 12, bold=True).pack(side='left')
+        self.label(top, 'TURN MAX DAMAGE', theme.MUTED, 9).pack(side='left', padx=(8, 0), pady=(2, 0))
+        self.total_label = tk.Label(hero, text='0', bg=self.hero.background, fg=PINK,
+                                    font=theme.num(46), anchor='w')
+        self.total_label.pack(fill='x', pady=(2, 0))
+        meta = tk.Frame(hero, bg=self.hero.background)
+        meta.pack(fill='x')
+        self.summary = self.label(meta, '尚未连接  ·  等待第一笔行动', DIM, 11, anchor='w')
+        self.summary.pack(side='left', fill='x', expand=True)
+        self.od_label = self.label(meta, 'OD · 等待采样', CYAN, 11, bold=True)
+        self.od_label.pack(side='right')
+        hero.bind('<Configure>', lambda e: self.summary.configure(
+            wraplength=max(90, e.width - self.od_label.winfo_reqwidth() - 12)))
+
+        self.current_damage_card = RoundedCard(summary, background=theme.mix(CARD, CYAN, .07),
+                                               accent=CYAN, pad=(20, 16), stretch=True, height=132)
+        self.current_damage_card.grid(row=0, column=1, sticky='nsew', padx=(6, 0))
+        current = self.current_damage_card.content
+        top = tk.Frame(current, bg=self.current_damage_card.background)
+        top.pack(fill='x')
+        self.label(top, '当前指令伤害', CYAN, 12, bold=True).pack(side='left')
+        self.label(top, 'TURN DAMAGE', theme.MUTED, 9).pack(side='left', padx=(8, 0), pady=(2, 0))
+        self.current_damage_label = tk.Label(current, text='0', bg=self.current_damage_card.background,
+                                             fg=CYAN, font=theme.num(30), anchor='w')
+        self.current_damage_label.pack(fill='x', pady=(4, 0))
+        self.label(current, '含追击与连击珠', theme.MUTED, 10).pack(anchor='w', pady=(2, 0))
+
+    def build_controls(self):
         controls = tk.Frame(self.root, bg=BG)
-        controls.pack(fill='x', padx=18, pady=(8, 4))
+        controls.pack(fill='x', padx=18, pady=(0, 8))
         for col in range(3):
             controls.columnconfigure(col, weight=1, uniform='controls')
-        self.start_button = RoundedButton(controls, '连接战斗', self.start_or_stop, PINK, BG, (*FONT, 'bold'))
+        self.start_button = RoundedButton(controls, '连接战斗', self.start_or_stop, PINK, '#2a2036',
+                                          theme.ui(13, 'bold'), height=46)
         self.start_button.grid(row=0, column=0, sticky='ew', padx=(0, 5))
-        self.pause_button = RoundedButton(controls, '暂停', self.toggle_pause, '#4b4163', FG, FONT)
+        self.pause_button = RoundedButton(controls, '暂停', self.toggle_pause, CARD_HI, FG,
+                                          theme.ui(13), height=46)
         self.pause_button.grid(row=0, column=1, sticky='ew', padx=5)
-        RoundedButton(controls, '星屑资料室', self.open_library, '#4b4163', FG, FONT).grid(row=0, column=2, sticky='ew', padx=(5, 0))
-        self.status = self.label(self.root, '先进入战斗指令选择画面，再连接。窗口可随时拖动。', DIM,
-                                 anchor='w', justify='left', wraplength=800)
-        self.status.pack(fill='x', padx=24, pady=(3, 8))
-        history_bar = tk.Frame(self.root, bg=BG)
-        history_bar.pack(fill='x', padx=22, pady=(0, 6))
-        tk.Checkbutton(history_bar,text='角色状态',variable=self.players_visible,command=self.layout,
-                       bg=BG,fg=PINK,selectcolor=CARD,activebackground=BG,activeforeground=FG,font=FONT).pack(side='left')
-        tk.Checkbutton(history_bar, text='行动轴独立窗口', variable=self.history_visible, command=self.toggle_history,
-                       bg=BG, fg=PINK, selectcolor=CARD, activebackground=BG,
-                       activeforeground=FG, font=FONT).pack(side='left')
-        tk.Button(history_bar, text='保存行动轴…', command=self.export_axis, bg=CARD, fg=FG,
-                  relief='flat', font=FONT).pack(side='right')
-        tk.Button(history_bar, text='伤害试算', command=self.open_damage_calculator, bg=CARD, fg=FG,
-                  relief='flat', font=FONT).pack(side='right',padx=6)
-        self.field_label = tk.Label(self.root, text='场地 · 待连接', bg='#304536', fg='#c8e7bb',
-                                    anchor='w', justify='left', padx=14, pady=8, font=FONT, cursor='hand2')
-        self.field_label.pack(fill='x',padx=22,pady=(0,8))
-        self.field_label.bind('<Button-1>',lambda e:self.show_field_details())
-        self.field_label.bind('<Configure>',lambda e:self.field_label.configure(wraplength=max(160,e.width-30)))
+        self.library_button = RoundedButton(controls, '星屑资料室', self.open_library, CARD_HI, FG,
+                                            theme.ui(13), height=46)
+        self.library_button.grid(row=0, column=2, sticky='ew', padx=(5, 0))
+
+    def build_status(self):
+        bar = RoundedCard(self.root, background=SURFACE, outline=LINE, pad=(14, 9),
+                          radius=theme.RADIUS_SM)
+        bar.pack(fill='x', padx=18, pady=(0, 10))
+        row = bar.content
+        self.status_dot = tk.Canvas(row, width=10, height=10, bg=SURFACE, highlightthickness=0, bd=0)
+        self.status_dot.pack(side='left', padx=(0, 9))
+        self._draw_status_dot(DIM)
+        self.status = self.label(row, '先进入战斗指令选择画面，再连接。窗口可随时拖动。', DIM, 11,
+                                 anchor='w', justify='left', wraplength=900)
+        self.status.pack(side='left', fill='x', expand=True)
+
+    def _draw_status_dot(self, color):
+        self.status_dot.delete('all')
+        self.status_dot.create_oval(1, 1, 9, 9, fill=color, outline='')
+
+    def build_toolbar(self):
+        bar = tk.Frame(self.root, bg=BG)
+        bar.pack(fill='x', padx=22, pady=(0, 8))
+        self.players_toggle = ToggleChip(bar, '角色状态', self.players_visible, self.layout, PINK)
+        self.players_toggle.pack(side='left')
+        self.history_toggle = ToggleChip(bar, '行动轴窗口', self.history_visible, self.toggle_history, CYAN)
+        self.history_toggle.pack(side='left', padx=8)
+        RoundedButton(bar, '保存行动轴…', self.export_axis, CARD_HI, DIM, theme.ui(12),
+                      height=34).pack(side='right')
+        RoundedButton(bar, '伤害试算', self.open_damage_calculator, theme.mix(CARD_HI, PINK, .22), FG,
+                      theme.ui(12), height=34).pack(side='right', padx=8)
+
+    def build_field(self):
+        card = RoundedCard(self.root, background=theme.mix(SURFACE, MINT, .10), outline=theme.mix(LINE, MINT, .3),
+                           pad=(16, 10), radius=theme.RADIUS_SM)
+        card.pack(fill='x', padx=18, pady=(0, 10))
+        row = card.content
+        self.label(row, '◈', MINT, 12, bold=True).pack(side='left', padx=(2, 10))
+        self.field_label = self.label(row, '场地 · 待连接', MINT, 11, anchor='w', justify='left',
+                                      cursor='hand2')
+        self.field_label.pack(side='left', fill='x', expand=True)
+        self.field_label.bind('<Button-1>', lambda e: self.show_field_details())
+        self.field_label.bind('<Configure>', lambda e: self.field_label.configure(wraplength=max(160, e.width - 20)))
+
+    def build_body(self):
         self.body = tk.Frame(self.root, bg=BG)
         self.body.pack(fill='both', expand=True, padx=18)
+        # team
         self.allies = tk.Frame(self.body, bg=BG)
-        self.label(self.allies, '队伍 · 六人状态', PINK, 13).pack(anchor='w', padx=8, pady=(2,10))
-        self.player_view = tk.Canvas(self.allies, bg=BG, highlightthickness=0)
-        player_scroll = ttk.Scrollbar(self.allies, command=self.player_view.yview)
+        allies_card = RoundedCard(self.allies, background=SURFACE, outline=LINE, pad=(14, 12),
+                                  stretch=True)
+        allies_card.pack(fill='both', expand=True)
+        head = tk.Frame(allies_card.content, bg=SURFACE)
+        head.pack(fill='x', pady=(0, 8))
+        self.label(head, '队伍 · 六人状态', PINK, 13, bold=True).pack(side='left')
+        self.label(head, '点击头像查看状态', theme.MUTED, 10).pack(side='right', pady=(2, 0))
+        self.player_view = tk.Canvas(allies_card.content, bg=SURFACE, highlightthickness=0, bd=0)
+        player_scroll = ttk.Scrollbar(allies_card.content, command=self.player_view.yview)
         self.player_view.configure(yscrollcommand=player_scroll.set)
         player_scroll.pack(side='right', fill='y')
         self.player_view.pack(fill='both', expand=True)
         from .player_panel import PlayerPanel
         self.player_panel = PlayerPanel(self.player_view, self.text_window)
-        player_slot = self.player_view.create_window(0,0,anchor='nw',window=self.player_panel)
-        self.player_view.bind('<Configure>',lambda e:self.player_view.itemconfigure(player_slot,width=e.width))
-        self.player_panel.bind('<Configure>',lambda e:self.player_view.configure(scrollregion=self.player_view.bbox('all')))
+        self.player_slot = self.player_view.create_window(0, 0, anchor='nw', window=self.player_panel)
+        self.player_view.bind('<Configure>', self.fit_player_view)
+        self.player_panel.bind('<Configure>', lambda e: self.player_view.configure(scrollregion=self.player_view.bbox('all')))
+        # enemies
         self.resources = tk.Frame(self.body, bg=BG)
-        self.label(self.resources, 'Boss 状态与行动', CYAN, 13).pack(anchor='w', padx=8, pady=(2, 10))
+        res_card = RoundedCard(self.resources, background=SURFACE, outline=LINE, pad=(14, 12),
+                               stretch=True)
+        res_card.pack(fill='both', expand=True)
+        inner = res_card.content
+        head = tk.Frame(inner, bg=SURFACE)
+        head.pack(fill='x', pady=(0, 2))
+        self.label(head, 'Boss 状态与行动', CYAN, 13, bold=True).pack(side='left')
         self.enemy_cards = {}
-        self.enemy_view = tk.Canvas(self.resources, bg=BG, highlightthickness=0, height=350)
-        enemy_scroll = ttk.Scrollbar(self.resources, command=self.enemy_view.yview)
+        self.enemy_view = tk.Canvas(inner, bg=SURFACE, highlightthickness=0, bd=0)
+        enemy_scroll = ttk.Scrollbar(inner, command=self.enemy_view.yview)
         self.enemy_view.configure(yscrollcommand=enemy_scroll.set)
         enemy_scroll.pack(side='right', fill='y')
         self.enemy_view.pack(fill='both', expand=True)
-        self.enemy_stack = tk.Frame(self.enemy_view, bg=BG)
+        self.enemy_stack = tk.Frame(self.enemy_view, bg=SURFACE)
         self.enemy_status_panels = {}
         enemy_slot = self.enemy_view.create_window(0, 0, anchor='nw', window=self.enemy_stack)
         self.enemy_view.bind('<Configure>', lambda e: self.enemy_view.itemconfigure(enemy_slot, width=e.width))
         self.enemy_stack.bind('<Configure>', lambda e: self.enemy_view.configure(scrollregion=self.enemy_view.bbox('all')))
-        self.resource_note = self.label(self.resources, '各条独立读取 · 比例参考本场观测最大值', DIM, 9, anchor='w', wraplength=275)
-        self.resource_note.pack(fill='x', padx=8, pady=5, before=self.enemy_view)
+        self.resource_note = self.label(inner, '各条独立读取 · 比例参考本场观测最大值', theme.MUTED, 10,
+                                        anchor='w', wraplength=275)
+        self.resource_note.pack(fill='x', pady=(0, 6), before=self.enemy_view)
+
+    def build_history(self):
         self.history_window = tk.Toplevel(self.root)
         self.history_window.title('HBR Live · 行动记录')
         self.history_window.configure(bg=BG)
@@ -213,11 +294,11 @@ class App:
         self.history_window.protocol('WM_DELETE_WINDOW', self.hide_history)
         self.history = tk.Frame(self.history_window, bg=BG, padx=16, pady=12)
         self.history.pack(fill='both', expand=True)
-        self.label(self.history, '行动记录', PINK, 13).pack(anchor='w', pady=(2, 10))
-        tk.Button(self.history, text='切换头像 / 角色风格', command=lambda: self.tree.toggle_portraits(),
-                  bg=CARD, fg=DIM, relief='flat', font=FONT).pack(anchor='e')
+        self.label(self.history, '行动记录', PINK, 14, bold=True).pack(anchor='w', pady=(2, 10))
+        RoundedButton(self.history, '切换头像 / 角色风格', lambda: self.tree.toggle_portraits(),
+                      CARD_HI, DIM, theme.ui(12), height=32).pack(anchor='e')
         tree_wrap = tk.Frame(self.history, bg=CARD)
-        tree_wrap.pack(fill='both', expand=True)
+        tree_wrap.pack(fill='both', expand=True, pady=(8, 0))
         self.tree = BattleTable(tree_wrap)
         scrollbar = ttk.Scrollbar(tree_wrap, command=self.tree.yview)
         horizontal = ttk.Scrollbar(tree_wrap, orient='horizontal', command=self.tree.xview)
@@ -227,22 +308,26 @@ class App:
         self.tree.pack(fill='both', expand=True)
         self.tree.bind('<<TreeviewSelect>>', lambda _: self.render_details())
         self.tree.bind('<<RowDetails>>', lambda _: self.show_details())
-        self.detail_caption = self.label(self.history, '一行一次行动 · / 表示未观测到行动 · 双击查看本行全部详情。', DIM, 9, anchor='w', wraplength=420, justify='left')
+        self.detail_caption = self.label(self.history, '一行一次行动 · / 表示未观测到行动 · 双击查看本行全部详情。',
+                                         theme.MUTED, 10, anchor='w', wraplength=420, justify='left')
         self.detail_caption.pack(fill='x', pady=8)
         self.detail_wrap = tk.Frame(self.history, bg=CARD)
-        self.detail = tk.Text(self.detail_wrap, height=6, bg=CARD, fg=FG, relief='flat', font=FONT,
-                              wrap='word', padx=12, pady=10, state='disabled')
+        self.detail = tk.Text(self.detail_wrap, height=6, **theme.text_widget_options(CARD),
+                              wrap='word', state='disabled')
         detail_scroll = ttk.Scrollbar(self.detail_wrap, command=self.detail.yview)
         self.detail.configure(yscrollcommand=detail_scroll.set)
         detail_scroll.pack(side='right', fill='y')
         self.detail.pack(fill='both', expand=True)
-        self.detail_button = RoundedButton(self.history, '展开本行详情', self.toggle_details, '#4b4163', FG, FONT)
-        self.detail_button.pack(fill='x', pady=(0, 6))
-        self.history.bind('<Configure>', lambda e: self.detail_caption.configure(wraplength=max(200,e.width-10)))
-        self.footer = self.label(self.root, '本地记录  ·  只读内存  ·  无需截图', DIM, 9, anchor='w')
-        self.footer.pack(side='bottom', fill='x', padx=24, pady=(10, 14), before=self.body)
-        self.root.bind('<Configure>', self.on_resize, add='+')
-        self.root.bind_all('<MouseWheel>', self.scroll_battle, add='+')
+        self.detail_button = RoundedButton(self.history, '展开本行详情', self.toggle_details, CARD_HI, FG,
+                                           theme.ui(12), height=38)
+        self.detail_button.pack(fill='x', pady=(8, 6))
+        self.history.bind('<Configure>', lambda e: self.detail_caption.configure(wraplength=max(200, e.width-10)))
+
+    # ---- interaction -------------------------------------------------------
+    def fit_player_view(self, event):
+        needed = self.player_panel.winfo_reqheight()
+        self.player_view.itemconfigure(self.player_slot, width=event.width,
+                                       height=max(event.height, needed))
 
     def scroll_battle(self, event):
         widget = event.widget
@@ -254,26 +339,52 @@ class App:
 
     def on_resize(self, event):
         if event.widget is self.root:
-            self.status.configure(wraplength=max(300, event.width-50))
-            self.total_label.configure(font=('Segoe UI', -36 if event.width < 500 else -46, 'bold italic'))
+            self.status.configure(wraplength=max(240, event.width - 110))
+            size = 34 if event.width < 620 else (38 if event.width < 820 else 46)
+            self.total_label.configure(font=theme.num(size))
+            self.layout_hero(event.width < 900)
+
+    def layout_hero(self, stacked):
+        if stacked == self.hero_stacked:
+            return
+        self.hero_stacked = stacked
+        row = self.hero_row
+        if stacked:
+            row.columnconfigure(0, weight=1, uniform='')
+            row.columnconfigure(1, weight=0, uniform='')
+            self.current_damage_card.grid_configure(row=1, column=0, padx=0, pady=(8, 0))
+            self.hero.grid_configure(row=0, column=0, padx=0)
+            self.current_damage_card.fixed_height = 116
+        else:
+            row.columnconfigure(0, weight=3, uniform='damage')
+            row.columnconfigure(1, weight=2, uniform='damage')
+            self.hero.grid_configure(row=0, column=0, padx=(0, 6))
+            self.current_damage_card.grid_configure(row=0, column=1, padx=(6, 0), pady=0)
+            self.current_damage_card.fixed_height = 132
+        self.current_damage_card.configure(height=self.current_damage_card.fixed_height)
+        self.current_damage_card.draw()
 
     def layout(self):
         visible = self.players_visible.get()
-        self.root.minsize(820 if visible else 420, 730)
-        self.body.columnconfigure(0, weight=1 if visible else 0, uniform='battle' if visible else '', minsize=360 if visible else 0)
-        self.body.columnconfigure(1, weight=1, uniform='battle' if visible else '', minsize=360)
+        self.root.minsize(980 if visible else 440, 760)
+        self.body.columnconfigure(0, weight=3 if visible else 0,
+                                  uniform='battle' if visible else '', minsize=380 if visible else 0)
+        self.body.columnconfigure(1, weight=2 if visible else 1,
+                                  uniform='battle' if visible else '', minsize=340)
         self.body.rowconfigure(0, weight=1)
         if visible:
-            self.allies.grid(row=0,column=0,sticky='nsew',padx=(0,8))
+            self.allies.grid(row=0, column=0, sticky='nsew', padx=(0, 6))
         else:
             self.allies.grid_remove()
-        self.resources.grid(row=0,column=1,sticky='nsew',padx=(8 if visible else 0,0))
-        self.root.geometry('1080x900' if visible else '520x850')
+        self.resources.grid(row=0, column=1, sticky='nsew', padx=(6 if visible else 0, 0))
+        self.players_toggle.draw()
         self.update_detail_visibility()
 
     def change_compact(self):
         self.players_visible.set(not self.compact.get())
         self.layout()
+        self.players_toggle.draw()
+        self.root.geometry('500x860' if self.compact.get() else '1180x900')
 
     def toggle_history(self):
         if self.history_visible.get():
@@ -306,8 +417,8 @@ class App:
         self.stop_event.clear()
         self.paused.clear()
         self.connected = False
-        self.pause_button.configure(text='暂停')
-        self.start_button.configure(text='取消连接')
+        self.pause_button.configure(text='暂停', bg=CARD_HI)
+        self.start_button.configure(text='取消连接', bg=theme.mix(CARD_HI, ROSE, .45))
         self.set_status('正在连接，请暂不行动…')
         from .source import run
         self.thread = threading.Thread(target=run,
@@ -324,11 +435,11 @@ class App:
             return
         if self.paused.is_set():
             self.paused.clear()
-            self.pause_button.configure(text='暂停')
+            self.pause_button.configure(text='暂停', bg=CARD_HI)
             self.set_status('正在读取 · 可以行动', CYAN)
         else:
             self.paused.set()
-            self.pause_button.configure(text='继续')
+            self.pause_button.configure(text='继续', bg=theme.mix(CARD_HI, GOLD, .45))
             self.set_status('已暂停 · 思考期间请勿行动；继续后沿用本场记录。', GOLD)
 
     def pump(self):
@@ -354,7 +465,7 @@ class App:
                     self.field_label.configure(text='场地 · 等待采样')
                     self.last_sample = None
                     self.connected = True
-                    self.start_button.configure(text='停止')
+                    self.start_button.configure(text='停止', bg=theme.mix(CARD_HI, ROSE, .6))
                     self.set_status('内存已连接 · 可以行动', CYAN)
                 elif kind == 'snapshot':
                     self.model.update(data)
@@ -367,8 +478,8 @@ class App:
                     self.connected = False
                     for card in self.enemy_cards.values():
                         card.set_monitoring(False)
-                    self.start_button.configure(text='连接新战斗')
-                    self.pause_button.configure(text='暂停')
+                    self.start_button.configure(text='连接新战斗', bg=theme.mix(CARD_HI, MINT, .4))
+                    self.pause_button.configure(text='暂停', bg=CARD_HI)
                 elif kind == 'battle_end':
                     run_id = data['run_id']
                     if run_id not in self.prompted_runs:
@@ -434,10 +545,10 @@ class App:
         for number, (key, state) in enumerate(self.model.enemies.items(), 1):
             if key not in self.enemy_cards:
                 card = self.enemy_cards[key] = EnemyCard(self.enemy_stack, number, self.show_enemy_details)
-                card.pack(fill='x', pady=(0, 6))
+                card.pack(fill='x', padx=(0, 10), pady=(0, 8))
                 from .status_groups import StatusGroups
                 panel = StatusGroups(self.enemy_stack, self.show_status_details, enemy=True)
-                panel.pack(fill='x', padx=4, pady=(0,12))
+                panel.pack(fill='x', padx=(2, 14), pady=(0,12))
                 self.enemy_status_panels[key] = panel
             self.enemy_cards[key].update_state(state)
             self.enemy_status_panels[key].update_state(state)
@@ -503,7 +614,7 @@ class App:
         if totals:
             text += '目标伤害：' + ' / '.join(f'{self.target_label(k)} {v:,}' for k,v in totals.items()) + '\n\n'
         else:
-            text += '未观测到对敌伤害；已记录技能发动，暂不解析特殊效果。\n'
+            text += '未观测到对敌伤害；已记录技能发动，暂不解析特殊效果。\n\n'
         text += '作用目标：' + self.target_summary(event) + '\n\n'
         for n, hit in enumerate(event['hits'], 1):
             enemy = self.model.enemies.get(hit['target'], {})
@@ -525,14 +636,24 @@ class App:
     def text_window(self, title, text):
         window = tk.Toplevel(self.root)
         window.title('HBR Live · ' + title)
-        window.geometry('580x500')
-        box = tk.Text(window, bg=BG, fg=FG, font=FONT, wrap='word', padx=20, pady=20)
-        scroll = ttk.Scrollbar(window, command=box.yview)
-        box.configure(yscrollcommand=scroll.set)
+        window.configure(bg=BG)
+        window.geometry('620x540')
+        head = tk.Frame(window, bg=BG)
+        head.pack(fill='x', padx=20, pady=(16, 8))
+        self.label(head, title, PINK, 14, bold=True).pack(side='left')
+        box = RoundedCard(window, background=CARD, pad=(0, 0), stretch=True)
+        box.pack(fill='both', expand=True, padx=16, pady=(0, 16))
+        body = tk.Frame(box.content, bg=CARD)
+        body.pack(fill='both', expand=True, padx=6, pady=6)
+        text_widget = tk.Text(body, **theme.text_widget_options(CARD), wrap='word')
+        scroll = ttk.Scrollbar(body, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scroll.set)
         scroll.pack(side='right', fill='y')
-        box.pack(fill='both', expand=True)
-        box.insert('end', text)
-        box.configure(state='disabled')
+        text_widget.pack(fill='both', expand=True)
+        text_widget.insert('end', text)
+        text_widget.configure(state='disabled')
+        for pass_event in ('<MouseWheel>',):
+            text_widget.bind(pass_event, lambda e: text_widget.yview_scroll(-int(e.delta / 120), 'units'))
 
     def open_library(self):
         from hbr_data.window import LibraryWindow
@@ -544,6 +665,7 @@ class App:
 
     def set_status(self, text, color=DIM):
         self.status.configure(text=text, fg=color)
+        self._draw_status_dot(color)
         self.log_lines.append(time.strftime('%H:%M:%S') + '  ' + text)
         self.log_lines = self.log_lines[-300:]
 

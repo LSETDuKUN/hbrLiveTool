@@ -3,6 +3,9 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
+from . import theme
+from .components import ToggleChip
+
 SLOTS=[(f'{e}EnhanceRing',f'{name}属性戒指','element_attack')
        for e,name in [('Fire','火'),('Ice','冰'),('Thunder','雷'),('Light','光'),('Dark','暗')]]+[
     ('DPAttackUpRangeByHitEarring','DP 特攻耳坠','dp_bonus'),
@@ -30,18 +33,26 @@ def totals(rows):
     return result
 
 
-class EquipmentEditor(ttk.Frame):
+class EquipmentEditor(tk.Frame):
     def __init__(self,parent):
-        super().__init__(parent)
+        super().__init__(parent, bg=theme.BG)
         self.rows=[];self.applied={}
-        ttk.Label(self,text='已计入对应乘区；修改后点击“计算”，只替换该饰品贡献，不会重复叠加。\n未检测到的项目默认不计入；如手动勾选，请同时填写已核实的增益。\n检测依据是装备效果标识；特殊项链按效果列出，不据此猜测具体项链名称。',wraplength=850).pack(anchor='w',pady=8)
+        intro=tk.Label(self,text='已计入对应乘区；修改后点击“计算”，只替换该饰品贡献，不会重复叠加。\n未检测到的项目默认不计入；如手动勾选，请同时填写已核实的增益。\n检测依据是装备效果标识；特殊项链按效果列出，不据此猜测具体项链名称。',
+            bg=theme.BG,fg=theme.MUTED,font=theme.ui(11),justify='left',anchor='w',wraplength=860)
+        intro.pack(fill='x',pady=(0,8))
         for slot,name,key in SLOTS:
-            frame=ttk.LabelFrame(self,text=name,padding=8);frame.pack(fill='x',pady=4)
+            frame=tk.Frame(self,bg=theme.SURFACE,padx=12,pady=6);frame.pack(fill='x',pady=2)
             enabled=tk.BooleanVar(self,value=False);value=tk.StringVar(self,value='0')
-            ttk.Checkbutton(frame,text='计入',variable=enabled).pack(side='left')
-            ttk.Entry(frame,textvariable=value,width=10).pack(side='left',padx=8)
-            ttk.Label(frame,text='% → '+DESTINATIONS[key]).pack(side='left')
-            note=ttk.Label(frame,text='未检测',wraplength=440);note.pack(side='left',padx=12)
+            right=tk.Frame(frame,bg=theme.SURFACE);right.pack(side='right')
+            ToggleChip(right,text='计入',variable=enabled,accent=theme.MINT,height=28).pack(side='left',padx=(0,8))
+            ttk.Entry(right,textvariable=value,width=7,style='Panel.TEntry',justify='right').pack(side='left')
+            tk.Label(right,text='%',bg=theme.SURFACE,fg=theme.MUTED,font=theme.ui(10)).pack(side='left',padx=(3,6))
+            tk.Label(right,text='→ '+DESTINATIONS[key],bg=theme.SURFACE,fg=theme.CYAN,font=theme.ui(10),
+                     width=10,anchor='w').pack(side='left')
+            note=tk.Label(frame,text='未检测',bg=theme.SURFACE,fg=theme.MUTED,font=theme.ui(10),anchor='e')
+            note.pack(side='right',padx=(10,10))
+            tk.Label(frame,text=name,bg=theme.SURFACE,fg=theme.FG,font=theme.ui(11,'bold'),
+                     anchor='w',width=18).pack(side='left')
             self.rows.append(dict(slot=slot,key=key,enabled=enabled,value=value,note=note))
 
     def load(self,details,owned):

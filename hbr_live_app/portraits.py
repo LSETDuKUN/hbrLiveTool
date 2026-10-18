@@ -22,14 +22,16 @@ def portrait_path(label):
 
 
 class Portraits:
-    def __init__(self, master):
+    def __init__(self, master, size=44):
         self.master = master
+        self.size = size
         self.cache = {}
 
     def get(self, label):
         if not label:
             return None
-        if label not in self.cache:
+        key = (label, self.size)
+        if key not in self.cache:
             photo = None
             try:
                 from PIL import Image, ImageTk
@@ -37,9 +39,9 @@ class Portraits:
                 if path:
                     with Image.open(path) as source:
                         picture = source.convert('RGBA')
-                        picture.thumbnail((44, 44), Image.Resampling.LANCZOS)
+                        picture.thumbnail((self.size, self.size), Image.Resampling.LANCZOS)
                     photo = ImageTk.PhotoImage(picture, master=self.master)
             except (OSError, ValueError, KeyError, sqlite3.Error, ImportError):
                 pass
-            self.cache[label] = photo
-        return self.cache[label]
+            self.cache[key] = photo
+        return self.cache[key]

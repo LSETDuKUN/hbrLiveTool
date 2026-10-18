@@ -110,7 +110,8 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(window.plot_data['hits'],2)
         self.assertIn('中央 90%',window.prob_summary.cget('text'))
         self.assertTrue(any(window.plot.type(item)=='polygon' for item in window.plot.find_all()))
-        self.assertEqual(window.raw.cget('background'),'#4a405e')
+        from hbr_live_app import theme
+        self.assertEqual(window.raw.cget('background'),theme.SURFACE)
         from hbr_live_app.components import RoundedCard
         def descendants(widget):
             for child in widget.winfo_children():

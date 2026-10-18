@@ -1,14 +1,19 @@
 """Separate compact gauges for every enemy, with stable session numbers."""
 import tkinter as tk
 import time
-from .gauge_trail import GaugeTrail
 from tkinter import font as tkfont
+
+from . import theme
 from .components import rounded
+from .gauge_trail import GaugeTrail
+
+CARD = theme.CARD
+SURFACE = theme.SURFACE
 
 
 class EnemyCard(tk.Canvas):
     def __init__(self, parent, number, show_details=None):
-        super().__init__(parent, height=232, bg='#201d32', highlightthickness=0)
+        super().__init__(parent, height=232, bg=parent.cget('bg'), highlightthickness=0, bd=0)
         self.number = number
         self.state = None
         self.show_details = show_details
@@ -24,7 +29,11 @@ class EnemyCard(tk.Canvas):
         self.trails = {p: GaugeTrail() for p in ('dp', 'hp')}
         self.bind('<Button-1>', self.click)
         self.bind('<Destroy>', self.on_destroy)
-        self.font = tkfont.Font(family='Microsoft YaHei UI', size=-12)
+        self.font = tkfont.Font(family=theme.UI_FAMILY, size=-12)
+        self.small = tkfont.Font(family=theme.UI_FAMILY, size=-11)
+        self.name_font = tkfont.Font(family=theme.UI_FAMILY, size=-14, weight='bold')
+        self.number_font = tkfont.Font(family=theme.num_family(), size=-15, weight='bold', slant='italic')
+        self.branch_font = tkfont.Font(family=theme.UI_FAMILY, size=-14, weight='bold')
         self.bind('<Configure>', lambda _: self.draw())
 
     def update_state(self, state):
@@ -120,117 +129,135 @@ class EnemyCard(tk.Canvas):
             self.after_cancel(self.timer)
             self.timer = None
 
+    # ---- drawing -----------------------------------------------------------
+    def bar(self, x1, y1, x2, y2, fraction, delayed, color):
+        rounded(self, x1, y1, x2, y2, (y2-y1)/2, fill=theme.BG, outline='')
+        if delayed > fraction:
+            rounded(self, x1, y1, x1+(x2-x1)*delayed, y2, (y2-y1)/2, fill=theme.mix(color, theme.ROSE, .55), outline='')
+        if fraction:
+            rounded(self, x1, y1, x1+(x2-x1)*fraction, y2, (y2-y1)/2, fill=color, outline='')
+
     def draw(self):
         self.delete('all')
         if not self.state:
             return
-        s, w = self.state, max(100, self.winfo_width())
+        s, w = self.state, max(120, self.winfo_width())
         preview = s.get('forecast', {})
         branches = preview.get('branches', [])
         visible = branches[:4]
         following = preview.get('future', [])[:2]
-        effect_texts, branch_heights = [], []
+        inner = w - 56
+
+        # Pass 1: measure the wrapped effect text so the band can size itself.
+        effect_texts, effect_heights = [], []
         for branch in visible:
             effects = branch.get('effects', [])
-            effect_text = '\n'.join((f'{i+1}. ' if len(effects)>1 else '')+value for i, value in enumerate(effects))
+            effect_text = '\n'.join((f'{i+1}. ' if len(effects) > 1 else '') + value
+                                     for i, value in enumerate(effects))
             effect_texts.append(effect_text)
-            item = self.create_text(0, 0, text=effect_text, font=self.font, width=w-36, anchor='nw')
+            item = self.create_text(0, 0, text=effect_text, font=self.small, width=inner, anchor='nw')
             box = self.bbox(item)
-            branch_heights.append(58+(box[3]-box[1]+8 if effect_text and box else 0))
+            effect_heights.append((box[3] - box[1]) if effect_text and box else 0)
             self.delete(item)
-        band_bottom = 169 + (sum(branch_heights) or 58)
-        status_text = ''
-        self.footer_y = band_bottom + 28*len(following) + (28 if preview.get('fallback') else 0) + 25
-        if status_text:
-            self.footer_y += 25
-        height = self.footer_y+14
+        row_heights = [40 + height + (16 if height else 0) for height in effect_heights]
+
+        band_top = 140
+        band_bottom = band_top + 34 + sum(row_heights or [46]) + 6
+        following_tops = [band_bottom + 18 + 26 * index for index in range(len(following))]
+        fallback_top = band_bottom + 18 + 26 * len(following)
+        self.footer_y = band_bottom + 26 * len(following) + (26 if preview.get('fallback') else 0) + 26
+        height = self.footer_y + 12
         if int(self.cget('height')) != height:
             self.configure(height=height)
-        rounded(self, 1, 1, w-1, height-1, 16, fill='#302b46', outline='#50415f')
-        departed = '（已离场）' if not s.get('active', True) else ''
+
+        rounded(self, 1, 1, w - 1, height - 1, 20, fill=CARD, outline=theme.LINE, tags='shell')
+        departed = not s.get('active', True)
         options = self.aliases()
         name = next((n for n in options if n['kind'] == self.name_kind), options[0])
-        title = f'敌{self.number}{departed} · {name["name"]}'
-        while self.font.measure(title) > w-24 and len(title) > 8:
+        rounded(self, 14, 12, 52, 40, 12, fill=theme.PINK_DEEP, outline='')
+        self.create_text(33, 26, text=str(self.number), font=theme.num(15), fill=theme.PINK)
+        title = name['name'] + (' · 已离场' if departed else '')
+        while self.name_font.measure(title) > w - 92 and len(title) > 4:
             title = title[:-2] + '…'
-        self.create_text(12, 16, text=title, anchor='w', fill='#f5aacb', font=self.font)
+        self.create_text(62, 19, text=title, anchor='w', fill=theme.FG, font=self.name_font)
         kind = {'cn': '中文', 'en': '国际服', 'internal': '内部名称'}.get(name['kind'], name['kind'])
-        self.create_text(12, 36, text=kind + (' · 点击名称切换' if len(options) > 1 else ''),
-                         anchor='w', fill='#bdb1d4', font=self.font)
-        for pool, y, color in [('dp', 57, '#83e5ed'), ('hp', 90, '#ffd398')]:
-            change = s[pool+'_change']
-            left = pool.upper() + (f'  {change:+,}' if change else '')
-            self.create_text(12, y, text=left, anchor='w', fill=color, font=self.font)
-            self.create_text(w-12, y, text=f'{s[pool]:,}', anchor='e', fill='#f7f0ff',
-                             font=('Segoe UI', -14, 'bold italic'))
-            rounded(self, 12, y+10, w-12, y+21, 5, fill='#201d32', outline='')
-            fraction = min(1, s[pool]/max(1, s[pool+'_reference']))
-            trail = self.trails[pool]
-            delayed = min(1, trail.display(time.monotonic()) / max(1, s[pool+'_reference']))
-            if delayed > fraction:
-                rounded(self, 12, y+10, 12+(w-24)*delayed, y+21, 5, fill='#e8a5ae', outline='')
-            if fraction:
-                rounded(self, 12, y+10, 12+(w-24)*fraction, y+21, 5, fill=color, outline='')
+        self.create_text(62, 35, text=kind + (' · 点击名称切换' if len(options) > 1 else ''),
+                         anchor='w', fill=theme.MUTED, font=self.small)
 
-        preview = s.get('forecast', {})
+        for pool, y, color in (('dp', 62, theme.CYAN), ('hp', 94, theme.GOLD)):
+            change = s[pool+'_change']
+            self.create_text(16, y, text=pool.upper(), anchor='w', fill=color, font=theme.ui(11, 'bold'))
+            if change:
+                self.create_text(48, y, text=f'{change:+,}', anchor='w',
+                                 fill=theme.ROSE if change < 0 else theme.MINT, font=self.small)
+            self.create_text(w - 18, y, text=f'{s[pool]:,}', anchor='e', fill=theme.FG,
+                             font=self.number_font)
+            fraction = min(1, s[pool]/max(1, s[pool+'_reference']))
+            delayed = min(1, self.trails[pool].display(time.monotonic()) / max(1, s[pool+'_reference']))
+            self.bar(16, y+10, w-18, y+19, fraction, delayed, color)
+
         text = preview.get('text', '行动预告未取得')
-        if not s.get('active', True):
+        if departed:
             text = '已离场'
         elif not self.monitoring and preview.get('blink'):
             text = '采样已暂停 · ' + text
-        flashing = self.timer is not None and self.monitoring
-        background = '#655036' if flashing and self.flash else '#3e354e'
+        flashing = self.timer is not None and self.monitoring and self.flash
         prior = f'{preview.get("phase", "").upper()} · 已推进至规则 {preview.get("progress_order", "—")}'
         if preview.get('previous'):
             prior = '刚执行 · ' + ' → '.join(preview['previous'])
-        while self.font.measure(prior) > w-32 and len(prior)>8:
+        while self.font.measure(prior) > w - 36 and len(prior) > 5:
             prior = prior[:-2]+'…'
-        self.create_text(16, 127, text=prior, anchor='w', fill='#a397b4', font=self.font)
-        rounded(self, 8, 140, w-8, band_bottom, 10, fill=background, outline='#817051')
-        caption = '恢复后候选' if preview.get('down', 0)>0 else '下一次行动'
+        self.create_text(16, 124, text=prior, anchor='w', fill=theme.MUTED, font=self.small)
+
+        band_fill = theme.GOLD_DEEP if flashing else theme.SURFACE
+        band_line = theme.mix(theme.GOLD_DEEP, theme.GOLD, .35) if flashing else theme.LINE
+        band = rounded(self, 10, band_top, w-10, band_bottom, 16, fill=band_fill, outline=band_line)
+        self.tag_raise(band, 'shell')
+        caption = '恢复后候选' if preview.get('down', 0) > 0 else '下一次行动'
         if not self.monitoring:
             caption += ' · 采样未更新'
-        self.create_text(18, 153, text=caption, anchor='w', fill='#d8c8ad', font=self.font)
+        self.create_text(22, band_top+13, text=caption, anchor='w',
+                         fill=theme.mix(theme.GOLD, theme.FG, .2), font=self.small)
+
         shift = max(0, 1-(time.monotonic()-self.roll_started)/0.22)*10
-        colors = ['#ffe4af', '#a9dbea', '#eab5d6', '#c5c1fa']
+        colors = [theme.GOLD, theme.CYAN, theme.PINK, theme.LAVENDER]
         if not visible:
             visible = [dict(skills=[text], status='unknown', share=None, weight=None)]
-        top = 169
+        top = band_top + 34
         for index, branch in enumerate(visible):
-            row_height = branch_heights[index] if index < len(branch_heights) else 58
+            row_height = row_heights[index] if index < len(row_heights) else 46
             titles = branch['skills']
             content = '  ·  '.join(f'{i+1} {title}' for i, title in enumerate(titles)) if len(titles)>1 else titles[0]
-            item = self.create_text(18, top+shift, text=content, width=w-36, anchor='nw',
-                fill=colors[index], font=('Microsoft YaHei UI', -15, 'bold'), tags='forecast')
-            while self.bbox(item)[3] > top+36+shift and len(content)>6:
+            item = self.create_text(22, top+shift, text=content, width=inner, anchor='nw',
+                fill=colors[index], font=self.branch_font, tags='forecast')
+            while self.bbox(item)[3] > top+26+shift and len(content) > 6:
                 content = content[:-2]+'…'
                 self.itemconfigure(item, text=content)
             if index < len(effect_texts) and effect_texts[index]:
-                self.create_text(18, top+40, text=effect_texts[index], width=w-36, anchor='nw',
-                                 fill='#d0c5dd', font=self.font, tags='skill_effects')
+                self.create_text(22, top+24+shift, text=effect_texts[index], width=inner, anchor='nw',
+                                 fill=theme.mix(theme.DIM, theme.FG, .25), font=self.small, tags='skill_effects')
             if branch.get('share') is not None and len(branches)>1:
-                self.create_line(18, top+row_height-14, 18+(w-135)*branch['share'], top+row_height-14, fill=colors[index], width=4)
-                self.create_text(w-18, top+row_height-14, text=f'{branch["share"]:.0%} 权重', anchor='e', fill=colors[index], font=self.font)
+                y = top+row_height-12+shift
+                self.create_line(22, y, 22+(w-160)*branch['share'], y, fill=colors[index],
+                                 width=3, capstyle='round')
+                self.create_text(w-22, y, text=f'{branch["share"]:.0%} 权重', anchor='e',
+                                 fill=colors[index], font=self.small)
             elif branch.get('weight') is not None:
                 label = ('观测推演' if branch.get('observed') else '条件已满足') if branch['status']=='matched' else '条件待确认'
-                self.create_text(18, top+row_height-14, text=label + (f' · 权重 {branch["weight"]}' if len(branches)>1 else ''),
-                                 anchor='w', fill='#c0b3ca', font=self.font)
+                self.create_text(22, top+row_height-12+shift,
+                                 text=label + (f' · 权重 {branch["weight"]}' if len(branches)>1 else ''),
+                                 anchor='w', fill=theme.MUTED, font=self.small)
             top += row_height
-        below = band_bottom+15
-        for row in following:
-            title = ' / '.join(' → '.join(b['skills']) for b in row['branches'])
-            text = f'↓ 推演 {row["order"]} · {title}'
-            while self.font.measure(text)>w-32 and len(text)>8:
-                text=text[:-2]+'…'
-            self.create_text(16, below, text=text, anchor='w', fill='#a397b4', font=self.font)
-            below += 28
+
+        for row, y in zip(following, following_tops):
+            line = '↓ 推演 ' + str(row['order']) + ' · ' + ' / '.join(' → '.join(b['skills']) for b in row['branches'])
+            while self.font.measure(line) > w - 36 and len(line) > 5:
+                line = line[:-2]+'…'
+            self.create_text(16, y, text=line, anchor='w', fill=theme.MUTED, font=self.small)
         if preview.get('fallback'):
-            self.create_text(16, below, text='↳ 条件不成立时有后续分支 · 见详情', anchor='w', fill='#c0b3ca', font=self.font)
-        if status_text:
-            while self.font.measure(status_text)>w-32 and len(status_text)>8:
-                status_text=status_text[:-2]+'…'
-            self.create_text(16, self.footer_y-25, text=status_text, anchor='w', fill='#eab5d6', font=self.font)
+            self.create_text(16, fallback_top, text='↳ 条件不成立时有后续分支 · 见详情', anchor='w',
+                             fill=theme.mix(theme.DIM, theme.FG, .2), font=self.small)
         footer = '名称、状态与技能效果 ›'
-        if len(branches)>4:
-            footer = f'另 {len(branches)-4} 个分支 · '+footer
-        self.create_text(12, self.footer_y, text=footer, anchor='w', fill='#83e5ed', font=self.font)
+        if len(branches) > 4:
+            footer = f'另 {len(branches)-4} 个分支 · ' + footer
+        self.create_text(16, self.footer_y, text=footer, anchor='w', fill=theme.CYAN, font=self.small)
