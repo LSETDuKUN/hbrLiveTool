@@ -16,7 +16,7 @@ class RoundedCard(tk.Canvas):
     """Rounded shell whose inner frame keeps normal Tk geometry management."""
     def __init__(self, master, background=theme.CARD, outline=theme.LINE,
                  radius=theme.RADIUS, pad=(16, 14), accent=None, stretch=False,
-                 highlight=None, **kwargs):
+                 clip=False, highlight=None, **kwargs):
         super().__init__(master, bg=master.cget('bg'), highlightthickness=0, bd=0, **kwargs)
         self.background = background
         self.outline = outline
@@ -24,6 +24,7 @@ class RoundedCard(tk.Canvas):
         self.pad = pad
         self.accent = accent
         self.stretch = stretch
+        self.clip = clip
         self.highlight = highlight
         self.fixed_height = kwargs.get('height')
         self.content = tk.Frame(self, bg=background)
@@ -52,9 +53,9 @@ class RoundedCard(tk.Canvas):
         padx, pady = self.pad
         self.itemconfigure(self.slot, width=width - 2 * padx)
         natural = self.content.winfo_reqheight() + 2 * pady
-        if self.stretch:
-            # Clip the body to the card so inner canvases can scroll instead of
-            # spilling past the rounded shell.
+        if self.clip and self.stretch:
+            # Only viewport cards clip their body; inner cards must shrink and
+            # grow with their content.
             self.itemconfigure(self.slot, width=width - 2 * padx,
                                height=max(1, self.winfo_height() - 2 * pady))
         if self.fixed_height is None and int(self.cget('height') or 0) != natural:

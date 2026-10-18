@@ -42,6 +42,8 @@ class App:
         self.last_packet = None
         self.last_sample = None
         self.session_path = None
+        self._player_need = -1
+        self._enemy_need = -1
         self.settings = self._load_settings()
         theme.use(self.settings.get('theme', theme.NAME))
         self.compact = tk.BooleanVar(value=bool(self.settings.get('compact', False)))
@@ -58,6 +60,7 @@ class App:
         self.layout()
         self._restore_geometry()
         self.root.after(60, self.pump)
+        self.root.after(160, self.watch_layout)
 
     def _load_settings(self):
         try:
@@ -253,7 +256,7 @@ class App:
         # team
         self.allies = tk.Frame(self.body, bg=theme.BG)
         allies_card = RoundedCard(self.allies, background=theme.SURFACE, outline=theme.LINE, pad=(14, 12),
-                                  stretch=True)
+                                  stretch=True, clip=True)
         allies_card.pack(fill='both', expand=True)
         head = tk.Frame(allies_card.content, bg=theme.SURFACE)
         head.pack(fill='x', pady=(0, 8))
@@ -274,7 +277,7 @@ class App:
         # enemies
         self.resources = tk.Frame(self.body, bg=theme.BG)
         res_card = RoundedCard(self.resources, background=theme.SURFACE, outline=theme.LINE, pad=(14, 12),
-                               stretch=True)
+                               stretch=True, clip=True)
         res_card.pack(fill='both', expand=True)
         inner = res_card.content
         head = tk.Frame(inner, bg=theme.SURFACE)
@@ -348,18 +351,36 @@ class App:
             self._fitting_enemy = False
 
     def fit_player_view(self, event=None):
-        """Keep the panel tall enough for its content so the view scrolls."""
-        if getattr(self, '_fitting_player', False):
+        """Re-apply the panel size after the next idle so content settles first."""
+        if getattr(self, '_player_fit_pending', False):
             return
-        self._fitting_player = True
+        self._player_fit_pending = True
+        self.root.after_idle(self._apply_player_fit)
+
+    def watch_layout(self):
+        """Content height changes without a Configure event; poll for it."""
+        if self.closing:
+            return
         try:
-            width = max(1, self.player_view.winfo_width())
-            height = max(1, self.player_view.winfo_height())
-            needed = max(height, self.player_panel.winfo_reqheight())
-            self.player_view.itemconfigure(self.player_slot, width=width, height=needed)
-            self.player_view.configure(scrollregion=(0, 0, width, needed))
-        finally:
-            self._fitting_player = False
+            need = self.player_panel.winfo_reqheight()
+            if need != self._player_need:
+                self._player_need = need
+                self._apply_player_fit()
+            need = self.enemy_stack.winfo_reqheight()
+            if need != self._enemy_need:
+                self._enemy_need = need
+                self.fit_enemy_view()
+        except tk.TclError:
+            return
+        self.root.after(120, self.watch_layout)
+
+    def _apply_player_fit(self):
+        self._player_fit_pending = False
+        width = max(1, self.player_view.winfo_width())
+        height = max(1, self.player_view.winfo_height())
+        needed = max(height, self.player_panel.winfo_reqheight())
+        self.player_view.itemconfigure(self.player_slot, width=width, height=needed)
+        self.player_view.configure(scrollregion=(0, 0, width, needed))
 
     def scroll_battle(self, event):
         widget = event.widget

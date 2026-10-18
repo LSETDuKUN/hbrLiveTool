@@ -110,14 +110,27 @@ class PlayerPanel(tk.Frame):
     def select(self,key):
         self.selected=None if self.selected==key else key
         self.update_state(list(self.players.values()),self.previous_gauge)
+        if self.selected is not None and self.detail.winfo_ismapped():
+            self.after_idle(self._reveal_detail)
+
+    def _reveal_detail(self):
+        """Scroll the roster so the opened card is on screen."""
+        view = self.master
+        if not self.detail.winfo_ismapped() or not hasattr(view, 'yview_moveto'):
+            return
+        try:
+            view.yview_moveto(1.0)
+        except tk.TclError:
+            pass
 
     def update_details(self):
         p=self.players.get(self.selected)
         if not p:
             self.detail.pack_forget()
             return
-        # Open above the portrait grid so the card is visible without scrolling.
-        self.detail.pack(fill='x',pady=(0,8),before=self.strip)
+        # Keep the portrait grid compact while a card is open so the card
+        # itself is visible without hunting for it.
+        self.detail.pack(fill='x',pady=(8,0))
         pools=[]
         for pool in ('dp','hp'):
             value,maximum=p.get(pool),p.get(pool+'_max')
