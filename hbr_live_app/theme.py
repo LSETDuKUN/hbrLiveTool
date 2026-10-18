@@ -1,64 +1,77 @@
-"""Shared visual tokens. Presentation only: never reads game or catalog data."""
+"""Shared visual tokens and palettes. Presentation only: no data access."""
 import tkinter as tk
 from tkinter import font as tkfont, ttk
 
 # ---- palette ---------------------------------------------------------------
-# Deep plum ground with pastel accents; neighbouring tones stay close in value
-# so nothing shouts louder than the damage numbers themselves.
-BG = '#171226'
-SURFACE = '#1e1832'
-CARD = '#251e3c'
-CARD_HI = '#2e2549'
-LINE = '#372d55'
-LINE_SOFT = '#2c2444'
-FG = '#f6f0fd'
-DIM = '#a99ec7'
-MUTED = '#7f749e'
-
-PINK = '#f7a9cd'
-CYAN = '#8fe3ea'
-GOLD = '#ffd39b'
-MINT = '#9fe6bf'
-ROSE = '#f5a4b0'
-LAVENDER = '#c6b8f2'
-
-PINK_DEEP = '#432a3d'
-CYAN_DEEP = '#1f3a44'
-GOLD_DEEP = '#3d3122'
-MINT_DEEP = '#203a31'
-ROSE_DEEP = '#3e2732'
-LAVENDER_DEEP = '#2f2a4d'
-NEUTRAL_DEEP = '#2b2445'
-
-# ---- geometry --------------------------------------------------------------
-PAD = 18
-GAP = 12
-RADIUS = 22
-RADIUS_SM = 14
+# Two palettes share one token vocabulary. Values are installed into module
+# globals by use(), so every widget reads them when it is built.
+PALETTES = {
+    'midnight': dict(
+        bg='#171226', surface='#1e1832', card='#251e3c', card_hi='#2e2549',
+        line='#372d55', line_soft='#2c2444',
+        fg='#f6f0fd', dim='#a99ec7', muted='#7f749e',
+        pink='#f7a9cd', cyan='#8fe3ea', gold='#ffd39b', mint='#9fe6bf',
+        rose='#f5a4b0', lavender='#c6b8f2',
+        pink_deep='#432a3d', cyan_deep='#1f3a44', gold_deep='#3d3122',
+        mint_deep='#203a31', rose_deep='#3e2732', lavender_deep='#2f2a4d',
+        neutral_deep='#2b2445',
+        pink_fill='#f7a9cd', cyan_fill='#8fe3ea', gold_fill='#ffd39b',
+        mint_fill='#9fe6bf', on_fill='#2a2036',
+    ),
+    'sakura': dict(
+        bg='#f5ecf5', surface='#fbf5fb', card='#ffffff', card_hi='#efe1ee',
+        line='#dfcddd', line_soft='#ecdfeb',
+        fg='#3f3350', dim='#6f6284', muted='#9a8cab',
+        pink='#c8457e', cyan='#1f8794', gold='#9c6a17', mint='#2f855a',
+        rose='#bf4459', lavender='#5f51b5',
+        pink_deep='#fde8f1', cyan_deep='#e5f6f8', gold_deep='#fdf3e2',
+        mint_deep='#e7f7ee', rose_deep='#fde9ec', lavender_deep='#eeebfb',
+        neutral_deep='#f4eff8',
+        pink_fill='#f9bfd6', cyan_fill='#a7e4ec', gold_fill='#ffdda8',
+        mint_fill='#b6ebcd', on_fill='#4a3a55',
+    ),
+}
+NAME = 'midnight'
 
 
-def mix(first, second, ratio):
-    """Blend two #rrggbb colours; ratio 0 keeps first, 1 keeps second."""
-    ratio = max(0.0, min(1.0, ratio))
-    a = tuple(int(first[i:i + 2], 16) for i in (1, 3, 5))
-    b = tuple(int(second[i:i + 2], 16) for i in (1, 3, 5))
-    return '#' + ''.join(f'{round(x + (y - x) * ratio):02x}' for x, y in zip(a, b))
+def use(name):
+    """Install one palette into module globals."""
+    global NAME
+    palette = PALETTES.get(name) or PALETTES['midnight']
+    NAME = name if name in PALETTES else 'midnight'
+    for key, value in palette.items():
+        globals()[key.upper()] = value
+    globals()['on_fill'] = palette['on_fill']
+    _resolved.clear()
+    return NAME
 
 
-def lift(color, amount=.06):
-    return mix(color, '#ffffff', amount)
+def options():
+    return tuple(PALETTES)
 
 
-def sink(color, amount=.12):
-    return mix(color, '#000000', amount)
-
-
-# ---- typography ------------------------------------------------------------
+# ---- type scale ------------------------------------------------------------
+# Sizes are design pixels at 96 dpi; they are multiplied by the live display
+# scale so text keeps its apparent size on 125% / 150% desktops.
 UI_FAMILY = 'Microsoft YaHei UI'
 NUM_CANDIDATES = ('Segoe UI Variable Display', 'Segoe UI', 'Arial')
 MONO_CANDIDATES = ('Cascadia Code', 'Consolas', 'Courier New')
+SCALE = 1.0
 _families = None
 _resolved = {}
+
+
+def install_scale(root):
+    global SCALE
+    try:
+        SCALE = max(1.0, float(root.winfo_fpixels('1i')) / 96.0)
+    except (tk.TclError, AttributeError, ValueError):
+        SCALE = 1.0
+    return SCALE
+
+
+def px(size):
+    return max(7, int(round(size * SCALE)))
 
 
 def _known():
@@ -80,41 +93,68 @@ def _first(candidates, fallback):
 
 
 def num_family():
-    if 'num' not in _resolved:
-        _resolved['num'] = _first(NUM_CANDIDATES, 'Segoe UI')
-    return _resolved['num']
+    return _resolved.setdefault('num', _first(NUM_CANDIDATES, 'Segoe UI'))
 
 
 def mono_family():
-    if 'mono' not in _resolved:
-        _resolved['mono'] = _first(MONO_CANDIDATES, 'Consolas')
-    return _resolved['mono']
+    return _resolved.setdefault('mono', _first(MONO_CANDIDATES, 'Consolas'))
 
 
-def ui(size=13, weight='normal'):
-    """Pixel-sized UI font; negative sizes keep DPI scaling predictable."""
-    return (UI_FAMILY, -int(size), weight) if weight != 'normal' else (UI_FAMILY, -int(size))
+def ui(size=12, weight='normal'):
+    return (UI_FAMILY, -px(size), weight) if weight != 'normal' else (UI_FAMILY, -px(size))
 
 
-def num(size=16, weight='bold', slant='roman'):
-    return (num_family(), -int(size), weight, slant)
+def num(size=15, weight='bold', slant='roman'):
+    return (num_family(), -px(size), weight, slant)
 
 
-def mono(size=12, weight='normal'):
-    return (mono_family(), -int(size), weight)
+def mono(size=11, weight='normal'):
+    return (mono_family(), -px(size), weight)
+
+
+# ---- geometry --------------------------------------------------------------
+PAD = 18
+GAP = 12
+RADIUS = 22
+RADIUS_SM = 14
+
+
+# ---- helpers ---------------------------------------------------------------
+def mix(first, second, ratio):
+    ratio = max(0.0, min(1.0, ratio))
+    a = tuple(int(first[i:i + 2], 16) for i in (1, 3, 5))
+    b = tuple(int(second[i:i + 2], 16) for i in (1, 3, 5))
+    return '#' + ''.join(f'{round(x + (y - x) * ratio):02x}' for x, y in zip(a, b))
+
+
+def field():
+    """Editable field background for the active palette."""
+    return _field()
+
+
+def bar_tint(color):
+    """Meter fills: full accent on dark, softened on light."""
+    return mix(color, CARD, .12) if NAME == 'midnight' else mix(color, CARD, .5)
+
+
+def lift(color, amount=.06):
+    return mix(color, '#ffffff', amount)
+
+
+def sink(color, amount=.12):
+    return mix(color, '#000000', amount)
 
 
 # ---- ttk -------------------------------------------------------------------
 def install(root):
-    """Apply the shared ttk look once for the widget-level dashboard."""
+    """Apply the shared ttk look; keeps a window's own derived theme."""
+    install_scale(root)
     style = ttk.Style(root)
-    # Only replace the native Windows theme; a window that installed its own
-    # derived theme (hbr_data uses 'quest') must keep it.
     if style.theme_use() in ('vista', 'winnative', 'xpnative', 'aqua', 'default'):
-        for theme in ('clam', 'alt'):
-            if theme in style.theme_names():
+        for theme_name in ('clam', 'alt'):
+            if theme_name in style.theme_names():
                 try:
-                    style.theme_use(theme)
+                    style.theme_use(theme_name)
                     break
                 except tk.TclError:
                     continue
@@ -122,36 +162,42 @@ def install(root):
     return style
 
 
+def _field():
+    return mix(SURFACE, '#000000', .35) if NAME == 'midnight' else mix(SURFACE, BG, .95)
+
+
+def _edge():
+    return mix(LINE, FG, .12) if NAME == 'midnight' else LINE
+
+
 def configure(style):
-    field = mix(SURFACE, '#000000', .35)
-    edge = mix(LINE, FG, .12)
+    field, edge = _field(), _edge()
     style.configure('TEntry', fieldbackground=field, foreground=FG, insertcolor=FG,
-                    bordercolor=edge, lightcolor=field, darkcolor=field, padding=6)
+                    bordercolor=edge, lightcolor=edge, darkcolor=edge, padding=6,
+                    font=ui(12))
     style.map('TEntry', bordercolor=[('focus', PINK)], lightcolor=[('focus', PINK)],
-              darkcolor=[('focus', field)])
+              darkcolor=[('focus', edge)])
     style.configure('TCombobox', fieldbackground=field, background=CARD, foreground=FG,
-                    arrowcolor=DIM, bordercolor=edge, lightcolor=edge, darkcolor=edge, padding=5)
+                    arrowcolor=DIM, bordercolor=edge, lightcolor=edge, darkcolor=edge,
+                    padding=5, font=ui(12))
     style.map('TCombobox', fieldbackground=[('readonly', field)], foreground=[('readonly', FG)])
     style.configure('TButton', background=CARD_HI, foreground=FG, padding=(12, 6), relief='flat',
                     borderwidth=0, font=ui(12))
     style.map('TButton', background=[('active', mix(CARD_HI, PINK, .16))])
-    style.configure('TScrollbar', background=CARD_HI, troughcolor=SURFACE, bordercolor=SURFACE,
-                    arrowcolor=DIM, relief='flat', gripcount=0, arrowsize=11)
-    style.map('TScrollbar', background=[('active', mix(CARD_HI, PINK, .25))])
+    style.configure('TScrollbar', background=mix(CARD_HI, LINE, .35), troughcolor=SURFACE,
+                    bordercolor=SURFACE, arrowcolor=DIM, relief='flat', gripcount=0, arrowsize=11)
     style.configure('Live.Treeview', background=CARD, fieldbackground=CARD, foreground=FG,
-                    rowheight=68, borderwidth=0, font=ui(13), indent=14)
+                    rowheight=px(52), borderwidth=0, font=ui(13), indent=14)
     style.configure('Live.Treeview.Heading', background=CARD_HI, foreground=PINK,
                     font=ui(13, 'bold'), relief='flat')
-    style.map('Live.Treeview', background=[('selected', CARD_HI)],
-              foreground=[('selected', FG)])
+    style.map('Live.Treeview', background=[('selected', CARD_HI)], foreground=[('selected', FG)])
     style.configure('Live.TCombobox', fieldbackground=CARD, foreground=FG, background=CARD,
-                    arrowcolor=DIM, bordercolor=LINE, lightcolor=CARD, darkcolor=CARD)
-    style.map('Live.TCombobox', fieldbackground=[('readonly', CARD)],
-              foreground=[('readonly', FG)])
+                    arrowcolor=DIM, bordercolor=edge, lightcolor=CARD, darkcolor=CARD)
+    style.map('Live.TCombobox', fieldbackground=[('readonly', CARD)], foreground=[('readonly', FG)])
 
 
 def dialog_style(style, prefix='Panel'):
-    """Scoped styles for the standalone windows (damage / library)."""
+    field, edge = _field(), _edge()
     for name in ('Frame', 'Label', 'Checkbutton', 'Radiobutton', 'Notebook'):
         style.configure(f'{prefix}.T{name}', background=BG, foreground=FG, font=ui(13))
     style.configure(f'{prefix}.TLabel', background=BG, foreground=DIM, font=ui(12))
@@ -160,18 +206,16 @@ def dialog_style(style, prefix='Panel'):
     style.map(f'{prefix}.TCheckbutton', indicatorcolor=[('selected', PINK_DEEP)],
               background=[('active', BG)])
     style.configure(f'{prefix}.TRadiobutton', background=BG, foreground=FG, font=ui(12))
-    field = mix(SURFACE, '#000000', .35)
-    edge = mix(LINE, FG, .12)
     style.configure(f'{prefix}.TEntry', fieldbackground=field, foreground=FG, insertcolor=FG,
-                    bordercolor=edge, lightcolor=field, darkcolor=field, padding=6)
-    style.map(f'{prefix}.TEntry', fieldbackground=[('readonly', mix(SURFACE, '#000000', .2))],
-              bordercolor=[('focus', PINK)], lightcolor=[('focus', PINK)], darkcolor=[('focus', field)])
+                    bordercolor=edge, lightcolor=edge, darkcolor=edge, padding=6, font=ui(12))
+    style.map(f'{prefix}.TEntry', fieldbackground=[('readonly', field)],
+              bordercolor=[('focus', PINK)], lightcolor=[('focus', PINK)], darkcolor=[('focus', edge)])
     style.configure(f'{prefix}.TButton', background=CARD_HI, foreground=FG, padding=(14, 7),
                     relief='flat', borderwidth=0, font=ui(12))
     style.map(f'{prefix}.TButton', background=[('active', mix(CARD_HI, PINK, .18))])
-    style.configure(f'{prefix}.TCombobox', fieldbackground=CARD, background=CARD, foreground=FG,
-                    bordercolor=LINE, arrowcolor=DIM, padding=5)
-    style.map(f'{prefix}.TCombobox', fieldbackground=[('readonly', CARD)],
+    style.configure(f'{prefix}.TCombobox', fieldbackground=field, background=CARD, foreground=FG,
+                    bordercolor=edge, arrowcolor=DIM, padding=5, font=ui(12))
+    style.map(f'{prefix}.TCombobox', fieldbackground=[('readonly', field)],
               foreground=[('readonly', FG)])
     style.configure(f'{prefix}.TNotebook', background=BG, borderwidth=0, tabmargins=(0, 0, 0, 0))
     style.configure(f'{prefix}.TNotebook.Tab', background=CARD, foreground=DIM,
@@ -181,11 +225,15 @@ def dialog_style(style, prefix='Panel'):
     style.configure(f'{prefix}.TLabelframe', background=CARD, borderwidth=0)
     style.configure(f'{prefix}.TLabelframe.Label', background=CARD, foreground=PINK, font=ui(12))
     style.configure(f'{prefix}.TSeparator', background=LINE)
-    style.configure(f'{prefix}.TScrollbar', background=CARD_HI, troughcolor=SURFACE,
+    style.configure(f'{prefix}.TScrollbar', background=mix(CARD_HI, LINE, .35), troughcolor=SURFACE,
                     bordercolor=SURFACE, arrowcolor=DIM, relief='flat', gripcount=0)
 
 
-def text_widget_options(bg=CARD):
-    return dict(bg=bg, fg=FG, insertbackground=FG, relief='flat', borderwidth=0,
-                padx=14, pady=12, font=ui(13), selectbackground=mix(CARD, PINK, .35),
+def text_widget_options(bg_override=None):
+    background = bg_override or CARD
+    return dict(bg=background, fg=FG, insertbackground=FG, relief='flat', borderwidth=0,
+                padx=14, pady=12, font=ui(13), selectbackground=mix(background, PINK, .35),
                 selectforeground=FG, highlightthickness=0)
+
+
+use(NAME)

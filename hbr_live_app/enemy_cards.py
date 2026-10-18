@@ -7,9 +7,6 @@ from . import theme
 from .components import rounded
 from .gauge_trail import GaugeTrail
 
-CARD = theme.CARD
-SURFACE = theme.SURFACE
-
 
 class EnemyCard(tk.Canvas):
     def __init__(self, parent, number, show_details=None):
@@ -161,7 +158,7 @@ class EnemyCard(tk.Canvas):
             self.delete(item)
         row_heights = [40 + height + (16 if height else 0) for height in effect_heights]
 
-        band_top = 140
+        band_top = 158
         band_bottom = band_top + 34 + sum(row_heights or [46]) + 6
         following_tops = [band_bottom + 18 + 26 * index for index in range(len(following))]
         fallback_top = band_bottom + 18 + 26 * len(following)
@@ -170,7 +167,7 @@ class EnemyCard(tk.Canvas):
         if int(self.cget('height')) != height:
             self.configure(height=height)
 
-        rounded(self, 1, 1, w - 1, height - 1, 20, fill=CARD, outline=theme.LINE, tags='shell')
+        rounded(self, 1, 1, w - 1, height - 1, 20, fill=theme.CARD, outline=theme.LINE, tags='shell')
         departed = not s.get('active', True)
         options = self.aliases()
         name = next((n for n in options if n['kind'] == self.name_kind), options[0])
@@ -184,7 +181,7 @@ class EnemyCard(tk.Canvas):
         self.create_text(62, 35, text=kind + (' · 点击名称切换' if len(options) > 1 else ''),
                          anchor='w', fill=theme.MUTED, font=self.small)
 
-        for pool, y, color in (('dp', 62, theme.CYAN), ('hp', 94, theme.GOLD)):
+        for pool, y, color in (('dp', 60, theme.CYAN), ('hp', 104, theme.GOLD)):
             change = s[pool+'_change']
             self.create_text(16, y, text=pool.upper(), anchor='w', fill=color, font=theme.ui(11, 'bold'))
             if change:
@@ -194,7 +191,7 @@ class EnemyCard(tk.Canvas):
                              font=self.number_font)
             fraction = min(1, s[pool]/max(1, s[pool+'_reference']))
             delayed = min(1, self.trails[pool].display(time.monotonic()) / max(1, s[pool+'_reference']))
-            self.bar(16, y+10, w-18, y+19, fraction, delayed, color)
+            self.bar(16, y+13, w-18, y+24, fraction, delayed, theme.bar_tint(color))
 
         text = preview.get('text', '行动预告未取得')
         if departed:
@@ -207,7 +204,7 @@ class EnemyCard(tk.Canvas):
             prior = '刚执行 · ' + ' → '.join(preview['previous'])
         while self.font.measure(prior) > w - 36 and len(prior) > 5:
             prior = prior[:-2]+'…'
-        self.create_text(16, 124, text=prior, anchor='w', fill=theme.MUTED, font=self.small)
+        self.create_text(16, 140, text=prior, anchor='w', fill=theme.MUTED, font=self.small)
 
         band_fill = theme.GOLD_DEEP if flashing else theme.SURFACE
         band_line = theme.mix(theme.GOLD_DEEP, theme.GOLD, .35) if flashing else theme.LINE

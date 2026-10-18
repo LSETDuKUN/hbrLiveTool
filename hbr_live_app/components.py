@@ -124,7 +124,10 @@ class RoundedButton(tk.Canvas):
         height = self._height
         color = theme.lift(self._color, .10) if self._hover else self._color
         radius = self._radius if self._radius is not None else height / 2
-        outline = theme.lift(color, .35) if self.focus_get() is self else ''
+        if self.focus_get() is self:
+            outline = theme.lift(color, .35)
+        else:
+            outline = theme.mix(color, theme.FG, .16)
         rounded(self, 1, 1, width - 1, height - 1, radius, fill=color, outline=outline)
         self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=self._fg)
 

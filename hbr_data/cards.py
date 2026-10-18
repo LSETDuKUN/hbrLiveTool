@@ -4,7 +4,6 @@ from tkinter import ttk
 from hbr_live_app import theme
 from hbr_live_app.components import RoundedCard
 
-BG, CARD, FG, DIM, PINK = theme.BG, theme.CARD, theme.FG, theme.DIM, theme.PINK
 WORDS = {"str":"力量","dex":"灵巧","wis":"智慧","spr":"精神","luk":"运气","con":"体力",
          "Attacker":"攻击手","Breaker":"破盾手","Blaster":"破坏手","Buffer":"增益手","Debuffer":"减益手","Healer":"治疗者","Defender":"守护者",
          "Slash":"斩","Stab":"突","Strike":"打","Fire":"火","Ice":"冰","Thunder":"雷","Light":"光","Dark":"暗",
@@ -76,20 +75,20 @@ def destruction_summary(effects):
 
 class DetailCards(tk.Frame):
     def __init__(self,parent):
-        super().__init__(parent,bg=BG)
-        self.canvas = tk.Canvas(self,bg=BG,highlightthickness=0)
+        super().__init__(parent,bg=theme.BG)
+        self.canvas = tk.Canvas(self,bg=theme.BG,highlightthickness=0)
         scroll = ttk.Scrollbar(self,command=self.canvas.yview)
         scroll.pack(side="right",fill="y")
         self.canvas.configure(yscrollcommand=scroll.set)
         self.canvas.pack(fill="both",expand=True)
-        self.body = tk.Frame(self.canvas,bg=BG)
+        self.body = tk.Frame(self.canvas,bg=theme.BG)
         self.slot = self.canvas.create_window(0,0,window=self.body,anchor="nw")
         self.canvas.bind("<Configure>",lambda e:self.canvas.itemconfigure(self.slot,width=e.width))
         self.body.bind("<Configure>",lambda e:self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.photos = []
         self.card_count = 0
 
-    def label(self,parent,text,size=10,color=FG,bold=False):
+    def label(self,parent,text,size=10,color=theme.FG,bold=False):
         label = tk.Label(parent,text=text,bg=parent.cget("bg"),fg=color,justify="left",anchor="w",
                          font=theme.ui(round(size*1.5),"bold" if bold else "normal"))
         label.pack(fill="x",pady=3)
@@ -97,17 +96,17 @@ class DetailCards(tk.Frame):
         return label
 
     def card(self,title):
-        shell = RoundedCard(self.body,background=CARD)
+        shell = RoundedCard(self.body,background=theme.CARD)
         shell.pack(fill="x",padx=10,pady=7)
-        self.label(shell.content,title,13,PINK,True)
+        self.label(shell.content,title,13,theme.PINK,True)
         return shell.content
 
     def row(self,parent,title,value):
         line = tk.Frame(parent,bg=parent.cget("bg"))
         line.pack(fill="x",pady=2)
-        tk.Label(line,text=title,bg=line.cget("bg"),fg=DIM,anchor="nw",width=12,
+        tk.Label(line,text=title,bg=line.cget("bg"),fg=theme.DIM,anchor="nw",width=12,
                  font=theme.ui(13)).pack(side="left",anchor="n")
-        self.label(line,value,10,FG,True)
+        self.label(line,value,10,theme.FG,True)
 
     def fold(self,parent,title,fill):
         panel = tk.Frame(parent,bg=parent.cget("bg"))
@@ -125,7 +124,7 @@ class DetailCards(tk.Frame):
                 content.pack(fill="x",padx=7,pady=4)
             else:
                 content.pack_forget()
-        button = tk.Button(panel,text="▸  "+title,command=toggle,bg=parent.cget("bg"),fg=PINK,
+        button = tk.Button(panel,text="▸  "+title,command=toggle,bg=parent.cget("bg"),fg=theme.PINK,
                            relief="flat",anchor="w",font=theme.ui(13,"bold"),cursor="hand2",
                            activebackground=parent.cget("bg"),activeforeground=theme.FG,borderwidth=0,
                            highlightthickness=0)
@@ -158,7 +157,7 @@ class DetailCards(tk.Frame):
         destruction = destruction_summary(skill.effects)
         if destruction:
             self.row(frame,"技能破坏倍率",destruction)
-            self.label(frame,"技能来源系数；实际破坏率增量还需结合敌人系数、增益与命中段数。",9,DIM)
+            self.label(frame,"技能来源系数；实际破坏率增量还需结合敌人系数、增益与命中段数。",9,theme.DIM)
         if skill.hits and any(effect_category(effect) == "伤害" for effect in skill.effects):
             self.hit_rows(frame,skill.hits,"技能伤害逐 Hit")
         elif any(effect_category(effect) == "伤害" for effect in skill.effects) and (skill.hit_count or 0) > 0:
@@ -170,7 +169,7 @@ class DetailCards(tk.Frame):
                 for effect in effects:
                     self.render_effect(group,effect,category)
             if len(skill.effects) == 1:
-                self.label(frame,category,10,PINK,True)
+                self.label(frame,category,10,theme.PINK,True)
                 fill(frame)
             else:
                 self.fold(frame,f"{category} · {len(effects)} 项",fill)
@@ -219,7 +218,7 @@ class DetailCards(tk.Frame):
         self.photos.clear();self.card_count=0
         data = record["raw"]
         frame = self.card(record.get("name") or "资料")
-        header = tk.Frame(frame,bg=CARD)
+        header = tk.Frame(frame,bg=theme.CARD)
         header.pack(fill="x")
         portrait = record.get("portrait") or {}
         if portrait.get("local_path"):
@@ -229,24 +228,24 @@ class DetailCards(tk.Frame):
                     picture = source.convert("RGBA");picture.thumbnail((100,100),Image.Resampling.LANCZOS)
                 photo = ImageTk.PhotoImage(picture,master=self)
                 self.photos.append(photo)
-                tk.Label(header,image=photo,bg=CARD).pack(side="left",anchor="n",padx=(0,12),pady=5)
+                tk.Label(header,image=photo,bg=theme.CARD).pack(side="left",anchor="n",padx=(0,12),pady=5)
             except (OSError,ValueError):
-                self.label(frame,"头像暂不可用",9,DIM)
+                self.label(frame,"头像暂不可用",9,theme.DIM)
         elif record["dataset"] in {"styles","characters","enemies"}:
-            self.label(frame,"图标未公开或尚未缓存",9,DIM)
+            self.label(frame,"图标未公开或尚未缓存",9,theme.DIM)
         if isinstance(data,dict):
-            info = tk.Frame(header,bg=CARD)
+            info = tk.Frame(header,bg=theme.CARD)
             info.pack(side="left",fill="x",expand=True)
             def identity(panel):
                 for key,label in (("chara","角色"),("tier","稀有度"),("role","定位"),("team","部队")):
-                    if data.get(key):self.label(panel,f"{label}  {friendly(data[key])}",9,DIM)
+                    if data.get(key):self.label(panel,f"{label}  {friendly(data[key])}",9,theme.DIM)
             if record["dataset"] == "skills":
                 owners = record.get("owners", [])
                 if owners:
-                    self.label(info, "所属角色：" + "、".join(dict.fromkeys(owner[1] for owner in owners)), 9, DIM)
-                    self.label(info, "关联风格：" + "、".join(dict.fromkeys(owner[3] for owner in owners)), 9, DIM)
+                    self.label(info, "所属角色：" + "、".join(dict.fromkeys(owner[1] for owner in owners)), 9, theme.DIM)
+                    self.label(info, "关联风格：" + "、".join(dict.fromkeys(owner[3] for owner in owners)), 9, theme.DIM)
                 else:
-                    self.label(info, "未找到明确的角色—风格关联；不根据技能名称猜测。", 9, DIM)
+                    self.label(info, "未找到明确的角色—风格关联；不根据技能名称猜测。", 9, theme.DIM)
                 self.fold(info,"来源标注",identity)
             else:
                 identity(info)
@@ -259,7 +258,7 @@ class DetailCards(tk.Frame):
         for index,skill in enumerate(record["skills"],1):
             self.render_skill(skill,index)
         extras = self.card("资料备注")
-        self.label(extras,"威力范围尚未代入等级、增益和敌人参数；逐 Hit 倍率只显示来源提供的 hits.power_ratio，空值不推算。",9,DIM)
+        self.label(extras,"威力范围尚未代入等级、增益和敌人参数；逐 Hit 倍率只显示来源提供的 hits.power_ratio，空值不推算。",9,theme.DIM)
         def more(panel):
             self.row(panel,"来源",record["source"])
             self.row(panel,"服务器",record["region"])

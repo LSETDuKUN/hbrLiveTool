@@ -26,7 +26,7 @@ GROUPS = (
         ('weakness_deepen','弱点加深 %'),('resistance','抗性 %'))),
     ('破坏率与 OD', theme.CYAN, (('destruction','当前破坏率 %'),('od','OD 倍率'))))
 FIELDS = tuple(pair for _,_,fields in GROUPS for pair in fields)
-BG, CARD, FG, DIM = theme.BG, theme.CARD, theme.FG, theme.DIM
+theme.BG, theme.CARD, theme.FG, theme.DIM = theme.BG, theme.CARD, theme.FG, theme.DIM
 
 NAMES = dict(attack='加攻（含充能／适用心眼）', defense='减防（含适用脆弱）', affinity='相性',
              critical='暴伤', chain='连击', destruction='破坏率', od='OD', token='Token',
@@ -34,13 +34,13 @@ NAMES = dict(attack='加攻（含充能／适用心眼）', defense='减防（�
 
 
 def scroll_page(parent):
-    frame = tk.Frame(parent, bg=BG)
-    canvas = tk.Canvas(frame, bg=BG, highlightthickness=0, bd=0)
+    frame = tk.Frame(parent, bg=theme.BG)
+    canvas = tk.Canvas(frame, bg=theme.BG, highlightthickness=0, bd=0)
     bar = ttk.Scrollbar(frame, command=canvas.yview, style='Panel.Vertical.TScrollbar')
     bar.pack(side='right', fill='y')
     canvas.pack(fill='both', expand=True)
     canvas.configure(yscrollcommand=bar.set)
-    body = tk.Frame(canvas, bg=BG)
+    body = tk.Frame(canvas, bg=theme.BG)
     item = canvas.create_window(0, 0, anchor='nw', window=body, width=1)
     body.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
     canvas.bind('<Configure>', lambda e: canvas.itemconfigure(item, width=e.width))
@@ -58,7 +58,7 @@ class DamageWindow(tk.Toplevel):
         super().__init__(parent)
         self.title('伤害试算 · 星屑战斗手帐')
         self.geometry('1180x900')
-        self.configure(bg=BG)
+        self.configure(bg=theme.BG)
         self.minsize(980, 700)
         self.option_add('*Font', theme.ui(12))
         style = ttk.Style(self)
@@ -79,14 +79,14 @@ class DamageWindow(tk.Toplevel):
 
     # ---- chrome ------------------------------------------------------------
     def build_header(self):
-        head = tk.Frame(self, bg=BG)
+        head = tk.Frame(self, bg=theme.BG)
         head.pack(fill='x', padx=20, pady=(16, 10))
-        tk.Label(head, text='✦ 伤害试算', bg=BG, fg=theme.PINK,
+        tk.Label(head, text='✦ 伤害试算', bg=theme.BG, fg=theme.PINK,
                  font=theme.ui(16, 'bold')).pack(side='left')
-        tk.Label(head, text='手填乘区 · 不影响战斗记录', bg=BG, fg=theme.MUTED,
+        tk.Label(head, text='手填乘区 · 不影响战斗记录', bg=theme.BG, fg=theme.MUTED,
                  font=theme.ui(11)).pack(side='left', padx=12, pady=(4, 0))
         self.compute_button = RoundedButton(head, text='计算', command=self.compute,
-                                            bg=theme.PINK, fg='#2a2036',
+                                            bg=theme.PINK_FILL, fg=theme.on_fill,
                                             font=theme.ui(13, 'bold'), height=36)
         self.compute_button.pack(side='right')
 
@@ -120,9 +120,9 @@ class DamageWindow(tk.Toplevel):
 
     def build_pages(self):
         self.tab_names = ['乘区试算', '技能与属性', '逐段破坏率', '饰品效果', '浮动概率曲线', '当前内存参数', '天赋与被动审查']
-        self.tabs = TabBar(self, self.tab_names, self.show_page, bg=BG)
+        self.tabs = TabBar(self, self.tab_names, self.show_page, bg=theme.BG)
         self.tabs.pack(fill='x', padx=14, pady=(0, 6))
-        self.pages = tk.Frame(self, bg=BG)
+        self.pages = tk.Frame(self, bg=theme.BG)
         self.pages.pack(fill='both', expand=True, padx=12, pady=(0, 12))
         self.page_widgets = {}
         for name in self.tab_names:
@@ -147,7 +147,7 @@ class DamageWindow(tk.Toplevel):
         self.tabs.draw()
 
     def note(self, parent, text, size=11, color=None):
-        label = tk.Label(parent, text=text, bg=BG, fg=color or theme.MUTED, justify='left',
+        label = tk.Label(parent, text=text, bg=theme.BG, fg=color or theme.MUTED, justify='left',
                          anchor='w', font=theme.ui(size))
         label.pack(fill='x', pady=(0, 6))
         label.bind('<Configure>', lambda e: label.configure(wraplength=max(240, e.width - 8)))
@@ -157,7 +157,7 @@ class DamageWindow(tk.Toplevel):
     def build_form_page(self, frame, form):
         self.note(form, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
                         '未确认条件请查看天赋审查与参数页；尚不完整模拟逐 Hit、破盾与后续施加效果。', 11)
-        grid = tk.Frame(form, bg=BG)
+        grid = tk.Frame(form, bg=theme.BG)
         grid.pack(fill='x')
         self.values = {}
         defaults = DamageInputs()
@@ -198,11 +198,11 @@ class DamageWindow(tk.Toplevel):
             var = tk.BooleanVar(self, value=getattr(defaults, key))
             self.flags[key] = var
             ToggleChip(options, title, var, accent=theme.GOLD).pack(side='left', padx=(0, 8))
-        result_head = tk.Frame(form, bg=BG)
+        result_head = tk.Frame(form, bg=theme.BG)
         result_head.pack(fill='x', pady=(2, 4))
-        tk.Label(result_head, text='试算结果', bg=BG, fg=theme.PINK,
+        tk.Label(result_head, text='试算结果', bg=theme.BG, fg=theme.PINK,
                  font=theme.ui(12, 'bold')).pack(side='left')
-        RoundedButton(result_head, '计算', self.compute, theme.PINK, '#2a2036',
+        RoundedButton(result_head, '计算', self.compute, theme.PINK, theme.on_fill,
                       theme.ui(11), height=30).pack(side='right')
         self.result = self.text_panel(form, height=12)
 
@@ -217,9 +217,9 @@ class DamageWindow(tk.Toplevel):
         return widget
 
     def field_row(self, parent, label, width=20):
-        row = tk.Frame(parent, bg=BG)
+        row = tk.Frame(parent, bg=theme.BG)
         row.pack(fill='x', pady=4)
-        tk.Label(row, text=label, bg=BG, fg=theme.DIM, font=theme.ui(11), width=width,
+        tk.Label(row, text=label, bg=theme.BG, fg=theme.DIM, font=theme.ui(11), width=width,
                  anchor='w').pack(side='left')
         var = tk.StringVar(self, value='')
         ttk.Entry(row, textvariable=var, width=16, style='Panel.TEntry',
@@ -228,12 +228,12 @@ class DamageWindow(tk.Toplevel):
 
     def build_skill_page(self, frame, form):
         self.use_skill = tk.BooleanVar(self, value=False)
-        use_row = tk.Frame(form, bg=BG)
+        use_row = tk.Frame(form, bg=theme.BG)
         use_row.pack(fill='x', pady=(0, 4))
         ToggleChip(use_row, '用技能参数生成基础伤害', self.use_skill, accent=theme.PINK).pack(side='left')
-        tk.Label(use_row, text='取消则使用手填基础伤害', bg=BG, fg=theme.MUTED,
+        tk.Label(use_row, text='取消则使用手填基础伤害', bg=theme.BG, fg=theme.MUTED,
                  font=theme.ui(10)).pack(side='left', padx=10, pady=(4, 0))
-        self.skill_title = tk.Label(form, text='尚未自动填充', bg=BG, fg=theme.PINK,
+        self.skill_title = tk.Label(form, text='尚未自动填充', bg=theme.BG, fg=theme.PINK,
                                     font=theme.ui(12, 'bold'), anchor='w')
         self.skill_title.pack(fill='x', pady=8)
         self.dp_panel = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
@@ -253,25 +253,39 @@ class DamageWindow(tk.Toplevel):
             var = tk.StringVar(self, value=''); self.params[key] = var
             ttk.Entry(cell, textvariable=var, width=14, style='Panel.TEntry',
                       justify='right').pack(side='left', padx=(4, 0))
-        pg = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
-        pg.pack(fill='x', pady=8)
-        pg.columnconfigure(0, weight=1); pg.columnconfigure(1, weight=1)
-        names = [('min_power','最小威力'),('max_power','最大威力'),('difference','属性差阈值'),('level','技能等级'),
-               ('enemy','敌方防御参考值'),('calamity','灾厄属性下降（通常20）'),('fear_of_devil','大灾厄属性下降（通常100）'),
-               ('orb','宝珠等级（默认满级 5）'),('growth_min','最小威力等级成长'),('growth_max','最大威力等级成长'),
-               ('critical_rate_bonus','普通暴击率加成 %（供核对）'),('element_critical_rate_bonus','元素暴击率加成 %（供核对）'),
-               ('morale_level','士气等级（每层六维 +5）'),
-               ('od_gain_bonus','OD 饰品获取量增幅 %')]
         from .damage_inputs import STATS
-        names += [(key, STATS[key]) for key in WEIGHTS] + [('weight_'+key, STATS[key]+'权重') for key in WEIGHTS]
-        for idx, (key, label) in enumerate(names):
-            cell = tk.Frame(pg, bg=theme.SURFACE)
-            cell.grid(row=idx//2, column=idx % 2, sticky='w', padx=(0, 16), pady=2)
-            tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
-                     width=17, anchor='w').pack(side='left')
-            var = tk.StringVar(self, value=''); self.params[key] = var
-            ttk.Entry(cell, textvariable=var, width=14, style='Panel.TEntry',
-                      justify='right').pack(side='left', padx=(4, 0))
+        blocks = [
+            ('威力与等级', theme.PINK, [
+                ('min_power', '最小威力'), ('max_power', '最大威力'), ('difference', '属性差阈值'),
+                ('level', '技能等级'), ('enemy', '敌方防御参考值'), ('orb', '宝珠等级（默认满级 5）'),
+                ('growth_min', '最小威力等级成长'), ('growth_max', '最大威力等级成长')]),
+            ('属性', theme.CYAN, [(key, STATS[key]) for key in WEIGHTS]),
+            ('属性权重', theme.MINT, [('weight_' + key, STATS[key] + '权重') for key in WEIGHTS]),
+            ('其他修正', theme.GOLD, [
+                ('calamity', '灾厄属性下降（通常 20）'), ('fear_of_devil', '大灾厄属性下降（通常 100）'),
+                ('critical_rate_bonus', '普通暴击率加成 %（供核对）'),
+                ('element_critical_rate_bonus', '元素暴击率加成 %（供核对）'),
+                ('morale_level', '士气等级（每层六维 +5）'), ('od_gain_bonus', 'OD 饰品获取量增幅 %')]),
+        ]
+        for title, color, fields in blocks:
+            block = tk.Frame(form, bg=theme.SURFACE, padx=16, pady=12)
+            block.pack(fill='x', pady=6)
+            head = tk.Frame(block, bg=theme.SURFACE)
+            head.pack(fill='x', pady=(0, 8))
+            tk.Label(head, text=title, bg=theme.SURFACE, fg=color,
+                     font=theme.ui(12, 'bold')).pack(side='left')
+            grid = tk.Frame(block, bg=theme.SURFACE)
+            grid.pack(fill='x')
+            for column in range(3):
+                grid.columnconfigure(column, weight=1, uniform='param')
+            for index, (key, label) in enumerate(fields):
+                cell = tk.Frame(grid, bg=theme.SURFACE)
+                cell.grid(row=index // 3, column=index % 3, sticky='ew', padx=6, pady=5)
+                tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
+                         anchor='w', justify='left').pack(fill='x')
+                var = tk.StringVar(self, value=''); self.params[key] = var
+                ttk.Entry(cell, textvariable=var, width=13, style='Panel.TEntry',
+                          justify='right').pack(anchor='w', pady=(3, 0))
         self.note(form, '权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。')
 
     def build_destruction_page(self, frame, form):
@@ -303,18 +317,18 @@ class DamageWindow(tk.Toplevel):
         self.note(probability, '每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。')
         self.note(probability, '启用递推时按各段实际破坏率调整权重；未模拟跨 DP 破盾与衰减，曲线不等同于完整实战击杀概率。')
         self.hit_weights = tk.StringVar(self, value='')
-        tk.Label(probability, text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）', bg=BG, fg=theme.DIM,
+        tk.Label(probability, text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）', bg=theme.BG, fg=theme.DIM,
                  font=theme.ui(11), anchor='w').pack(fill='x', pady=(6, 4))
-        weights_row = tk.Frame(probability, bg=BG)
+        weights_row = tk.Frame(probability, bg=theme.BG)
         weights_row.pack(fill='x')
         ttk.Entry(weights_row, textvariable=self.hit_weights, style='Panel.TEntry').pack(
             side='left', fill='x', expand=True)
         RoundedButton(weights_row, '重新计算', self.compute, theme.mix(theme.CARD_HI, theme.CYAN, .28),
                       theme.FG, theme.ui(11), height=32).pack(side='left', padx=8)
-        self.hit_source = tk.Label(probability, text='尚无权重，不假定为单 Hit', bg=BG, fg=theme.MUTED,
+        self.hit_source = tk.Label(probability, text='尚无权重，不假定为单 Hit', bg=theme.BG, fg=theme.MUTED,
                                    font=theme.ui(11), anchor='w')
         self.hit_source.pack(fill='x', pady=6)
-        self.prob_summary = tk.Label(probability, text='', bg=BG, fg=theme.FG, font=theme.ui(11),
+        self.prob_summary = tk.Label(probability, text='', bg=theme.BG, fg=theme.FG, font=theme.ui(11),
                                      anchor='w', justify='left')
         self.prob_summary.pack(fill='x', pady=(0, 8))
         self.prob_summary.bind('<Configure>', lambda e: self.prob_summary.configure(
@@ -324,7 +338,7 @@ class DamageWindow(tk.Toplevel):
         self.plot.bind('<Configure>', lambda e: self.draw_plot())
         self.plot.bind('<Motion>', self.hover_plot)
         self.plot_hint = tk.Label(probability, text='横轴：伤害倍率；纵轴：概率密度（面积为概率）',
-                                  bg=BG, fg=theme.MUTED, font=theme.ui(10), anchor='w')
+                                  bg=theme.BG, fg=theme.MUTED, font=theme.ui(10), anchor='w')
         self.plot_hint.pack(fill='x')
 
     def build_raw_page(self, frame, data):

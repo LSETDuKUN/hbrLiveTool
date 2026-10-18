@@ -7,17 +7,14 @@ from .portraits import Portraits
 from .statuses import status_details
 from .status_groups import StatusGroups
 
-SURFACE = theme.SURFACE
-CARD = theme.CARD
-FG = theme.FG
-DIM = theme.DIM
+
 
 
 class PlayerPanel(tk.Frame):
     def __init__(self, parent, show_details):
         super().__init__(parent, bg=parent.cget('bg'))
         self.show_details = show_details
-        self.portraits = Portraits(self, size=66)
+        self.portraits = Portraits(self, size=58)
         self.order = []
         self.tiles = {}
         self.players = {}
@@ -33,22 +30,22 @@ class PlayerPanel(tk.Frame):
             self.strip.columnconfigure(col, weight=1, uniform='portraits')
         for row in range(2):
             self.strip.rowconfigure(row, weight=1, uniform='portraits')
-        self.hint = tk.Label(self, text='点击头像查看状态 · 亮框为前排', bg=self.cget('bg'), fg=DIM,
+        self.hint = tk.Label(self, text='点击头像查看状态 · 亮框为前排', bg=self.cget('bg'), fg=theme.DIM,
                              anchor='w', font=theme.ui(10))
         self.hint.pack(fill='x', pady=(8, 4))
         self.detail = tk.Frame(self, bg=self.cget('bg'))
-        self.detail_card = RoundedCard(self.detail, background=CARD, outline=theme.LINE,
+        self.detail_card = RoundedCard(self.detail, background=theme.CARD, outline=theme.LINE,
                                        pad=(14, 12), stretch=True)
         self.detail_card.pack(fill='both', expand=True)
         body = self.detail_card.content
-        self.caption = tk.Label(body, bg=CARD, fg=FG, anchor='w', justify='left', font=theme.ui(12),
+        self.caption = tk.Label(body, bg=theme.CARD, fg=theme.FG, anchor='w', justify='left', font=theme.ui(12),
                                 wraplength=260)
         self.caption.pack(fill='x')
-        head = tk.Frame(body, bg=CARD)
+        head = tk.Frame(body, bg=theme.CARD)
         head.pack(fill='x', pady=(6, 2))
-        self.pools = tk.Label(head, bg=CARD, fg=theme.CYAN, anchor='w', font=theme.ui(11))
+        self.pools = tk.Label(head, bg=theme.CARD, fg=theme.CYAN, anchor='w', font=theme.ui(11))
         self.pools.pack(side='left')
-        RoundedButton(head, '完整详情', self.details, theme.CARD_HI, DIM, theme.ui(11),
+        RoundedButton(head, '完整详情', self.details, theme.CARD_HI, theme.DIM, theme.ui(11),
                       height=28).pack(side='right')
         self.groups = StatusGroups(body, self.status_details)
         self.groups.pack(fill='x', pady=(4, 0))
@@ -72,17 +69,17 @@ class PlayerPanel(tk.Frame):
         for key in self.order:
             p=self.players.get(key)
             if key not in self.tiles:
-                frame=RoundedCard(self.strip, background=CARD, outline=theme.LINE,
+                frame=RoundedCard(self.strip, background=theme.CARD, outline=theme.LINE,
                                   radius=18, pad=(10, 10), stretch=True)
                 index=self.order.index(key);frame.grid(row=index//3,column=index%3,sticky='nsew',padx=5,pady=5)
-                holder=tk.Frame(frame.content,bg=CARD)
+                holder=tk.Frame(frame.content,bg=theme.CARD)
                 holder.pack(expand=True)
-                portrait=tk.Label(holder,bg=CARD,cursor='hand2')
+                portrait=tk.Label(holder,bg=theme.CARD,cursor='hand2')
                 portrait.pack(pady=(0, 6))
-                name=tk.Label(holder,bg=CARD,fg=theme.FG,font=theme.ui(11,'bold'),
+                name=tk.Label(holder,bg=theme.CARD,fg=theme.FG,font=theme.ui(11,'bold'),
                               anchor='center',wraplength=120,justify='center')
                 name.pack(fill='x')
-                badge=tk.Label(holder,bg=CARD,fg=DIM,font=theme.ui(10))
+                badge=tk.Label(holder,bg=theme.CARD,fg=theme.DIM,font=theme.ui(10))
                 badge.pack(pady=(3, 0))
                 for widget in (holder,frame,portrait,name,badge):
                     widget.configure(cursor='hand2')

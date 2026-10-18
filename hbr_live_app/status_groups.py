@@ -4,17 +4,22 @@ import tkinter as tk
 from . import theme
 from .statuses import status_line
 
-GROUPS = (
-    ('boost', '加攻 · 心眼', theme.PINK),
-    ('funnel', '连击珠', theme.CYAN),
-    ('charge', '充能 / 蓄力', theme.MINT),
-    ('critical', '暴击 · 爆伤', theme.GOLD),
-    ('debuff', '减防 · 脆弱', theme.ROSE),
-    ('resist', '抗性 · 弱点', theme.LAVENDER),
-    ('negative', '其他已识别减益', theme.ROSE))
-BACKGROUNDS = dict(boost=theme.PINK_DEEP, funnel=theme.CYAN_DEEP, charge=theme.MINT_DEEP,
-                   critical=theme.GOLD_DEEP, debuff=theme.ROSE_DEEP, resist=theme.LAVENDER_DEEP,
-                   negative=theme.NEUTRAL_DEEP)
+def group_list():
+    """Resolved per draw so a palette switch is picked up immediately."""
+    return (
+        ('boost', '加攻 · 心眼', theme.PINK),
+        ('funnel', '连击珠', theme.CYAN),
+        ('charge', '充能 / 蓄力', theme.MINT),
+        ('critical', '暴击 · 爆伤', theme.GOLD),
+        ('debuff', '减防 · 脆弱', theme.ROSE),
+        ('resist', '抗性 · 弱点', theme.LAVENDER),
+        ('negative', '其他已识别减益', theme.ROSE))
+
+
+def group_backgrounds():
+    return dict(boost=theme.PINK_DEEP, funnel=theme.CYAN_DEEP, charge=theme.MINT_DEEP,
+                critical=theme.GOLD_DEEP, debuff=theme.ROSE_DEEP, resist=theme.LAVENDER_DEEP,
+                negative=theme.NEUTRAL_DEEP)
 KINDS = {
     'boost': {'AttackUp','AttackUpIncludeNormal','AttackUpOnlyNormal','MindEye','BIYamawakiServant'},
     'funnel': {'Funnel'},
@@ -27,7 +32,7 @@ KINDS = {
 
 
 def group_statuses(state):
-    groups = {key: [] for key,_,_ in GROUPS}
+    groups = {key: [] for key,_,_ in group_list()}
     other = []
     for status in state.get('statuses', []):
         kind = status.get('label','').removeprefix('SpecialStatus.')
@@ -83,15 +88,15 @@ class StatusGroups(tk.Frame):
             if self.enemy:self.base_resistances()
             return
         shown = False
-        for key,title,color in GROUPS:
+        for key,title,color in group_list():
             items = groups[key]
             if not items:continue
             shown = True
-            block = tk.Frame(self,bg=BACKGROUNDS[key])
+            block = tk.Frame(self,bg=group_backgrounds()[key])
             block.pack(fill='x',pady=3)
             accent = tk.Frame(block,bg=color,width=3)
             accent.pack(side='left',fill='y')
-            body = tk.Frame(block,bg=BACKGROUNDS[key])
+            body = tk.Frame(block,bg=group_backgrounds()[key])
             body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
             self.row(title, color, bold=True, parent=body)
             # Each applied effect remains separate, including different durations.
@@ -115,11 +120,11 @@ class StatusGroups(tk.Frame):
 
     def base_resistances(self):
         from .resistances import resistance_lines
-        block=tk.Frame(self,bg=BACKGROUNDS['resist'])
+        block=tk.Frame(self,bg=group_backgrounds()['resist'])
         block.pack(fill='x',pady=3)
         accent=tk.Frame(block,bg=theme.LAVENDER,width=3)
         accent.pack(side='left',fill='y')
-        body=tk.Frame(block,bg=BACKGROUNDS['resist'])
+        body=tk.Frame(block,bg=group_backgrounds()['resist'])
         body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
         self.row('抗性 · 弱点参考', theme.LAVENDER, bold=True, parent=body)
         for text in resistance_lines(self.state):self.row(text, theme.FG, parent=body)
