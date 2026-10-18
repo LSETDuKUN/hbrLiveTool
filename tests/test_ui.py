@@ -413,7 +413,8 @@ class DashboardTests(unittest.TestCase):
         canvas = self.app.tree.canvas
         actor_items = [i for i in canvas.find_all() if canvas.type(i) == 'text' and canvas.itemcget(i, 'text') == '角色']
         self.assertEqual(canvas.itemcget(actor_items[0], 'justify'), 'center')
-        self.assertEqual(canvas.itemcget(actor_items[0], 'fill'), '#bdb1d4')
+        from hbr_live_app import theme
+        self.assertEqual(canvas.itemcget(actor_items[0], 'fill'), theme.DIM)
         updated = ledger.update([event(1, 50)], context(6, turn=2))
         # Positions normally arrive on every event from ActionLedger.
         updated[0]['actor_position'] = 1

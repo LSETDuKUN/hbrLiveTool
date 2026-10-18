@@ -157,27 +157,27 @@ class App:
         summary.columnconfigure(0, weight=3, uniform='damage')
         summary.columnconfigure(1, weight=2, uniform='damage')
         self.hero = RoundedCard(summary, background=theme.mix(theme.CARD, theme.PINK, .07),
-                                accent=theme.PINK, pad=(18, 14), stretch=True, height=150)
+                                accent=theme.PINK, pad=(18, 14), stretch=True)
         self.hero.grid(row=0, column=0, sticky='nsew', padx=(0, 6))
         hero = self.hero.content
         top = tk.Frame(hero, bg=self.hero.background)
         top.pack(fill='x')
         self.label(top, '指令最大伤害', theme.PINK, 12, bold=True).pack(side='left')
         self.label(top, 'TURN MAX DAMAGE', theme.MUTED, 9).pack(side='left', padx=(8, 0), pady=(2, 0))
+        self.od_label = self.label(top, 'OD · 等待采样', theme.CYAN, 11, bold=True)
+        self.od_label.pack(side='right')
         self.total_label = tk.Label(hero, text='0', bg=self.hero.background, fg=theme.PINK,
                                     font=theme.num(34), anchor='w')
         self.total_label.pack(fill='x', pady=(2, 0))
         meta = tk.Frame(hero, bg=self.hero.background)
         meta.pack(fill='x')
         self.summary = self.label(meta, '尚未连接  ·  等待第一笔行动', theme.DIM, 11, anchor='w')
-        self.summary.pack(side='left', fill='x', expand=True)
-        self.od_label = self.label(meta, 'OD · 等待采样', theme.CYAN, 11, bold=True)
-        self.od_label.pack(side='right')
-        hero.bind('<Configure>', lambda e: self.summary.configure(
-            wraplength=max(90, e.width - self.od_label.winfo_reqwidth() - 12)))
+        self.summary.pack(fill='x')
+        self.summary.bind('<Configure>', lambda e: self.summary.configure(
+            wraplength=max(120, e.width - 2)))
 
         self.current_damage_card = RoundedCard(summary, background=theme.mix(theme.CARD, theme.CYAN, .07),
-                                               accent=theme.CYAN, pad=(18, 14), stretch=True, height=150)
+                                               accent=theme.CYAN, pad=(18, 14), stretch=True)
         self.current_damage_card.grid(row=0, column=1, sticky='nsew', padx=(6, 0))
         current = self.current_damage_card.content
         top = tk.Frame(current, bg=self.current_damage_card.background)
@@ -268,7 +268,9 @@ class App:
         self.player_panel = PlayerPanel(self.player_view, self.text_window)
         self.player_slot = self.player_view.create_window(0, 0, anchor='nw', window=self.player_panel)
         self.player_view.bind('<Configure>', self.fit_player_view)
-        self.player_panel.bind('<Configure>', lambda e: self.player_view.configure(scrollregion=self.player_view.bbox('all')))
+        self.player_panel.bind('<Configure>', self.fit_player_view, add='+')
+        self.player_panel.detail.bind('<Configure>', self.fit_player_view, add='+')
+        self.player_panel.strip.bind('<Configure>', self.fit_player_view, add='+')
         # enemies
         self.resources = tk.Frame(self.body, bg=theme.BG)
         res_card = RoundedCard(self.resources, background=theme.SURFACE, outline=theme.LINE, pad=(14, 12),
@@ -287,8 +289,9 @@ class App:
         self.enemy_stack = tk.Frame(self.enemy_view, bg=theme.SURFACE)
         self.enemy_status_panels = {}
         enemy_slot = self.enemy_view.create_window(0, 0, anchor='nw', window=self.enemy_stack)
+        tk.Frame(self.enemy_stack, height=14, bg=theme.SURFACE).pack(side='bottom', fill='x')
         self.enemy_view.bind('<Configure>', lambda e: self.enemy_view.itemconfigure(enemy_slot, width=e.width))
-        self.enemy_stack.bind('<Configure>', lambda e: self.enemy_view.configure(scrollregion=self.enemy_view.bbox('all')))
+        self.enemy_stack.bind('<Configure>', self.fit_enemy_view)
         self.resource_note = self.label(inner, '各条独立读取 · 比例参考本场观测最大值', theme.MUTED, 10,
                                         anchor='w', wraplength=275)
         self.resource_note.pack(fill='x', pady=(0, 6), before=self.enemy_view)
@@ -332,10 +335,31 @@ class App:
         self.history.bind('<Configure>', lambda e: self.detail_caption.configure(wraplength=max(200, e.width-10)))
 
     # ---- interaction -------------------------------------------------------
-    def fit_player_view(self, event):
-        needed = self.player_panel.winfo_reqheight()
-        self.player_view.itemconfigure(self.player_slot, width=event.width,
-                                       height=max(event.height, needed))
+    def fit_enemy_view(self, event=None):
+        """Size the scroll region from requested height; bbox() lags a frame."""
+        if getattr(self, '_fitting_enemy', False):
+            return
+        self._fitting_enemy = True
+        try:
+            width = max(self.enemy_stack.winfo_reqwidth(), self.enemy_view.winfo_width())
+            height = self.enemy_stack.winfo_reqheight()
+            self.enemy_view.configure(scrollregion=(0, 0, width, height))
+        finally:
+            self._fitting_enemy = False
+
+    def fit_player_view(self, event=None):
+        """Keep the panel tall enough for its content so the view scrolls."""
+        if getattr(self, '_fitting_player', False):
+            return
+        self._fitting_player = True
+        try:
+            width = max(1, self.player_view.winfo_width())
+            height = max(1, self.player_view.winfo_height())
+            needed = max(height, self.player_panel.winfo_reqheight())
+            self.player_view.itemconfigure(self.player_slot, width=width, height=needed)
+            self.player_view.configure(scrollregion=(0, 0, width, needed))
+        finally:
+            self._fitting_player = False
 
     def scroll_battle(self, event):
         widget = event.widget
@@ -354,6 +378,11 @@ class App:
             narrow = event.width < 760
             self.export_button.configure(text='保存' if narrow else '保存行动轴…')
             self.damage_button.configure(text='试算' if narrow else '伤害试算')
+            if event.width < 520:
+                if self.export_button.winfo_manager():
+                    self.export_button.pack_forget()
+            elif not self.export_button.winfo_manager():
+                self.export_button.pack(side='right', before=self.damage_button)
 
     def layout_hero(self, stacked):
         if stacked == self.hero_stacked:
@@ -365,15 +394,12 @@ class App:
             row.columnconfigure(1, weight=0, uniform='')
             self.current_damage_card.grid_configure(row=1, column=0, padx=0, pady=(8, 0))
             self.hero.grid_configure(row=0, column=0, padx=0)
-            self.current_damage_card.fixed_height = 132
         else:
-            row.columnconfigure(0, weight=3, uniform='damage')
-            row.columnconfigure(1, weight=2, uniform='damage')
+            row.columnconfigure(0, weight=5, uniform='damage')
+            row.columnconfigure(1, weight=4, uniform='damage')
             self.hero.grid_configure(row=0, column=0, padx=(0, 6))
             self.current_damage_card.grid_configure(row=0, column=1, padx=(6, 0), pady=0)
-            self.current_damage_card.fixed_height = 150
-        self.current_damage_card.configure(height=self.current_damage_card.fixed_height)
-        self.current_damage_card.draw()
+        
 
     def layout(self):
         visible = self.players_visible.get()
@@ -564,6 +590,7 @@ class App:
                 self.enemy_status_panels[key] = panel
             self.enemy_cards[key].update_state(state)
             self.enemy_status_panels[key].update_state(state)
+        self.fit_enemy_view()
 
     def show_status_details(self, status):
         from .statuses import status_details
@@ -704,6 +731,8 @@ class App:
         self.style()
         self.build()
         self.layout()
+        self.history_rows = table_rows(self.model.actions.values())
+        self.tree.set_rows(self.history_rows)
         self.render(getattr(self, 'last_events', []))
         if self.history_visible.get():
             self.history_window.deiconify()

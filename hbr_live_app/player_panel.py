@@ -114,8 +114,10 @@ class PlayerPanel(tk.Frame):
     def update_details(self):
         p=self.players.get(self.selected)
         if not p:
-            self.detail.pack_forget();return
-        self.detail.pack(fill='x',pady=(8,0))
+            self.detail.pack_forget()
+            return
+        # Open above the portrait grid so the card is visible without scrolling.
+        self.detail.pack(fill='x',pady=(0,8),before=self.strip)
         pools=[]
         for pool in ('dp','hp'):
             value,maximum=p.get(pool),p.get(pool+'_max')

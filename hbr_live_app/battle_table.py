@@ -1,16 +1,17 @@
 """Centered, individually styled table cells backed by a scrollable Tk canvas."""
 import tkinter as tk
 from tkinter import font as tkfont
+from . import theme
 from .history import actor_title, skill_title, beneficiary, beneficiary_title
 from .turns import context_label
 
 
 class BattleTable(tk.Frame):
     def __init__(self, parent):
-        super().__init__(parent, bg='#302b46')
-        self.header = tk.Canvas(self, height=38, bg='#403650', highlightthickness=0)
+        super().__init__(parent, bg=theme.CARD)
+        self.header = tk.Canvas(self, height=38, bg=theme.CARD_HI, highlightthickness=0)
         self.header.pack(fill='x')
-        self.canvas = tk.Canvas(self, bg='#302b46', highlightthickness=0, takefocus=True)
+        self.canvas = tk.Canvas(self, bg=theme.CARD, highlightthickness=0, takefocus=True)
         self.canvas.pack(fill='both', expand=True)
         self.widths = [215, 240, 240, 240]
         self.rows = {}
@@ -106,7 +107,7 @@ class BattleTable(tk.Frame):
             left = cx-total_width/2
             ids.append(self.canvas.create_image(left+22, 0, image=photo, tags='portrait_switch'))
             ids.append(self.canvas.create_text(left+58+skill_width/2, 0, text=skill_title(event),
-                width=skill_width, font=self.skill_font, fill='#ffe4af', justify='center'))
+                width=skill_width, font=self.skill_font, fill=theme.GOLD, justify='center'))
             if target:
                 right = left+total_width-22
                 target_photo = self.portraits.get(target.get('style_label'))
@@ -114,16 +115,16 @@ class BattleTable(tk.Frame):
                     ids.append(self.canvas.create_image(right, 0, image=target_photo, tags='portrait_switch'))
                 else:
                     ids.append(self.canvas.create_text(right, 0, text=target.get('name') or '友方',
-                        width=44, font=self.actor_font, fill='#83e5ed', justify='center', tags='portrait_switch'))
-                ids.append(self.canvas.create_text(right-38, 0, text='→', font=self.actor_font, fill='#83e5ed'))
+                        width=44, font=self.actor_font, fill=theme.CYAN, justify='center', tags='portrait_switch'))
+                ids.append(self.canvas.create_text(right-38, 0, text='→', font=self.actor_font, fill=theme.CYAN))
             height = max(64, max(self.canvas.bbox(item)[3]-self.canvas.bbox(item)[1] for item in ids)+20)
             for item in ids:
                 self.canvas.move(item, 0, y+height/2)
             return ids, height
-        texts = [(self.fit_title(actor_title(event), width-28), self.actor_font, '#bdb1d4'),
-                 (skill_title(event), self.skill_font, '#ffe4af')]
+        texts = [(self.fit_title(actor_title(event), width-28), self.actor_font, theme.DIM),
+                 (skill_title(event), self.skill_font, theme.GOLD)]
         if target:
-            texts.append(('→ '+beneficiary_title(event), self.actor_font, '#83e5ed'))
+            texts.append(('→ '+beneficiary_title(event), self.actor_font, theme.CYAN))
         height = 0
         for index, (text, font, color) in enumerate(texts):
             item = self.canvas.create_text(cx, y+height, text=text, font=font, fill=color,
@@ -159,7 +160,7 @@ class BattleTable(tk.Frame):
             edges.append(edges[-1]+w)
         for index, title in enumerate(('回合', '前排 · 左', '前排 · 中', '前排 · 右')):
             self.header.create_text((edges[index]+edges[index+1])/2, 19,
-                                    text=title, fill='#ded1ed', font=self.skill_font)
+                                    text=title, fill=theme.FG, font=self.skill_font)
         y = 0
         for number, (key, row) in enumerate(self.rows.items()):
             if (row['group'] or {}).get('kind') == 'instant':
@@ -167,10 +168,10 @@ class BattleTable(tk.Frame):
                     available-edges[1], row['events'][0])
                 height = max(84, content_height+20)
                 rect = self.canvas.create_rectangle(0, y, available, y+height,
-                    fill='#514360' if key in self.selected else '#352e4b', outline='#51475f')
+                    fill=theme.mix(theme.CARD, theme.PINK, .18) if key in self.selected else theme.mix(theme.CARD, theme.BG, .35), outline=theme.LINE)
                 self.canvas.tag_lower(rect)
                 self.canvas.create_text(edges[1]/2, y+height/2, text=context_label(row['group']),
-                    width=edges[1]-20, font=self.badge_font, fill='#ffdc9d', justify='center')
+                    width=edges[1]-20, font=self.badge_font, fill=theme.GOLD, justify='center')
                 self.bounds[key] = (y, y+height)
                 y += height
                 continue
@@ -184,22 +185,22 @@ class BattleTable(tk.Frame):
                     ids.extend(items)
                     height += block_height
                 if not slot:
-                    ids.append(self.canvas.create_text(cx, y, text='/', font=self.actor_font, fill='#9388a8', anchor='n'))
+                    ids.append(self.canvas.create_text(cx, y, text='/', font=self.actor_font, fill=theme.MUTED, anchor='n'))
                     height = 24
                 blocks.append((ids, height))
                 content_height = max(content_height, height)
             group = row['group'] or {}
-            badges = [(f'Turn {group["turn"]}', '#8fe5ed', '#2d4b55')] if group.get('turn') else [('回合待确认', '#d7c8e8', '#4a3b57')]
+            badges = [(f'Turn {group["turn"]}', theme.CYAN, theme.CYAN_DEEP)] if group.get('turn') else [('回合待确认', theme.LAVENDER, theme.LAVENDER_DEEP)]
             if group.get('od'):
-                badges.append((f'Bonus {group["bonus"]}', '#ffdc9d', '#514432'))
+                badges.append((f'Bonus {group["bonus"]}', theme.GOLD, theme.GOLD_DEEP))
             if group.get('additional') or group.get('extra'):
-                badges.append(('Extra', '#ffb4d7', '#513449'))
+                badges.append(('Extra', theme.PINK, theme.PINK_DEEP))
             if group.get('kind') == 'instant':
-                badges.append(('小按钮', '#ffdc9d', '#514432'))
+                badges.append(('小按钮', theme.GOLD, theme.GOLD_DEEP))
             body_height = max(82, content_height+22)
             height = body_height + (24 if row['unplaced'] else 0)
-            fill = '#514360' if key in self.selected else ('#302b46' if number % 2 == 0 else '#352e4b')
-            rect = self.canvas.create_rectangle(0, y, available, y+height, fill=fill, outline='#51475f')
+            fill = theme.mix(theme.CARD, theme.PINK, .18) if key in self.selected else (theme.CARD if number % 2 == 0 else theme.mix(theme.CARD, theme.BG, .35))
+            rect = self.canvas.create_rectangle(0, y, available, y+height, fill=fill, outline=theme.LINE)
             self.canvas.tag_lower(rect)
             for ids, block_height in blocks:
                 for item in ids:
@@ -207,7 +208,7 @@ class BattleTable(tk.Frame):
             segments = []
             for text, color, _ in badges:
                 if segments:
-                    segments.append((' / ', '#bdb1d4'))
+                    segments.append((' / ', theme.DIM))
                 segments.append((text, color))
             x = (edges[1] - sum(self.badge_font.measure(t) for t, _ in segments))/2
             for text, color in segments:
@@ -215,10 +216,10 @@ class BattleTable(tk.Frame):
                                         font=self.badge_font, anchor='w', tags=('context',))
                 x += self.badge_font.measure(text)
             for edge in edges[1:-1]:
-                self.canvas.create_line(edge, y+10, edge, y+body_height-10, fill='#554963')
+                self.canvas.create_line(edge, y+10, edge, y+body_height-10, fill=theme.LINE_SOFT)
             if row['unplaced']:
                 self.canvas.create_text(available/2, y+body_height+10,
-                    text=' / '.join(skill_title(e) for e in row['unplaced']) if group.get('kind') == 'instant' else f'{len(row["unplaced"])} 条行动位置未确认 · 展开详情查看', fill='#e1bb94', font=self.skill_font)
+                    text=' / '.join(skill_title(e) for e in row['unplaced']) if group.get('kind') == 'instant' else f'{len(row["unplaced"])} 条行动位置未确认 · 展开详情查看', fill=theme.ROSE, font=self.skill_font)
             self.bounds[key] = (y, y+height)
             y += height
         self.canvas.configure(scrollregion=(0, 0, available, y))

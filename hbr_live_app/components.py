@@ -52,9 +52,11 @@ class RoundedCard(tk.Canvas):
         padx, pady = self.pad
         self.itemconfigure(self.slot, width=width - 2 * padx)
         natural = self.content.winfo_reqheight() + 2 * pady
-        if self.stretch and self.winfo_height() > natural + 2:
+        if self.stretch:
+            # Clip the body to the card so inner canvases can scroll instead of
+            # spilling past the rounded shell.
             self.itemconfigure(self.slot, width=width - 2 * padx,
-                               height=self.winfo_height() - 2 * pady)
+                               height=max(1, self.winfo_height() - 2 * pady))
         if self.fixed_height is None and int(self.cget('height') or 0) != natural:
             self.configure(height=natural)
         actual = self.winfo_height()
@@ -80,7 +82,8 @@ class RoundedButton(tk.Canvas):
         self._height = height
         self._radius = radius
         self._hover = False
-        if 'width' not in kwargs:
+        self._explicit_width = 'width' in kwargs
+        if not self._explicit_width:
             kwargs['width'] = tkfont.Font(font=self._font).measure(text or '确定') + 46
         super().__init__(master, height=height, bg=master.cget('bg'), highlightthickness=0,
                          takefocus=True, cursor='hand2', bd=0, **kwargs)
@@ -94,9 +97,16 @@ class RoundedButton(tk.Canvas):
         self.bind('<FocusOut>', lambda e: self.draw())
 
     def configure(self, cnf=None, **kwargs):
+        relabel = None
         for option, attr in (('text', '_text'), ('bg', '_color'), ('fg', '_fg')):
             if option in kwargs:
                 setattr(self, attr, kwargs.pop(option))
+                if option == 'text':
+                    relabel = self._text
+        if 'width' in kwargs:
+            self._explicit_width = True
+        if relabel is not None and not self._explicit_width:
+            kwargs['width'] = tkfont.Font(font=self._font).measure(relabel or '确定') + 46
         result = super().configure(cnf, **kwargs)
         self.draw()
         return result
