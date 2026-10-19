@@ -16,7 +16,7 @@ PALETTES = {
         mint_deep='#203a31', rose_deep='#3e2732', lavender_deep='#2f2a4d',
         neutral_deep='#2b2445',
         pink_fill='#f7a9cd', cyan_fill='#8fe3ea', gold_fill='#ffd39b',
-        mint_fill='#9fe6bf', on_fill='#2a2036',
+        mint_fill='#9fe6bf', on_fill='#2a2036', shadow='#0c0918',
     ),
     'sakura': dict(
         bg='#f5ecf5', surface='#fbf5fb', card='#ffffff', card_hi='#efe1ee',
@@ -28,7 +28,7 @@ PALETTES = {
         mint_deep='#e7f7ee', rose_deep='#fde9ec', lavender_deep='#eeebfb',
         neutral_deep='#f4eff8',
         pink_fill='#f9bfd6', cyan_fill='#a7e4ec', gold_fill='#ffdda8',
-        mint_fill='#b6ebcd', on_fill='#4a3a55',
+        mint_fill='#b6ebcd', on_fill='#4a3a55', shadow='#e0cfe4',
     ),
 }
 NAME = 'midnight'
@@ -163,7 +163,7 @@ def install(root):
 
 
 def _field():
-    return mix(SURFACE, '#000000', .35) if NAME == 'midnight' else mix(SURFACE, BG, .95)
+    return mix(CARD, '#000000', .32) if NAME == 'midnight' else mix(SURFACE, BG, .95)
 
 
 def _edge():

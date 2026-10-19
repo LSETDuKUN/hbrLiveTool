@@ -16,7 +16,7 @@ class RoundedCard(tk.Canvas):
     """Rounded shell whose inner frame keeps normal Tk geometry management."""
     def __init__(self, master, background=theme.CARD, outline=theme.LINE,
                  radius=theme.RADIUS, pad=(16, 14), accent=None, stretch=False,
-                 clip=False, highlight=None, **kwargs):
+                 clip=False, shadow=True, highlight=None, **kwargs):
         super().__init__(master, bg=master.cget('bg'), highlightthickness=0, bd=0, **kwargs)
         self.background = background
         self.outline = outline
@@ -25,6 +25,7 @@ class RoundedCard(tk.Canvas):
         self.accent = accent
         self.stretch = stretch
         self.clip = clip
+        self.shadow = shadow
         self.highlight = highlight
         self.fixed_height = kwargs.get('height')
         self.content = tk.Frame(self, bg=background)
@@ -63,8 +64,14 @@ class RoundedCard(tk.Canvas):
         actual = self.winfo_height()
         height = max(natural, actual) if self.stretch else natural
         self.delete('shell')
-        rounded(self, 1, 1, width - 1, height - 1, self.radius,
+        if self.shadow:
+            rounded(self, 3, 5, width - 1, height - 1, self.radius,
+                    fill=theme.SHADOW, outline='', tags='shell')
+        rounded(self, 1, 1, width - 2, height - 2, self.radius,
                 fill=self.background, outline=self.outline or '', tags='shell')
+        if self.outline:
+            self.create_line(self.radius, 2, width - self.radius, 2,
+                             fill=theme.mix(self.background, '#ffffff', .07), tags='shell')
         if self.accent:
             rounded(self, padx - 8, pady, padx - 5, pady + 17, 1.5,
                     fill=self.accent, outline='', tags='shell')
@@ -139,7 +146,10 @@ class RoundedButton(tk.Canvas):
             outline = theme.lift(color, .35)
         else:
             outline = theme.mix(color, theme.FG, .16)
-        rounded(self, 1, 1, width - 1, height - 1, radius, fill=color, outline=outline)
+        rounded(self, 2, 3, width - 1, height, radius, fill=theme.SHADOW, outline='')
+        rounded(self, 1, 1, width - 1, height - 2, radius, fill=color, outline=outline)
+        self.create_line(radius, 2.5, width - radius, 2.5,
+                         fill=theme.mix(color, '#ffffff', .18))
         self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=self._fg)
 
 
@@ -220,6 +230,187 @@ class ToggleChip(tk.Canvas):
         self.create_text(28, height / 2, text=self._text, anchor='w',
                          font=theme.ui(12, 'bold' if on else 'normal'),
                          fill=theme.FG if on else theme.DIM)
+
+
+class RoundedEntry(tk.Canvas):
+    """Rounded field wrapping a borderless entry, so inputs match the cards."""
+
+    def __init__(self, master, textvariable=None, width=130, height=None, justify='right',
+                 font=None, radius=None, **kwargs):
+        self._var = textvariable if textvariable is not None else tk.StringVar()
+        self._justify = justify
+        self._font = font or theme.ui(12)
+        self._height = height or theme.px(34)
+        self._radius = radius
+        self._focused = False
+        super().__init__(master, height=self._height, width=width, bg=master.cget('bg'),
+                         highlightthickness=0, bd=0, **kwargs)
+        self.entry = tk.Entry(self, textvariable=self._var, relief='flat', bd=0,
+                              highlightthickness=0, bg=theme.field(), fg=theme.FG,
+                              insertbackground=theme.FG, disabledbackground=theme.field(),
+                              disabledforeground=theme.MUTED, justify=justify, font=self._font)
+        self._slot = self.create_window(12, self._height / 2, anchor='w', window=self.entry)
+        self.entry.bind('<FocusIn>', self._focus_in)
+        self.entry.bind('<FocusOut>', self._focus_out)
+        self.bind('<Configure>', lambda e: self.draw())
+        self.entry.bind('<Configure>', lambda e: None)
+        self.draw()
+
+    def _focus_in(self, event=None):
+        self._focused = True
+        self.draw()
+
+    def _focus_out(self, event=None):
+        self._focused = False
+        self.draw()
+
+    def focus_set(self):
+        self.entry.focus_set()
+
+    def configure(self, cnf=None, **kwargs):
+        if 'textvariable' in kwargs:
+            self._var = kwargs.pop('textvariable')
+            self.entry.configure(textvariable=self._var)
+        if 'justify' in kwargs:
+            self._justify = kwargs.pop('justify')
+            self.entry.configure(justify=self._justify)
+        if 'state' in kwargs:
+            self.entry.configure(state=kwargs.pop('state'))
+        result = super().configure(cnf, **kwargs)
+        self.after_idle(self.draw)
+        return result
+
+    config = configure
+
+    def get(self):
+        return self._var.get()
+
+    def set(self, value):
+        self._var.set(value)
+
+    def draw(self):
+        self.delete('all')
+        width = max(40, self.winfo_width())
+        height = self._height
+        radius = self._radius if self._radius is not None else min(height / 2, theme.RADIUS_SM)
+        outline = theme.PINK if self._focused else theme.LINE
+        rounded(self, 1, 1, width - 1, height - 1, radius, fill=theme.field(), outline=outline)
+        if self._focused:
+            rounded(self, 3, 3, width - 3, height - 3, max(3, radius - 2), fill='',
+                    outline=theme.mix(theme.field(), theme.PINK, .45))
+        self.itemconfigure(self._slot, width=max(20, width - 24))
+
+
+class RoundedSelect(tk.Canvas):
+    """Read-only select that keeps the combobox API but drops the native chrome."""
+
+    def __init__(self, master, textvariable=None, values=(), width=190, height=None,
+                 state='readonly', font=None, placeholder='请选择', **kwargs):
+        self._var = textvariable if textvariable is not None else tk.StringVar()
+        self._values = list(values)
+        self._font = font or theme.ui(12)
+        self._height = height or theme.px(34)
+        self._state = state
+        self._placeholder = placeholder
+        self._callbacks = {}
+        self._hover = False
+        self._open = False
+        super().__init__(master, height=self._height, width=width, bg=master.cget('bg'),
+                         highlightthickness=0, bd=0, cursor='hand2', takefocus=True, **kwargs)
+        self.bind('<Button-1>', self.popup)
+        self.bind('<Return>', self.popup)
+        self.bind('<space>', self.popup)
+        self.bind('<Enter>', lambda e: self._set_hover(True))
+        self.bind('<Leave>', lambda e: self._set_hover(False))
+        self.bind('<Configure>', lambda e: self.draw())
+        self._var.trace_add('write', lambda *_: self.draw())
+        self.draw()
+
+    def _set_hover(self, value):
+        self._hover = value
+        self.draw()
+
+    def draw(self):
+        self.delete('all')
+        width = max(40, self.winfo_width())
+        height = self._height
+        radius = min(height / 2, theme.RADIUS_SM)
+        fill = theme.lift(theme.field(), .05) if self._hover else theme.field()
+        outline = theme.PINK if self._open else theme.LINE
+        rounded(self, 1, 1, width - 1, height - 1, radius, fill=fill, outline=outline)
+        text = self._var.get() or self._placeholder
+        color = theme.FG if self._var.get() else theme.MUTED
+        room = width - 34
+        while room > 20:
+            item = self.create_text(14, height / 2, text=text, anchor='w', font=self._font, fill=color)
+            box = self.bbox(item)
+            if box and box[2] <= width - 30:
+                break
+            self.delete(item)
+            text = text[:-2] + '…'
+            if len(text) <= 2:
+                break
+        self.create_text(width - 16, height / 2, text='▾', anchor='center',
+                         font=self._font, fill=theme.MUTED)
+
+    def popup(self, event=None):
+        if self._state == 'disabled' or not self._values:
+            return
+        self._open = True
+        self.draw()
+        menu = tk.Menu(self, tearoff=False, bg=theme.CARD, fg=theme.FG, bd=0, relief='flat',
+                       activebackground=theme.CARD_HI, activeforeground=theme.FG,
+                       font=self._font, selectcolor=theme.PINK)
+        for value in self._values:
+            menu.add_command(label=value, command=lambda v=value: self._choose(v))
+        try:
+            menu.tk_popup(self.winfo_rootx(), self.winfo_rooty() + self.winfo_height())
+        finally:
+            menu.grab_release()
+            self._open = False
+            self.after_idle(self.draw)
+
+    def _choose(self, value):
+        self._var.set(value)
+        self.draw()
+        for callback in list(self._callbacks.get('<<ComboboxSelected>>', [])):
+            callback(None)
+
+    def bind(self, sequence=None, func=None, add=None):
+        if sequence == '<<ComboboxSelected>>' and func is not None:
+            self._callbacks.setdefault(sequence, []).append(func)
+            return 'cb' + str(len(self._callbacks[sequence]))
+        return super().bind(sequence, func, add)
+
+    def get(self):
+        return self._var.get()
+
+    def set(self, value):
+        self._var.set(value)
+
+    def current(self, index=None):
+        current = self._var.get()
+        if index is None:
+            try:
+                return self._values.index(current)
+            except ValueError:
+                return -1
+        if 0 <= index < len(self._values):
+            self.set(self._values[index])
+        return index
+
+    def configure(self, cnf=None, **kwargs):
+        if 'values' in kwargs:
+            self._values = list(kwargs.pop('values'))
+        if 'state' in kwargs:
+            self._state = kwargs.pop('state')
+        if 'textvariable' in kwargs:
+            self._var = kwargs.pop('textvariable')
+        result = super().configure(cnf, **kwargs)
+        self.after_idle(self.draw)
+        return result
+
+    config = configure
 
 
 class Segment(tk.Canvas):

@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from dataclasses import asdict
 from . import theme
-from .components import RoundedCard, RoundedButton
+from .components import RoundedCard, RoundedButton, RoundedEntry, RoundedSelect, ToggleChip
 from .effect_math import EffectInputs, calculate_effect
 from .effect_preview import proposals, KINDS
 
@@ -22,20 +22,20 @@ class EffectEditor(tk.Frame):
         self.orb_level=tk.StringVar(self,value='5')
         tk.Label(self,text='单项效果试算 · 手动预添加到当前伤害目标；重新自动填充会清空预添加',bg=theme.BG,fg=theme.DIM,
                  font=theme.ui(12)).pack(anchor='w',pady=8)
-        self.caster_box=ttk.Combobox(self,state='readonly',style='Panel.TCombobox')
-        self.caster_box.pack(fill='x',pady=4)
+        self.caster_box=RoundedSelect(self,values=(),width=theme.px(260))
+        self.caster_box.pack(anchor='w',pady=4)
         self.caster_box.bind('<<ComboboxSelected>>',self.change_caster)
         self.target_note=tk.Label(self,text='',bg=theme.BG,fg=theme.CYAN,anchor='w',font=theme.ui(10))
         self.target_note.pack(fill='x')
-        self.selector=ttk.Combobox(self,state='readonly',style='Panel.TCombobox')
-        self.selector.pack(fill='x',pady=8);self.selector.bind('<<ComboboxSelected>>',self.choose)
+        self.selector=RoundedSelect(self,values=(),width=theme.px(520))
+        self.selector.pack(anchor='w',pady=8);self.selector.bind('<<ComboboxSelected>>',self.choose)
         self.overview=tk.Label(self,text='',bg=theme.BG,fg=theme.DIM,justify='left',anchor='w',font=theme.ui(10))
         self.overview.pack(fill='x',pady=4)
         self.overview.bind('<Configure>',lambda e:self.overview.configure(wraplength=max(200,e.width-8)))
         row=tk.Frame(self,bg=theme.BG);row.pack(fill='x',pady=8)
-        tk.Label(row,text='公式类型',bg=theme.BG,fg=theme.FG).pack(side='left')
-        ttk.Combobox(row,textvariable=self.kind,values=['buff','debuff','fixed'],state='readonly',width=12,
-                     style='Panel.TCombobox').pack(side='left',padx=8)
+        tk.Label(row,text='公式类型',bg=theme.BG,fg=theme.DIM,font=theme.ui(11)).pack(side='left')
+        RoundedSelect(row,textvariable=self.kind,values=['buff','debuff','fixed'],
+                      width=theme.px(120),height=theme.px(32)).pack(side='left',padx=8)
         tk.Label(row,text='buff 增益 / debuff 减益 / fixed 固定值',bg=theme.BG,fg=theme.DIM).pack(side='left')
         RoundedButton(row,'计算效果量',self.compute,theme.PINK_FILL,theme.on_fill,height=32).pack(side='right')
         grid=tk.Frame(self,bg=theme.BG);grid.pack(fill='x')
@@ -52,19 +52,24 @@ class EffectEditor(tk.Frame):
                 var=tk.StringVar(self,value=str(defaults[key]));self.values[key]=var
                 if key=='orb':
                     controls=tk.Frame(body,bg=theme.CARD);controls.grid(row=n,column=1,sticky='e')
-                    tk.Checkbutton(controls,text='启用',variable=self.orb_enabled,bg=theme.CARD,fg=theme.FG,
-                                   selectcolor=theme.BG,command=self.compute).pack(side='left')
-                    ttk.Combobox(controls,textvariable=self.orb_level,values=['1','2','3','4','5'],state='readonly',width=3,
-                                 style='Panel.TCombobox').pack(side='left')
+                    ToggleChip(controls,text='启用',variable=self.orb_enabled,accent=theme.MINT,
+                               height=theme.px(28),command=self.compute).pack(side='left',padx=(0,6))
+                    RoundedSelect(controls,textvariable=self.orb_level,values=['1','2','3','4','5'],
+                                  width=theme.px(64),height=theme.px(28)).pack(side='left')
                     self.orb_level.trace_add('write',lambda *_:self.compute() if hasattr(self,'result') else None)
-                else:ttk.Entry(body,textvariable=var,width=12,justify='right',style='Panel.TEntry').grid(row=n,column=1,sticky='e',padx=5)
+                else:
+                    RoundedEntry(body,textvariable=var,width=theme.px(124)).grid(row=n,column=1,sticky='e',padx=5)
         self.result=tk.Label(self,text='选择效果，或手动输入参数。',bg=theme.BG,fg=theme.CYAN,
                              font=theme.ui(12,'bold'),anchor='w',justify='left')
         self.result.pack(fill='x',pady=12)
         actions=tk.Frame(self,bg=theme.BG);actions.pack(fill='x')
         RoundedButton(actions,'预添加当前效果',self.add_pending,theme.PINK_FILL,theme.on_fill,height=32).pack(side='left')
         RoundedButton(actions,'删除所选预添加',self.remove_pending,theme.CARD,theme.FG,height=32).pack(side='left',padx=8)
-        self.pending_list=tk.Listbox(self,height=4,bg=theme.CARD,fg=theme.FG,exportselection=False)
+        self.pending_list=tk.Listbox(self,height=4,bg=theme.CARD,fg=theme.FG,exportselection=False,
+                                     relief='flat',borderwidth=0,highlightthickness=1,
+                                     highlightbackground=theme.LINE,highlightcolor=theme.PINK,
+                                     selectbackground=theme.mix(theme.CARD,theme.PINK,.35),
+                                     selectforeground=theme.FG,font=theme.ui(11),activestyle='none')
         self.pending_list.pack(fill='x',pady=6)
         self.notes=tk.Text(self,height=15,wrap='word',bg=theme.CARD,fg=theme.DIM,relief='flat',font=theme.ui(10),padx=12,pady=12)
         self.notes.pack(fill='both',expand=True,pady=8)

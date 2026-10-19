@@ -5,7 +5,8 @@ import tkinter as tk
 from tkinter import ttk
 
 from . import theme
-from .components import RoundedButton, RoundedCard, Segment, TabBar, ToggleChip
+from .components import (RoundedButton, RoundedCard, RoundedEntry, RoundedSelect, Segment,
+                         TabBar, ToggleChip)
 from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_reduction
 from .damage_probability import distribution
 from .destruction import apply_to_result, dp_factor, simulate_pools
@@ -99,10 +100,10 @@ class DamageWindow(tk.Toplevel):
         row = tk.Frame(bar, bg=theme.SURFACE)
         row.pack(fill='x')
         tk.Label(row, text='角色', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
-        self.player_box = ttk.Combobox(row, state='readonly', width=22, style='Panel.TCombobox')
+        self.player_box = RoundedSelect(row, values=(), width=theme.px(240))
         self.player_box.pack(side='left', padx=(6, 14))
         tk.Label(row, text='敌人', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
-        self.enemy_box = ttk.Combobox(row, state='readonly', width=22, style='Panel.TCombobox')
+        self.enemy_box = RoundedSelect(row, values=(), width=theme.px(240))
         self.enemy_box.pack(side='left', padx=(6, 14))
         RoundedButton(row, '刷新列表', self.reload_choices, theme.CARD_HI, theme.DIM,
                       theme.ui(11), height=30).pack(side='left')
@@ -116,8 +117,8 @@ class DamageWindow(tk.Toplevel):
             tk.Label(modes, text=label, bg=theme.SURFACE, fg=theme.MUTED,
                      font=theme.ui(11)).pack(side='left', padx=(12, 4))
             var = tk.StringVar(self, value='自动'); self.mode_choices[key] = var
-            ttk.Combobox(modes, textvariable=var, values=['自动', '启用', '禁用'], state='readonly',
-                         width=6, style='Panel.TCombobox').pack(side='left')
+            RoundedSelect(modes, textvariable=var, values=['自动', '启用', '禁用'],
+                          width=theme.px(96), height=theme.px(30)).pack(side='left')
         tk.Label(modes, text='修改后点击自动填充；仅影响试算', bg=theme.SURFACE, fg=theme.MUTED,
                  font=theme.ui(10)).pack(side='left', padx=12)
 
@@ -210,8 +211,8 @@ class DamageWindow(tk.Toplevel):
                 value = getattr(defaults, key)
                 var = tk.StringVar(self, value='' if value is None else str(value))
                 self.values[key] = var
-                ttk.Entry(rows, textvariable=var, width=12, style='Panel.TEntry',
-                          justify='right').grid(row=row, column=1, sticky='e', padx=(10, 0), pady=3)
+                RoundedEntry(rows, textvariable=var, width=theme.px(132)).grid(
+                    row=row, column=1, sticky='e', padx=(10, 0), pady=3)
         options = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
         options.pack(fill='x', pady=10,before=self.result_area)
         self.pool = tk.StringVar(self, value='hp')
@@ -242,8 +243,7 @@ class DamageWindow(tk.Toplevel):
         tk.Label(row, text=label, bg=theme.BG, fg=theme.DIM, font=theme.ui(11), width=width,
                  anchor='w').pack(side='left')
         var = tk.StringVar(self, value='')
-        ttk.Entry(row, textvariable=var, width=16, style='Panel.TEntry',
-                  justify='right').pack(side='left')
+        RoundedEntry(row, textvariable=var, width=theme.px(150)).pack(side='left')
         return var
 
     def build_skill_page(self, frame, form):
@@ -264,7 +264,7 @@ class DamageWindow(tk.Toplevel):
         for key,label in [('sp_consumed','预计消耗 SP'),('sp_cap','效果封顶 SP')]:
             tk.Label(self.sp_panel,text=label,bg=theme.SURFACE,fg=theme.DIM).pack(anchor='w')
             self.params[key]=tk.StringVar(self,value='')
-            ttk.Entry(self.sp_panel,textvariable=self.params[key],style='Panel.TEntry').pack(anchor='w')
+            RoundedEntry(self.sp_panel,textvariable=self.params[key],width=theme.px(150)).pack(anchor='w')
         self.sp_dr_scaling=tk.BooleanVar(self,value=False)
         ToggleChip(self.sp_panel,'破坏倍率也随消耗 SP 线性缩放（核实后启用）',self.sp_dr_scaling,accent=theme.CYAN).pack(anchor='w')
         self.dp_panel = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
@@ -281,8 +281,7 @@ class DamageWindow(tk.Toplevel):
             tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
                      width=16, anchor='w').pack(side='left')
             var = tk.StringVar(self, value=''); self.params[key] = var
-            ttk.Entry(cell, textvariable=var, width=14, style='Panel.TEntry',
-                      justify='right').pack(side='left', padx=(4, 0))
+            RoundedEntry(cell, textvariable=var, width=theme.px(140)).pack(side='left', padx=(4, 0))
         from .damage_inputs import STATS
         blocks = [
             ('威力与等级', theme.PINK, [
@@ -317,10 +316,9 @@ class DamageWindow(tk.Toplevel):
                 if key=='orb':
                     var.set('5')
                     ToggleChip(cell,'启用宝珠',self.damage_orb_enabled,accent=theme.CYAN).pack(side='left')
-                    ttk.Combobox(cell,textvariable=var,values=['1','2','3','4','5'],state='readonly',width=3,
-                                 style='Panel.TCombobox').pack(side='left')
-                else:ttk.Entry(cell, textvariable=var, width=13, style='Panel.TEntry',
-                               justify='right').pack(anchor='w', pady=(3, 0))
+                    RoundedSelect(cell,textvariable=var,values=['1','2','3','4','5'],
+                                  width=theme.px(70),height=theme.px(28)).pack(side='left')
+                else:RoundedEntry(cell, textvariable=var, width=theme.px(148)).pack(anchor='w', pady=(3, 0))
         self.note(form, '权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。')
 
     def build_destruction_page(self, frame, form):
@@ -355,8 +353,8 @@ class DamageWindow(tk.Toplevel):
                  font=theme.ui(11), anchor='w').pack(fill='x', pady=(6, 4))
         weights_row = tk.Frame(controls, bg=theme.BG)
         weights_row.pack(fill='x')
-        ttk.Entry(weights_row, textvariable=self.hit_weights, style='Panel.TEntry').pack(
-            side='left', fill='x', expand=True)
+        RoundedEntry(weights_row, textvariable=self.hit_weights, width=theme.px(520),
+                     justify='left').pack(side='left', fill='x', expand=True, padx=(0, 8))
         RoundedButton(weights_row, '重新计算', self.compute, theme.mix(theme.CARD_HI, theme.CYAN, .28),
                       theme.FG, theme.ui(11), height=32).pack(side='left', padx=8)
         self.hit_source = tk.Label(controls, text='尚无权重，不假定为单 Hit', bg=theme.BG, fg=theme.MUTED,

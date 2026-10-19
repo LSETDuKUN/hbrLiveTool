@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from . import theme
-from .components import ToggleChip
+from .components import RoundedEntry, ToggleChip
 
 SLOTS=[(f'{e}EnhanceRing',f'{name}属性戒指','element_attack')
        for e,name in [('Fire','火'),('Ice','冰'),('Thunder','雷'),('Light','光'),('Dark','暗')]]+[
@@ -45,7 +45,7 @@ class EquipmentEditor(tk.Frame):
             enabled=tk.BooleanVar(self,value=False);value=tk.StringVar(self,value='0')
             right=tk.Frame(frame,bg=theme.SURFACE);right.pack(side='right')
             ToggleChip(right,text='计入',variable=enabled,accent=theme.MINT,height=28).pack(side='left',padx=(0,8))
-            ttk.Entry(right,textvariable=value,width=7,style='Panel.TEntry',justify='right').pack(side='left')
+            RoundedEntry(right,textvariable=value,width=theme.px(76),height=theme.px(28)).pack(side='left',padx=(6,0))
             tk.Label(right,text='%',bg=theme.SURFACE,fg=theme.MUTED,font=theme.ui(10)).pack(side='left',padx=(3,6))
             tk.Label(right,text='→ '+DESTINATIONS[key],bg=theme.SURFACE,fg=theme.CYAN,font=theme.ui(10),
                      width=10,anchor='w').pack(side='left')
