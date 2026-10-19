@@ -178,7 +178,7 @@ class DetailCards(tk.Frame):
             self.label(frame,skill.description,10)
         if any(effect_category(effect) == "伤害" for effect in skill.effects):
             self.row(frame,"技能 Hit 数",number(skill.hit_count) if skill.hit_count is not None and skill.hit_count>=0 else "来源未定义")
-        self.row(frame,"SP 消耗",number(skill.sp_cost))
+        self.row(frame,"SP 消耗","全部 SP" if skill.sp_cost==-1 and skill.raw.get('consume_type')=='Sp' else number(skill.sp_cost))
         destruction = destruction_summary(skill.effects)
         if destruction:
             self.row(frame,"技能破坏倍率",destruction)
@@ -209,6 +209,9 @@ class DetailCards(tk.Frame):
         self.label(area,f"来源效果 {effect.index+1} · {WORDS.get(effect.kind,effect.kind) or '未标类型'}",10,"#9ee4ef",True)
         from .battle_conditions import conditional_attack
         changed=conditional_attack(effect.raw)
+        if effect.kind=='AttackBySp':
+            self.row(area,'SP 比例威力','显示封顶 SP 时的最小 / 最大威力')
+            self.row(area,'效果封顶 SP',number((effect.raw.get('value') or [None])[0]))
         if changed:
             self.row(area,'条件成立时基础威力',' ～ '.join(number(v*changed['power_factor']) for v in effect.power))
             self.row(area,'条件成立时破坏倍率',number(changed['destruction']))

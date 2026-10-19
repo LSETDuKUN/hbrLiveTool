@@ -61,7 +61,7 @@ def dp_factor(current, maximum, at_zero, at_full):
 
 
 def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonus, maximum,
-                   enemy_dp, enemy_hp=None, hp_adjustments=None):
+                   enemy_dp, enemy_hp=None, hp_adjustments=None, shield=None):
     """Resolve damage first; a hit that removes the shield then grants DR."""
     from dataclasses import replace
     from .damage_math import calculate
@@ -75,6 +75,17 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
         changes={key:getattr(inputs,key)+delta for key,delta in (hp_adjustments or {}).items()} if pool=='hp' else {}
         bases[pool]=calculate(replace(inputs,target_pool=pool,destruction=100,chain=0,**changes))['damage']
     if any(v is None for v in bases.values()):raise ValueError('跨池计算需要基础伤害，且不适用于吸收情景')
+    locked=False;next_dp=None
+    if shield and shield.get('remaining',0)>0:
+        if shield.get('limit_per_turn')!=1 or shield.get('locked') is None:
+            raise ValueError('盾层或本 Turn 破盾记录未确认，暂不预测跨层伤害')
+        locked=shield['locked']
+        if not locked and shield['remaining']>1:
+            next_dp=shield.get('next_dp')
+            if not isinstance(next_dp,(int,float)) or not math.isfinite(next_dp) or next_dp<1:
+                raise ValueError('下一层 DP 上限未知，暂不预测跨层伤害')
+        if enemy_dp<=0:raise ValueError('盾层正在切换，请刷新稳定快照后计算')
+    initial_locked=locked;initial_next=next_dp
     dp=enemy_dp;hp=enemy_hp;rate=inputs.destruction;rows=[];theoretical=0;total_dp=total_hp=overflow=0
     for item in template['rows']:
         alive=hp is None or hp>0
@@ -83,7 +94,9 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
         raw=bases[pool]*item['weight']*(rate/100 if pool=='hp' else 1) if alive else 0
         if not math.isfinite(raw):raise ValueError('逐段伤害溢出')
         if pool=='dp':
-            applied=min(dp,raw);dp-=applied;total_dp+=applied;lost=raw-applied;overflow+=lost
+            applied=min(max(0,dp-(1 if locked else 0)),raw);dp-=applied;total_dp+=applied;lost=raw-applied;overflow+=lost
+            if dp<=0 and next_dp is not None:
+                dp=next_dp;next_dp=None;locked=True
         else:
             applied=raw if hp is None else min(hp,raw)
             if hp is not None:hp-=applied
@@ -93,7 +106,10 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
         rows.append(dict(item,pool=pool,before=before,after=rate,increment=rate-before,
                          theoretical_increment=increment,clipped=increment-(rate-before),
                          raw_damage=raw,applied_damage=applied,overflow=lost,remaining_dp=dp,remaining_hp=hp))
-    return dict(rows=rows,final=rate,initial=inputs.destruction,theoretical_increment=theoretical,
+    return dict(rows=rows,bases=bases,initial_dp=enemy_dp,initial_hp=enemy_hp,
+                shield_locked=initial_locked,next_shield_dp=initial_next,
+                potential_increments=[r['theoretical_increment'] for r in template['rows']],
+                maximum=maximum,final=rate,initial=inputs.destruction,theoretical_increment=theoretical,
                 theoretical_final=inputs.destruction+theoretical,actual_increment=rate-inputs.destruction,
                 clipped=theoretical-(rate-inputs.destruction),dp_damage=total_dp,hp_damage=total_hp,
                 damage=total_dp+total_hp,overflow=overflow,remaining_dp=dp,remaining_hp=hp,segmented=True)

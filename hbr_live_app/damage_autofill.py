@@ -45,6 +45,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     from .conditional_passives import predictions
     from .status_rules import independent,active
     modes=context_for(player,enemy,modes)
+    if player.get('statuses_available'):
+        modes['charging']=any(s.get('label')=='SpecialStatus.BuffCharge' and active(s) for s in player.get('statuses',[]))
     added,passive_notes=predictions(player,modes)
     player=dict(player,statuses=list(player.get('statuses',[]))+added)
     notes.extend(passive_notes)
@@ -64,7 +66,7 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         notes.append(f'本体段数 {live_hits}：游戏读取')
     else:notes.append('本体段数：本地资料库（游戏字段未读到）；逐段伤害分布：本地资料库，可手动修改')
     attacks=[p for p in db.get('parts',[]) if p.get('skill_type') in
-             ('AttackSkill','AttackNormal','TokenAttack','PenetrationCriticalAttack','AttackByOwnDpRate','DamageRateChangeAttackSkill')]
+             ('AttackSkill','AttackNormal','TokenAttack','PenetrationCriticalAttack','AttackByOwnDpRate','AttackBySp','DamageRateChangeAttackSkill')]
     raw=[p for p in selected.get('parts',[]) if p.get('skill_type_raw')==10]
     part=attacks[0] if len(attacks)==1 else {}
     live=next((p for p in selected.get('parts',[]) if p.get('Label')==part.get('label')),None)
@@ -97,6 +99,14 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     for pool in ('dp','hp'):
         rate=pick('Vs'+pool.capitalize()+'Rate',mult.get(pool))
         if isinstance(rate,(int,float)) and rate>=1: values[pool+'_bonus']=(rate-1)*100
+    sp_scaling=part.get('skill_type')=='AttackBySp'
+    params['sp_scaling']=sp_scaling
+    if sp_scaling:
+        params.update(sp_cap=pick('Value1',(part.get('value') or [None])[0]),
+                      sp_consumed=inputs.get('current_sp'))
+        notes.append('全 SP 技能：威力栏为封顶 SP 时的端点；按 min(预计消耗 SP, 封顶 SP)/封顶 SP 线性缩放，再计算等级、差值和超差。')
+        notes.append(f"当前 SP {inputs.get('current_sp')}；预计剩余 {inputs.get('expected_sp')}；预计消耗字段 {inputs.get('sp_to_consume')}（仅供核对，不信任缓存）。默认消耗当前 SP，可手改行动前预计值。")
+        skipped.append('破坏倍率是否随 SP 变化需独立确认；默认保留来源倍率，可手动启用 SP 比例破坏倍率。')
     dp_scaling=part.get('skill_type')=='AttackByOwnDpRate'
     if dp_scaling:
         endpoints=part.get('value') or [None,None]
@@ -356,7 +366,7 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         total=sum(hit_weights);hit_weights=[w/total for w in hit_weights]+chain_weights
     if values['chain'] and not chain_weights:
         hit_weights=[];hit_note='连击逐 Hit 权重未确认，请手动填写完整权重'
-    result=dict(dp_scaling=dp_scaling,pool_simulation=bool(enemy.get('dp',0)>0 and not progress.get('dp_extra')),
+    result=dict(sp_scaling=sp_scaling,dp_scaling=dp_scaling,
                 destruction_ready=exact_hits and bool(hit_weights) and all(params.get(k) is not None for k in ('skill_dr','enemy_dr','max_dr')),
                 equipment_notes=equipment_notes,equipment_details=equipment_details,
                 equipment_owned=list(set(inputs.get('passive_labels',[])) | {p['label'] for p in inputs.get('passive_audit',[])}
@@ -366,7 +376,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     result['hp_adjustments']={}
     if _compare_pools and enemy.get('dp',0)>0:
         hp=autofill(player,dict(enemy,dp=0),fields,lookup,modes,party,_compare_pools=False)['values']
-        for key in ('attack','element_attack','charge','defense_down','element_defense_down'):
+        for key in ('attack','element_attack','charge','defense_down','element_defense_down',
+                    'hp_bonus','dp_bonus'):
             delta=hp[key]-values[key]
             if delta:
                 result['hp_adjustments'][key]=delta

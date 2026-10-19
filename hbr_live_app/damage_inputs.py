@@ -20,6 +20,12 @@ def read_inputs(reader, actor):
     if reader.r.cls(actor) != 'BattlePlayerData':
         return result
     result['reinforced_mode_turn'] = reader.get(actor, '_reinforcedModeTurn')
+    field = reader.fields(actor).get('spInternal')
+    if field and field[1] == 17:
+        result['current_sp'] = reader.r.i(actor+field[0])
+    # Keep these observations separate: they can be stale outside resolution.
+    result['expected_sp'] = reader.prop(actor, 'expectedSp')
+    result['sp_to_consume'] = reader.prop(actor, 'spToConsume')
     passive_list = reader.prop(actor, 'passiveSkillList')
     if passive_list and reader.r.cls(passive_list) == 'List`1':
         from .passive_audit import audit_entry

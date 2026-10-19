@@ -122,7 +122,7 @@ class DamageWindow(tk.Toplevel):
                  font=theme.ui(10)).pack(side='left', padx=12)
 
     def build_pages(self):
-        self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '逐段破坏率', '饰品效果', '浮动概率曲线', '当前内存参数', '天赋与被动审查']
+        self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '逐段破坏率', '饰品效果', '当前内存参数', '天赋与被动审查']
         self.tabs = TabBar(self, self.tab_names, self.show_page, bg=theme.BG)
         self.tabs.pack(fill='x', padx=14, pady=(0, 6))
         self.pages = tk.Frame(self, bg=theme.BG)
@@ -135,7 +135,7 @@ class DamageWindow(tk.Toplevel):
         self.build_skill_page(*self.page_widgets['技能与属性'])
         self.build_destruction_page(*self.page_widgets['逐段破坏率'])
         self.build_equipment_page(*self.page_widgets['饰品效果'])
-        self.build_probability_page(*self.page_widgets['浮动概率曲线'])
+        self.build_probability_page(self.page_widgets['乘区试算'][0],self.result_area)
         self.build_raw_page(*self.page_widgets['当前内存参数'])
         self.build_audit_page(*self.page_widgets['天赋与被动审查'])
         self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1],self.update_pending)
@@ -158,10 +158,31 @@ class DamageWindow(tk.Toplevel):
         label.bind('<Configure>', lambda e: label.configure(wraplength=max(240, e.width - 8)))
         return label
 
+    def fold(self,parent,title):
+        shell=tk.Frame(parent,bg=theme.BG);shell.pack(fill='x',pady=5)
+        body=tk.Frame(shell,bg=theme.BG)
+        opened=tk.BooleanVar(self,value=False)
+        def toggle():
+            opened.set(not opened.get())
+            button.configure(text=('▾ ' if opened.get() else '▸ ')+title)
+            if opened.get():body.pack(fill='x')
+            else:body.pack_forget()
+        button=tk.Button(shell,text='▸ '+title,command=toggle,bg=theme.SURFACE,fg=theme.DIM,
+                         relief='flat',anchor='w',font=theme.ui(11))
+        button.pack(fill='x')
+        return body
+
     # ---- pages -------------------------------------------------------------
     def build_form_page(self, frame, form):
-        self.note(form, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
-                        '未确认条件请查看天赋审查与参数页；尚不完整模拟逐 Hit、破盾与后续施加效果。', 11)
+        self.result_area=tk.Frame(form,bg=theme.BG)
+        self.result_area.pack(fill='x',pady=6)
+        self.summary=tk.Label(self.result_area,text='尚无计算结果',bg=theme.BG,fg=theme.FG,
+                              font=theme.ui(13,'bold'),justify='left',anchor='w')
+        self.summary.pack(fill='x',pady=6)
+        self.summary.bind('<Configure>',lambda e:self.summary.configure(wraplength=max(300,e.width-12)))
+        self.result_details=self.fold(form,'计算明细与备注')
+        self.note(self.result_details, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
+                        '跨池按每段实际目标计算；支持已识别的阿蒙锁盾；尚不模拟其他多层盾、行动中新增状态和伤害衰减。', 11)
         grid = tk.Frame(form, bg=theme.BG)
         grid.pack(fill='x')
         self.values = {}
@@ -192,24 +213,18 @@ class DamageWindow(tk.Toplevel):
                 ttk.Entry(rows, textvariable=var, width=12, style='Panel.TEntry',
                           justify='right').grid(row=row, column=1, sticky='e', padx=(10, 0), pady=3)
         options = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
-        options.pack(fill='x', pady=10)
+        options.pack(fill='x', pady=10,before=self.result_area)
         self.pool = tk.StringVar(self, value='hp')
-        tk.Label(options, text='打击池', bg=theme.SURFACE, fg=theme.DIM,
+        tk.Label(options, text='目标判定', bg=theme.SURFACE, fg=theme.DIM,
                  font=theme.ui(11)).pack(side='left')
-        Segment(options, [('dp', '打 DP'), ('hp', '打 HP')], self.pool, accent=theme.CYAN).pack(
+        Segment(options, [('auto', '自动跨 DP/HP'), ('dp', '仅 DP'), ('hp', '仅 HP')], self.pool, accent=theme.CYAN).pack(
             side='left', padx=(8, 18))
         self.flags = {}
         for key, title in [('critical', '暴击'), ('penetration_critical', '贯通暴击'), ('absorbed', '吸收')]:
             var = tk.BooleanVar(self, value=getattr(defaults, key))
             self.flags[key] = var
             ToggleChip(options, title, var, accent=theme.GOLD).pack(side='left', padx=(0, 8))
-        result_head = tk.Frame(form, bg=theme.BG)
-        result_head.pack(fill='x', pady=(2, 4))
-        tk.Label(result_head, text='试算结果', bg=theme.BG, fg=theme.PINK,
-                 font=theme.ui(12, 'bold')).pack(side='left')
-        RoundedButton(result_head, '计算', self.compute, theme.PINK, theme.on_fill,
-                      theme.ui(11), height=30).pack(side='right')
-        self.result = self.text_panel(form, height=12)
+        self.result = self.text_panel(self.result_details, height=12)
 
     def text_panel(self, parent, height=10):
         box = tk.Frame(parent, bg=theme.SURFACE, padx=2, pady=2)
@@ -232,6 +247,7 @@ class DamageWindow(tk.Toplevel):
         return var
 
     def build_skill_page(self, frame, form):
+        self.params = {}
         self.use_skill = tk.BooleanVar(self, value=False)
         self.damage_orb_enabled=tk.BooleanVar(self,value=False)
         use_row = tk.Frame(form, bg=theme.BG)
@@ -242,6 +258,15 @@ class DamageWindow(tk.Toplevel):
         self.skill_title = tk.Label(form, text='尚未自动填充', bg=theme.BG, fg=theme.PINK,
                                     font=theme.ui(12, 'bold'), anchor='w')
         self.skill_title.pack(fill='x', pady=8)
+        self.sp_scaling=False
+        self.sp_panel=tk.Frame(form,bg=theme.SURFACE,padx=14,pady=10)
+        self.note(self.sp_panel,'全 SP 技能：威力为封顶端点。预计消耗默认当前 SP，可按行动前回复/消耗手动修改。超过封顶只限制效果，不代表实际少消耗 SP。')
+        for key,label in [('sp_consumed','预计消耗 SP'),('sp_cap','效果封顶 SP')]:
+            tk.Label(self.sp_panel,text=label,bg=theme.SURFACE,fg=theme.DIM).pack(anchor='w')
+            self.params[key]=tk.StringVar(self,value='')
+            ttk.Entry(self.sp_panel,textvariable=self.params[key],style='Panel.TEntry').pack(anchor='w')
+        self.sp_dr_scaling=tk.BooleanVar(self,value=False)
+        ToggleChip(self.sp_panel,'破坏倍率也随消耗 SP 线性缩放（核实后启用）',self.sp_dr_scaling,accent=theme.CYAN).pack(anchor='w')
         self.dp_panel = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
         self.use_dp_scaling = tk.BooleanVar(self, value=False)
         ToggleChip(self.dp_panel, '按技能端点及自身 DP 自动计算独立倍率', self.use_dp_scaling,
@@ -249,7 +274,6 @@ class DamageWindow(tk.Toplevel):
         grid = tk.Frame(self.dp_panel, bg=theme.SURFACE)
         grid.pack(fill='x', pady=(6, 0))
         grid.columnconfigure(0, weight=1); grid.columnconfigure(1, weight=1)
-        self.params = {}
         for index, (key, label) in enumerate([('own_dp','自身当前 DP'),('own_dp_max','自身 DP 上限'),
                                               ('dp_zero_factor','0 DP 时倍率'),('dp_full_factor','满 DP 时倍率')]):
             cell = tk.Frame(grid, bg=theme.SURFACE)
@@ -308,9 +332,7 @@ class DamageWindow(tk.Toplevel):
         for key, label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),
                            ('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
             self.params[key] = self.field_row(form, label, 20)
-        self.use_pool_simulation = tk.BooleanVar(self, value=False)
-        ToggleChip(form, '逐段处理 DP → HP（破盾段溢出丢弃）', self.use_pool_simulation,
-                   accent=theme.CYAN).pack(anchor='w', pady=8)
+        self.note(form,'主界面选择自动跨 DP/HP 时，按敌人剩余 DP 逐段判断承伤池；破盾段溢出仍丢弃。')
         for key, label in [('enemy_dp','敌人剩余 DP'),('enemy_hp','敌人剩余 HP（可空）')]:
             self.params[key] = self.field_row(form, label, 28)
         RoundedButton(form, '计算逐段伤害', self.compute, theme.mix(theme.CARD_HI, theme.PINK, .3),
@@ -325,21 +347,22 @@ class DamageWindow(tk.Toplevel):
         self.equipment_text = self.text_panel(form, height=12)
 
     def build_probability_page(self, frame, probability):
-        self.note(probability, '每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。')
-        self.note(probability, '启用递推时按各段实际破坏率调整权重；未模拟跨 DP 破盾与衰减，曲线不等同于完整实战击杀概率。')
+        controls=self.fold(self.result_details,'概率模型、Hit 权重与破盾分支')
+        self.note(controls, '每 Hit 独立均匀浮动 0.9–1.1；按各段伤害权重合计，采用参考网站的概率模型。')
+        self.note(controls, '跨 DP/HP 时按破盾段概率混合各分支；竖线标记集中概率。固定增益、独立逐 Hit 浮动；支持已确认的阿蒙锁盾，其他多层盾和衰减待补充。')
         self.hit_weights = tk.StringVar(self, value='')
-        tk.Label(probability, text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）', bg=theme.BG, fg=theme.DIM,
+        tk.Label(controls, text='各 Hit 相对伤害权重（含追击，逗号分隔；可修改）', bg=theme.BG, fg=theme.DIM,
                  font=theme.ui(11), anchor='w').pack(fill='x', pady=(6, 4))
-        weights_row = tk.Frame(probability, bg=theme.BG)
+        weights_row = tk.Frame(controls, bg=theme.BG)
         weights_row.pack(fill='x')
         ttk.Entry(weights_row, textvariable=self.hit_weights, style='Panel.TEntry').pack(
             side='left', fill='x', expand=True)
         RoundedButton(weights_row, '重新计算', self.compute, theme.mix(theme.CARD_HI, theme.CYAN, .28),
                       theme.FG, theme.ui(11), height=32).pack(side='left', padx=8)
-        self.hit_source = tk.Label(probability, text='尚无权重，不假定为单 Hit', bg=theme.BG, fg=theme.MUTED,
+        self.hit_source = tk.Label(controls, text='尚无权重，不假定为单 Hit', bg=theme.BG, fg=theme.MUTED,
                                    font=theme.ui(11), anchor='w')
         self.hit_source.pack(fill='x', pady=6)
-        self.prob_summary = tk.Label(probability, text='', bg=theme.BG, fg=theme.FG, font=theme.ui(11),
+        self.prob_summary = tk.Label(controls, text='', bg=theme.BG, fg=theme.FG, font=theme.ui(11),
                                      anchor='w', justify='left')
         self.prob_summary.pack(fill='x', pady=(0, 8))
         self.prob_summary.bind('<Configure>', lambda e: self.prob_summary.configure(
@@ -348,7 +371,7 @@ class DamageWindow(tk.Toplevel):
         self.plot.pack(fill='both', expand=True, pady=6)
         self.plot.bind('<Configure>', lambda e: self.draw_plot())
         self.plot.bind('<Motion>', self.hover_plot)
-        self.plot_hint = tk.Label(probability, text='横轴：伤害倍率；纵轴：概率密度（面积为概率）',
+        self.plot_hint = tk.Label(controls, text='横轴：伤害倍率；纵轴：概率密度（面积为概率）',
                                   bg=theme.BG, fg=theme.MUTED, font=theme.ui(10), anchor='w')
         self.plot_hint.pack(fill='x')
 
@@ -396,35 +419,42 @@ class DamageWindow(tk.Toplevel):
         if not data:
             c.create_text(l,44,anchor='w',text='填入已确认的各 Hit 权重后显示概率曲线',fill=theme.MUTED,
                           font=theme.ui(11));return
-        peak=max(data['density']);scale=self.plot_damage if self.plot_damage is not None else 1
-        c.create_text(l,18,anchor='w',fill=theme.MUTED,text='概率密度（每单位伤害倍率）',font=theme.ui(10))
+        peak=max(data['density']) or 1;scale=self.plot_damage if self.plot_damage is not None else 1
+        xmin,xmax=data.get('domain',(.9,1.1));span=xmax-xmin
+        c.create_text(l,18,anchor='w',fill=theme.MUTED,text='概率密度（每单位伤害）' if data.get('absolute') else '概率密度（每单位伤害倍率）',font=theme.ui(10))
         for i in range(5):
             y=b-(b-t)*i/4
             c.create_line(l,y,r,y,fill=theme.LINE_SOFT)
-            c.create_text(l-10,y,anchor='e',text=f'{peak*i/4:.1f}',fill=theme.MUTED,font=theme.num(10))
+            c.create_text(l-10,y,anchor='e',text=f'{peak*i/4:.3g}',fill=theme.MUTED,font=theme.num(10))
         for i in range(5):
-            x=l+(r-l)*i/4;factor=.9+.05*i
+            x=l+(r-l)*i/4;factor=xmin+span*i/4
             c.create_text(x,b+18,text=f'{factor*scale:,.4g}',fill=theme.MUTED,font=theme.num(10))
         points=[]
-        for x,y in zip(data['x'][::4],data['density'][::4]):
-            if .9<=x<=1.1:points.extend((l+(x-.9)/.2*(r-l),b-y/peak*(b-t)))
+        for x,y in zip(data['x'][::1 if data.get('absolute') else 4],data['density'][::1 if data.get('absolute') else 4]):
+            if xmin<=x<=xmax:points.extend((l+(x-xmin)/span*(r-l),b-y/peak*(b-t)))
         if points:
             polygon=c.create_polygon([l,b]+points+[r,b],fill=theme.CYAN_DEEP,outline='')
             c.itemconfigure(polygon,fill=theme.mix(theme.SURFACE,theme.CYAN,.18))
             c.create_line(points,fill=theme.CYAN,width=2,smooth=False)
-        for value in (data['low'],1,data['high']):
-            x=l+(value-.9)/.2*(r-l)
+        for value in (data['low'],data.get('mean',1),data['high']):
+            x=l+(value-xmin)/span*(r-l)
             c.create_line(x,t,x,b,fill=theme.PINK if value==1 else theme.mix(theme.SURFACE,theme.LAVENDER,.7),
                           dash=(3,5))
+
+        for value,prob in data.get('atoms',[]):
+            x=l+(value-xmin)/span*(r-l)
+            c.create_line(x,t,x,b,fill=theme.GOLD,width=2)
+            c.create_text(x,t+12,anchor='n',text=f'{prob:.2%}',fill=theme.GOLD,font=theme.num(10))
 
     def hover_plot(self,event):
         if not self.plot_data:return
         width=max(300,self.plot.winfo_width())
-        factor=.9+(event.x-64)/(width-92)*.2
-        if not .9<=factor<=1.1:return
+        xmin,xmax=self.plot_data.get('domain',(.9,1.1))
+        factor=xmin+(event.x-64)/(width-92)*(xmax-xmin)
+        if not xmin<=factor<=xmax:return
         d=self.plot_data;idx=max(0,min(len(d['x'])-1,round((factor-d['x'][0])/d['step'])))
         scale=self.plot_damage if self.plot_damage is not None else 1
-        self.plot_hint.configure(text=f'伤害倍率 {factor:.4f} · 对应伤害 {factor*scale:,.4g} · 密度 {d["density"][idx]:.3f}（密度不是单点概率）')
+        self.plot_hint.configure(text=f'{"伤害" if d.get("absolute") else "伤害倍率"} {factor:.4f} · 对应伤害 {factor*scale:,.4g} · 密度 {d["density"][idx]:.3f}（密度不是单点概率）')
 
     def reload_choices(self):
         data=self.snapshot()
@@ -485,15 +515,23 @@ class DamageWindow(tk.Toplevel):
         for k,var in self.values.items():
             v=filled['values'][k];var.set('' if v is None else f'{v:g}')
         for k,var in self.flags.items():var.set(filled['values'][k])
-        self.pool.set(filled['values']['target_pool'])
+        self.pool.set('auto')
+        self.shield_state=enemy.get('enemy_progress',{}).get('shield')
+        self.auto_pool_blocked=bool(enemy.get('enemy_progress',{}).get('dp_extra')) and not (
+            self.shield_state and self.shield_state.get('limit_per_turn')==1)
+        from .shield_layers import shield_text
+        if self.shield_state:filled['notes'].append(shield_text(self.shield_state)+'；下一层 DP 容量来自本地资料')
         for k,var in self.params.items():
             v=filled['params'].get(k);var.set('' if v is None else f'{v:g}')
         self.hit_weights.set(', '.join(f'{w:.8g}' for w in filled.get('hit_weights',[])))
         self.hit_source.configure(text=filled.get('hit_note','权重未确认'))
         self.use_destruction.set(filled.get('destruction_ready',False))
-        self.use_pool_simulation.set(filled.get('pool_simulation',False) and filled.get('destruction_ready',False))
         self.hp_adjustments=filled.get('hp_adjustments',{})
         self.use_dp_scaling.set(filled.get('dp_scaling',False))
+        self.sp_scaling=filled.get('sp_scaling',False)
+        self.sp_dr_scaling.set(False)
+        if self.sp_scaling:self.sp_panel.pack(fill='x',pady=8,before=self.skill_title)
+        else:self.sp_panel.pack_forget()
         if filled.get('dp_scaling'):self.dp_panel.pack(fill='x',pady=8,before=self.skill_title)
         else:self.dp_panel.pack_forget()
         self.equipment_editor.load(filled.get('equipment_details',[]),filled.get('equipment_owned',[]))
@@ -537,7 +575,12 @@ class DamageWindow(tk.Toplevel):
 
     def compute(self):
         try:
-            if self.use_pool_simulation.get() and not self.use_destruction.get():
+            self.destruction_report.configure(state='normal');self.destruction_report.delete('1.0','end')
+            self.destruction_report.configure(state='disabled')
+            auto=self.pool.get()=='auto'
+            cross=auto
+            if auto and getattr(self,'auto_pool_blocked',False):raise ValueError('当前为多层盾，自动跨池尚未支持；可选择单池核对')
+            if cross and not self.use_destruction.get():
                 raise ValueError('跨 DP/HP 计算需要先启用逐段递推并补齐参数')
             self.equipment_editor.apply({**self.values,**self.params})
             if self.use_dp_scaling.get():
@@ -547,27 +590,32 @@ class DamageWindow(tk.Toplevel):
             base=self.values['base'].get().strip()
             if self.use_skill.get():
                 skill_params={k:v.get() for k,v in self.params.items()}
+                skill_params['sp_scaling']=self.sp_scaling
                 if not self.damage_orb_enabled.get():skill_params['orb']='0'
                 computed,weighted=skill_base(skill_params,self.flags['critical'].get())
                 base=str(computed);self.values['base'].set(f'{computed:.8g}')
-            values.update(base=float(base) if base else None,target_pool=self.pool.get(),
+            values.update(base=float(base) if base else None,target_pool=('dp' if float(self.params['enemy_dp'].get())>0 else 'hp') if auto else self.pool.get(),
                           **{k:v.get() for k,v in self.flags.items()})
             inputs=DamageInputs(**values)
+            if not cross and inputs.target_pool=='hp' and getattr(self,'hp_adjustments',{}):
+                from dataclasses import replace
+                inputs=replace(inputs,**{k:getattr(inputs,k)+v for k,v in self.hp_adjustments.items()})
             result=calculate(inputs);detail=None
-            self.destruction_report.configure(state='normal');self.destruction_report.delete('1.0','end')
-            self.destruction_report.configure(state='disabled')
             if self.use_destruction.get():
                 raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
                 weights=[float(w) for w in raw.split(',') if w.strip()]
                 count=float(self.params['main_hits'].get())
                 if not math.isfinite(count) or not count.is_integer():raise ValueError('本体 Hit 数必须为整数')
                 args=[float(self.params[k].get()) for k in ('skill_dr','enemy_dr','destruction_bonus','max_dr')]
-                if self.use_pool_simulation.get():
+                if self.sp_scaling and self.sp_dr_scaling.get():
+                    from .sp_scaling import sp_factor
+                    args[0]*=sp_factor(self.params['sp_consumed'].get(),self.params['sp_cap'].get())
+                if cross:
                     hp=self.params['enemy_hp'].get().strip()
                     detail=simulate_pools(inputs,weights,int(count),*args,float(self.params['enemy_dp'].get()),float(hp) if hp else None,
-                                          hp_adjustments=getattr(self,'hp_adjustments',{}))
+                                          hp_adjustments=getattr(self,'hp_adjustments',{}),shield=getattr(self,'shield_state',None))
                     result.update(damage=detail['damage'],minimum=None,maximum=None,multiplier=None,
-                                  note='逐段跨池基准情景；破盾溢出丢弃，不计入 HP。未模拟多层盾、动态增减益及伤害衰减。')
+                                  note='逐段跨池基准情景；破盾溢出丢弃，不计入 HP。支持已确认的阿蒙锁盾；其他多层盾、动态增减益及伤害衰减未模拟。')
                 else:
                     result,detail=apply_to_result(result,inputs,weights,int(count),*args)
                 lines=[f"破坏率：{inputs.destruction:g}% → {detail['final']:g}%"]
@@ -585,7 +633,13 @@ class DamageWindow(tk.Toplevel):
             if values['absorbed']:
                 self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='吸收情景不输出伤害概率曲线')
             elif detail and detail.get('segmented'):
-                self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='跨池时浮动会改变破盾段，固定权重曲线不适用；当前展示无浮动逐段基准。')
+                from .pool_probability import pool_distribution
+                data=pool_distribution(detail);self.plot_data=data;self.plot_damage=1
+                branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in data['branches'])
+                summary=f"破盾分支数值卷积 · 有效 DP+HP 伤害均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
+                if data['kill_probability'] is not None:summary+=f"\n当前模型击杀概率 {data['kill_probability']:.3%}（固定增益、当前已识别盾机制）"
+                if data['atoms']:summary+='\n集中概率：'+'；'.join(f'{x:,.4g} 伤害 {p:.3%}' for x,p in data['atoms'])
+                self.prob_summary.configure(text=summary);self.draw_plot()
             else:self.update_probability(result['damage'],detail['weights'] if detail else None)
             text='弱点条件：'+('满足' if result['weak'] else '不满足（不计心眼／脆弱）')+'\n'
             if detail and detail.get('segmented'):text+='跨池各段分别采用 DP/HP 特攻，下面单池乘区仅供参考。\n'
@@ -602,13 +656,19 @@ class DamageWindow(tk.Toplevel):
                 if result['minimum'] is not None:
                     text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
                     text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
-                else:text+='跨池结果为无浮动基准；浮动可能改变破盾段，本模式不输出固定权重概率区间。\n'
+                else:text+='此处为无浮动基准；随机伤害均值、区间和各破盾段概率见浮动概率曲线。\n'
             if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见专页）\n"
             else:text+='逐段递推未启用：沿用固定破坏率，请核对逐段破坏率页的缺失参数。\n'
             text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
         except (ValueError, OverflowError) as exc:
             text='无法计算：'+str(exc)
             self.plot_data=None;self.draw_plot();self.prob_summary.configure(text=text)
+        if self.plot_data:
+            data=self.plot_data;scale=self.plot_damage if self.plot_damage is not None else 1
+            mean=data['mean'] if data.get('absolute') else self.plot_damage
+            self.summary.configure(text=(f'平均伤害  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
+                f"\n伤害浮动区间（中央 90%）  {data['low']*scale:,.2f} – {data['high']*scale:,.2f}")
+        else:self.summary.configure(text='暂无法生成完整结果：'+self.prob_summary.cget('text'))
         self.result.configure(state='normal');self.result.delete('1.0','end')
         self.result.insert('end',text)
         self.result.configure(state='disabled')

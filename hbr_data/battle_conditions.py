@@ -21,6 +21,7 @@ def evaluate(text,context):
     text=''.join((text or '').split())
     if not text:return True
     if text=='IsOverDrive()':return context.get('od_active')
+    if text=='IsCharging()':return context.get('charging')
     if text=='TargetBreakDownTurn()>0':
         down=context.get('target_down');return down>0 if isinstance(down,(int,float)) else None
     if text=='IsFront()':

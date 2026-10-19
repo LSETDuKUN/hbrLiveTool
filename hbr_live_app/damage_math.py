@@ -29,6 +29,10 @@ def skill_base(params, critical=True):
     if total<=0:raise ValueError('技能偏向权重尚未确认')
     weighted=sum(number(k)*v for k,v in weights.items() if v)/total
     lo,hi=number('min_power'),number('max_power')
+    if params.get('sp_scaling'):
+        from .sp_scaling import sp_factor
+        factor=sp_factor(params.get('sp_consumed'),params.get('sp_cap'))
+        lo*=factor;hi*=factor
     level,orb,border=number('level'),number('orb'),number('difference')
     if border<=0 or level<1 or hi<lo:raise ValueError('技能等级、威力或差值不适用基础公式')
     if orb>5:raise ValueError('宝珠等级请输入 0–5')

@@ -6,15 +6,60 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_auto_pool_and_main_page_probability_with_collapsed_notes(self):
+        self.app.open_damage_calculator();w=self.app.damage_window
+        w.values['base'].set('100');w.values['hp_bonus'].set('65')
+        w.flags['critical'].set(False);w.pool.set('auto');w.use_destruction.set(True)
+        w.hit_weights.set('.5,.5')
+        for k,v in dict(main_hits=2,skill_dr=0,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
+        w.compute();self.root.update_idletasks()
+        self.assertAlmostEqual(w.plot_data['mean'],122.5,delta=.01)
+        self.assertIn('平均伤害',w.summary.cget('text'))
+        self.assertIn('中央 90%',w.summary.cget('text'))
+        self.assertNotIn('浮动概率曲线',w.tab_names)
+        self.assertTrue(str(w.plot).startswith(str(w.page_widgets['乘区试算'][1])))
+        self.assertFalse(w.result_details.winfo_ismapped())
+        # Explicit manual mode does not silently retain a separate cross-pool toggle.
+        w.pool.set('dp');w.compute()
+        self.assertFalse(w.plot_data.get('absolute',False))
+        self.assertAlmostEqual(w.plot_damage,100)
+        w.destroy()
+
+    def test_sp_controls_scale_power_and_opt_in_destruction_without_compounding(self):
+        from test_sp_scaling import SpScalingTests
+        from hbr_live_app.damage_autofill import autofill
+        p,e,db=SpScalingTests().skill()
+        filled=autofill(p,e,lookup=lambda _:db)
+        self.app.open_damage_calculator();w=self.app.damage_window
+        for k,var in w.params.items():
+            value=filled['params'].get(k)
+            var.set('' if value is None else str(value))
+        w.sp_scaling=True;w.use_skill.set(True)
+        w.params['orb'].set('0');w.compute()
+        half=float(w.values['base'].get())
+        w.params['sp_consumed'].set('30');w.compute()
+        self.assertAlmostEqual(float(w.values['base'].get()),2*half)
+        w.params['sp_consumed'].set('15');w.sp_dr_scaling.set(True)
+        w.hit_weights.set('1');w.use_destruction.set(True)
+        for k,v in dict(main_hits=1,skill_dr=10,enemy_dr=4,destruction_bonus=0,max_dr=300).items():w.params[k].set(str(v))
+        w.compute()
+        self.assertIn('120%',w.destruction_report.get('1.0','end'))
+        w.compute()
+        self.assertIn('120%',w.destruction_report.get('1.0','end'))
+        self.assertEqual(w.params['skill_dr'].get(),'10')
+        w.sp_scaling=False;w.compute()
+        self.assertIn('140%',w.destruction_report.get('1.0','end'))
+        w.destroy()
+
     def test_pool_simulation_and_skill_dp_controls(self):
         self.app.open_damage_calculator();w=self.app.damage_window
         w.values['base'].set('100');w.flags['critical'].set(False)
-        w.hit_weights.set('.25,.25,.25,.25');w.use_destruction.set(True);w.use_pool_simulation.set(True)
+        w.hit_weights.set('.25,.25,.25,.25');w.use_destruction.set(True);w.pool.set('auto')
         for k,v in dict(main_hits=4,skill_dr=12,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
         w.compute()
         self.assertIn('丢弃破盾溢出 10.00',w.destruction_report.get('1.0','end'))
-        self.assertIsNone(w.plot_data)
-        self.assertIn('固定权重曲线不适用',w.prob_summary.cget('text'))
+        self.assertTrue(w.plot_data['absolute'])
+        self.assertIn('破盾分支数值卷积',w.prob_summary.cget('text'))
         w.use_dp_scaling.set(True)
         for k,v in dict(own_dp=50,own_dp_max=100,dp_zero_factor=1.75,dp_full_factor=1).items():w.params[k].set(str(v))
         w.compute();self.assertEqual(float(w.values['health_factor'].get()),1.375)

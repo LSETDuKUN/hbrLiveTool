@@ -20,6 +20,18 @@ def setup():
 
 
 class AutofillTests(unittest.TestCase):
+    def test_hp_accessory_is_retained_while_enemy_still_has_dp(self):
+        p,e,lookup=setup();e['dp']=40
+        accessory=status('AttackUpIncludeNormal',source='AccessoryHp')
+        accessory['values']['amountOnHpDamageInt']=1500
+        p['statuses']=[accessory]
+        r=autofill(p,e,lookup=lookup)
+        self.assertEqual(r['values']['target_pool'],'dp')
+        self.assertEqual(r['values']['hp_bonus'],65)
+        self.assertEqual(r['values']['dp_bonus'],0)
+        self.assertEqual(r['values']['attack'],0)
+        self.assertNotIn('hp_bonus',r['hp_adjustments'])  # Already included, no double count.
+
     def test_thunder_mark_thresholds_and_highest_only(self):
         for rank,attack,crit,rate in [(0,0,50,0),(1,30,50,0),(3,30,50,0),(4,30,50,30),(5,30,80,30),(6,30,80,30)]:
             with self.subTest(rank=rank):

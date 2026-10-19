@@ -11,6 +11,8 @@ class EnemyReader:
         self.catalog = EnemyCatalog()
         self.observations = EnemyObservations()
         self.previews = EnemyPreview()
+        from .shield_layers import ShieldLayers
+        self.shields=ShieldLayers()
 
     def offsets(self, obj, cls, required):
         r = self.r
@@ -68,7 +70,8 @@ class EnemyReader:
         for pool in ('dp', 'hp'):
             raw = r.read(enemy+fields['<exists'+pool.capitalize()+'ExtraGauge>k__BackingField'], 1)
             live[pool+'_extra'] = raw != b'\0'
-            if not live[pool+'_extra']:
+            catalog_multilayer=pool=='dp' and len((info.get('bars') or {}).get('main',[]))>1
+            if not live[pool+'_extra'] and not catalog_multilayer:
                 continue
             try:
                 name = pool+'IndexInternal'
@@ -121,6 +124,7 @@ class EnemyReader:
                         live[key] = struct.unpack('<f', raw)[0]
             except (RuntimeError, ValueError, KeyError):
                 pass
+        live['shield']=self.shields.update(enemy,strings['Label'],live,info.get('bars'),context)
         preview = self.previews.update(enemy, info, live, context) if state['hp'] > 0 else dict(text='已击败', blink=False)
         return dict(enemy_label=strings['Label'], enemy_id=identity, names=aliases,
                     base_resistances=info.get('base_resistances'),

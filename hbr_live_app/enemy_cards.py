@@ -202,6 +202,9 @@ class EnemyCard(tk.Canvas):
         prior = f'{preview.get("phase", "").upper()} · 已推进至规则 {preview.get("progress_order", "—")}'
         if preview.get('previous'):
             prior = '刚执行 · ' + ' → '.join(preview['previous'])
+        from .shield_layers import shield_text
+        shield=shield_text(s.get('enemy_progress',{}).get('shield'))
+        if shield:prior=shield
         while self.font.measure(prior) > w - 36 and len(prior) > 5:
             prior = prior[:-2]+'…'
         self.create_text(16, 140, text=prior, anchor='w', fill=theme.MUTED, font=self.small)
