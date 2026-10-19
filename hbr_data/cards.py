@@ -40,12 +40,12 @@ def friendly(value):
 DAMAGE_TYPES = {"AttackSkill", "PenetrationCriticalAttack", "DamageRateChangeAttackSkill",
                 "TokenAttack", "AttackByOwnDpRate", "AttackBySp", "FixedHpDamageRate",
                 "SelfDamage"}
-BUFF_TYPES = {"AttackUp", "AttackUpIncludeNormal", "DefenseUp", "CriticalRateUp",
+BUFF_TYPES = {"AttackUp", "AttackUpIncludeNormal", "DefenseUp", "CriticalRateUp", "GiveDebuffUp", "GiveDefenseDebuffUp",
               "CriticalDamageUp", "MindEye", "BuffCharge", "Morale",
               "Funnel", "DamageRateUp", "ToughnessUpValue", "AllStatusUpValue",
               "GiveAttackBuffUp", "FightingSpirit", "OverDrivePointUp", "TokenSet"}
 DEBUFF_TYPES = {"DefenseDown", "AttackDown", "Fragile", "ResistDown",
-                "ResistDownOverwrite", "HealDown", "GiveDebuffUp",
+                "ResistDownOverwrite", "HealDown",
                 "OverDrivePointDown", "Provoke", "StunRandom",
                 "ConfusionRandom", "ImprisonRandom", "Misfortune"}
 EFFECT_GROUPS = (("伤害", DAMAGE_TYPES), ("增益", BUFF_TYPES), ("减益", DEBUFF_TYPES))
@@ -149,7 +149,32 @@ class DetailCards(tk.Frame):
     def render_skill(self,skill,index):
         self.card_count += 1
         frame = self.card(f"✦  {index}  {skill.name}")
-        if skill.description:
+        from .skill_views import variants
+        from .details import skill_detail
+        options=variants(skill.raw)
+        if len(options)>1:
+            self.label(frame,skill.description,10)
+            bar=tk.Frame(frame,bg=theme.CARD);bar.pack(fill='x',pady=6)
+            body=tk.Frame(frame,bg=theme.CARD);body.pack(fill='x')
+            selected=tk.IntVar(frame,value=0)
+            # Retain the Tcl variable for the lifetime of the card.
+            bar.selection=selected
+            def show():
+                for child in body.winfo_children():child.destroy()
+                name,data=options[selected.get()]
+                self.label(body,name,10,theme.PINK,True)
+                self.render_skill_content(body,skill_detail(data,skill.pointer),description=False)
+                self.bind_wheel(body)
+            for i,(name,_) in enumerate(options):
+                tk.Radiobutton(bar,text=name,variable=selected,value=i,command=show,indicatoron=False,
+                    bg=theme.CARD,fg=theme.FG,selectcolor=theme.PINK_FILL,wraplength=220,
+                    relief='flat',padx=10,pady=6).grid(row=i//3,column=i%3,sticky='ew',padx=3,pady=3)
+                bar.columnconfigure(i%3,weight=1)
+            show()
+        else:self.render_skill_content(frame,skill)
+
+    def render_skill_content(self,frame,skill,description=True):
+        if description and skill.description:
             self.label(frame,skill.description,10)
         if any(effect_category(effect) == "伤害" for effect in skill.effects):
             self.row(frame,"技能 Hit 数",number(skill.hit_count) if skill.hit_count is not None and skill.hit_count>=0 else "来源未定义")
@@ -182,6 +207,12 @@ class DetailCards(tk.Frame):
         area = tk.Frame(parent,bg=theme.SURFACE,padx=10,pady=8)
         area.pack(fill="x",pady=5)
         self.label(area,f"来源效果 {effect.index+1} · {WORDS.get(effect.kind,effect.kind) or '未标类型'}",10,"#9ee4ef",True)
+        from .battle_conditions import conditional_attack
+        changed=conditional_attack(effect.raw)
+        if changed:
+            self.row(area,'条件成立时基础威力',' ～ '.join(number(v*changed['power_factor']) for v in effect.power))
+            self.row(area,'条件成立时破坏倍率',number(changed['destruction']))
+            self.row(area,'对应条件',changed['condition'])
         if category == "伤害":
             self.row(area,"基础威力"," ～ ".join(number(v) for v in effect.power) or "未提供")
             self.row(area,"上限属性差",number(effect.stat_difference))

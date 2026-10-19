@@ -1,12 +1,6 @@
 """Preserve skill identity; traverse conditional children without name matching."""
 from copy import deepcopy
-
-
-def condition_value(text, context):
-    text=''.join((text or '').split())
-    if not text:return True
-    if text=='IsOverDrive()':return context.get('od_active')
-    return None
+from .battle_conditions import evaluate as condition_value
 
 
 def effects(skill, context=None, include_unknown=True, path=()):

@@ -1,23 +1,13 @@
 """Predict owned, verified before-action enhancement passives once per source."""
-import re
+from hbr_data.battle_conditions import context_for,evaluate
 from .passive_audit import owned_audit, audit_entry
 
 
-def condition_check(condition, player):
-    condition=''.join((condition or '').split())
-    if not condition:return True
-    if condition=='IsFront()':
-        pos=player.get('actor_position')
-        return pos in (0,1,2) if pos is not None else None
-    match=re.fullmatch(r'DpRate\(\)>=([0-9.]+)',condition)
-    if match:
-        dp,maximum=player.get('dp'),player.get('dp_max')
-        if isinstance(dp,(int,float)) and isinstance(maximum,(int,float)) and maximum>0:
-            return dp/maximum>=float(match[1])
-    return None
+def condition_check(condition, player, context=None):
+    return evaluate(condition,context if context is not None else context_for(player))
 
 
-def enhancements(player,typ,scopes,states):
+def enhancements(player,typ,scopes,states,context=None):
     applied={s.get('source') for s in states};seen=set();total=0;notes=[]
     for owned in owned_audit(player):
         item=audit_entry(owned['label'],owned.get('runtime',{})) if not owned.get('parts') and owned.get('label') else owned
@@ -30,8 +20,8 @@ def enhancements(player,typ,scopes,states):
         for part in item.get('parts',[]):
             if typ not in scopes.get(part.get('skill_type'),set()):continue
             label=item.get('name') or identity
-            checks=[condition_check(item.get('condition'),player),condition_check(part.get('cond'),player),
-                    condition_check(part.get('target_condition'),player),condition_check(part.get('hit_condition'),player)]
+            checks=[condition_check(item.get('condition'),player,context),condition_check(part.get('cond'),player,context),
+                    condition_check(part.get('target_condition'),player,context),condition_check(part.get('hit_condition'),player,context)]
             if False in checks:notes.append(f'{label}：当前不满足发动条件');continue
             power=part.get('power') or []
             if (item.get('timing')!='OnPlayerTurnStart' or part.get('target_type')!='Self'

@@ -41,6 +41,13 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     values['critical_rate_bonus']=0
     values['element_critical_rate_bonus']=0
     inputs=player.get('combat_inputs',player.get('inputs',{}))
+    from hbr_data.battle_conditions import context_for,evaluate,conditional_attack
+    from .conditional_passives import predictions
+    from .status_rules import independent,active
+    modes=context_for(player,enemy,modes)
+    added,passive_notes=predictions(player,modes)
+    player=dict(player,statuses=list(player.get('statuses',[]))+added)
+    notes.extend(passive_notes)
     selected=inputs.get('selected_skill',{}); db=lookup(selected.get('label','')) if selected.get('label') else {}
     from hbr_data.skill_tree import resolve
     branching=any(any(isinstance(child,dict) and 'parts' in child for child in p.get('strval',[])) for p in db.get('parts',[]))
@@ -78,6 +85,15 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     for stat,dbkey in WEIGHTS.items():
         params[stat]=inputs.get('stats',{}).get(stat)
         params['weight_'+stat]=pick('RefParam'+stat.capitalize(),part.get('parameters',{}).get(dbkey))
+    changed=conditional_attack(part)
+    changed_active=changed and evaluate(changed['condition'],modes) is True
+    if changed_active:
+        factor=pick('Value2',changed['power_factor'])
+        for key in ('min_power','max_power'):
+            if params[key] is not None:params[key]*=factor
+        notes.append(f'技能条件 {changed["condition"]} 成立：基础威力 ×{factor:g}，不是额外倒地乘区')
+    elif changed:
+        skipped.append('条件威力/破坏倍率未启用：'+str(changed['condition'])+'（不满足或状态未知）')
     for pool in ('dp','hp'):
         rate=pick('Vs'+pool.capitalize()+'Rate',mult.get(pool))
         if isinstance(rate,(int,float)) and rate>=1: values[pool+'_bonus']=(rate-1)*100
@@ -108,10 +124,9 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     burst=bool(modes.get('transcend') and modes.get('lightning_style') and element=='Thunder')
     notes.append('技能：'+str(selected.get('name') or '未读取')+'；威力/权重优先内存，属性/成长查本地资料。宝珠默认 5 级。')
     if not part:skipped.append('技能属性/类型未唯一确认：属性相关状态未自动计入')
-    if part.get('skill_type') not in ('AttackSkill','AttackNormal',None):skipped.append('特殊攻击 '+part['skill_type']+' 的条件倍率待核对')
+    if part.get('skill_type') not in ('AttackSkill','AttackNormal',None) and not changed_active:skipped.append('特殊攻击 '+part['skill_type']+' 的条件倍率待核对')
     def applicable(s):
-        if s.get('effective') is False or s.get('pending_add') or s.get('pending_remove'):return False
-        if s.get('duration_kind') in ('turn','count') and s.get('remaining',1)<=0:return False
+        if not active(s):return False
         info=s.get('source_effect',{})
         cond=' && '.join(info.get(k,'') for k in ('target_condition','condition','hit_condition') if info.get(k))
         if cond and cond!='IsWeakElement()' and s.get('source') not in LOW_SP:
@@ -127,9 +142,11 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     def aggregate(entries):
         permanent=[]; groups={}
         for s,key,value in entries:
-            if (s.get('duration_kind')=='permanent' and s.get('buff_limit_type')!=4) or s.get('source')=='Passive.Condition_AttackUp11':
+            if independent(s) or (s.get('duration_kind')=='permanent' and s.get('buff_limit_type')!=4):
                 permanent.append((s,key,value));continue
-            group=(key,s.get('label'),s.get('element_key'),s.get('element_type') or 0)
+            # Numeric and named element encodings describe the same stacking pool.
+            element_id=s.get('element_key') or {1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(s.get('element_type'))
+            group=(key,s.get('label'),element_id)
             groups.setdefault(group,[]).append((s,key,value))
         chosen=list(permanent)
         for group in groups.values():
@@ -306,6 +323,9 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     skipped.append('未作为状态读取的饰品/被动不自动猜测；Token/血量特殊倍率未预测')
     params['destruction_bonus']=values.pop('destruction_bonus')
     params['skill_dr']=pick('DamageRateRate',mult.get('dr'))
+    if changed_active:
+        params['skill_dr']=pick('Value1',changed['destruction'])
+        notes.append(f'条件成立时破坏倍率替换为 {params["skill_dr"]:g}')
     progress=enemy.get('enemy_progress',{})
     params['enemy_dr']=progress.get('destruction_coefficient')
     params['max_dr']=progress.get('destruction_max')

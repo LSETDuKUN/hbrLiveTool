@@ -68,6 +68,8 @@ class DamageWindow(tk.Toplevel):
         self.plot_damage = None
         self.snapshot = snapshot
         self.loaded_snapshot = {}
+        self.pending_effects=[]
+        self.pending_delta={}
         self.fill_notes = '尚未自动填充'
         self.build_header()
         self.build_selector()
@@ -136,7 +138,7 @@ class DamageWindow(tk.Toplevel):
         self.build_probability_page(*self.page_widgets['浮动概率曲线'])
         self.build_raw_page(*self.page_widgets['当前内存参数'])
         self.build_audit_page(*self.page_widgets['天赋与被动审查'])
-        self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1])
+        self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1],self.update_pending)
         self.effect_editor.pack(fill='both', expand=True)
         self.show_page(self.tab_names[0])
 
@@ -231,6 +233,7 @@ class DamageWindow(tk.Toplevel):
 
     def build_skill_page(self, frame, form):
         self.use_skill = tk.BooleanVar(self, value=False)
+        self.damage_orb_enabled=tk.BooleanVar(self,value=False)
         use_row = tk.Frame(form, bg=theme.BG)
         use_row.pack(fill='x', pady=(0, 4))
         ToggleChip(use_row, '用技能参数生成基础伤害', self.use_skill, accent=theme.PINK).pack(side='left')
@@ -260,7 +263,7 @@ class DamageWindow(tk.Toplevel):
         blocks = [
             ('威力与等级', theme.PINK, [
                 ('min_power', '最小威力'), ('max_power', '最大威力'), ('difference', '属性差阈值'),
-                ('level', '技能等级'), ('enemy', '敌方防御参考值'), ('orb', '宝珠等级（默认满级 5）'),
+                ('level', '技能等级'), ('enemy', '敌方防御参考值'), ('orb', '宝珠（核实后启用）'),
                 ('growth_min', '最小威力等级成长'), ('growth_max', '最大威力等级成长')]),
             ('属性', theme.CYAN, [(key, STATS[key]) for key in WEIGHTS]),
             ('属性权重', theme.MINT, [('weight_' + key, STATS[key] + '权重') for key in WEIGHTS]),
@@ -287,15 +290,20 @@ class DamageWindow(tk.Toplevel):
                 tk.Label(cell, text=label, bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11),
                          anchor='w', justify='left').pack(fill='x')
                 var = tk.StringVar(self, value=''); self.params[key] = var
-                ttk.Entry(cell, textvariable=var, width=13, style='Panel.TEntry',
-                          justify='right').pack(anchor='w', pady=(3, 0))
+                if key=='orb':
+                    var.set('5')
+                    ToggleChip(cell,'启用宝珠',self.damage_orb_enabled,accent=theme.CYAN).pack(side='left')
+                    ttk.Combobox(cell,textvariable=var,values=['1','2','3','4','5'],state='readonly',width=3,
+                                 style='Panel.TCombobox').pack(side='left')
+                else:ttk.Entry(cell, textvariable=var, width=13, style='Panel.TEntry',
+                               justify='right').pack(anchor='w', pady=(3, 0))
         self.note(form, '权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。')
 
     def build_destruction_page(self, frame, form):
         self.use_destruction = tk.BooleanVar(self, value=False)
         ToggleChip(form, '启用逐段破坏率递推（参数完整时自动启用）', self.use_destruction,
                    accent=theme.PINK).pack(anchor='w')
-        self.note(form, '各段先结算伤害，再增加破坏率。可启用逐段 DP→HP；破盾段不增长破坏率且溢出不转入 HP。\n'
+        self.note(form, '各段先结算伤害，再增加破坏率。破盾当段即增加破坏率；该段溢出伤害不转入 HP，后续段使用新破坏率。\n'
                         '敌人系数沿用 DamageRateValue（例如 4），不是属性抗性百分比；有破坏抗性状态时需核对最终有效系数。')
         for key, label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),
                            ('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
@@ -459,14 +467,20 @@ class DamageWindow(tk.Toplevel):
         # Let autofill apply its complete status/expiry/condition filtering in auto mode.
         if self.mode_choices['high_boost'].get()=='自动':modes.pop('high_boost')
         modes.update(ghost=automatic['ghost'],gidou=automatic['gidou'])
+        modes['enemies']=data.get('enemies',[])
         od=data.get('od_state') or {}
         modes.update(od_active=od.get('active') if od.get('available') else None,od_level=od.get('level'))
         modes['lightning_style']='Thunder' in style_elements(player.get('style_label',''))
         if gauge.get('full') and (gauge.get('element')!=3 or modes.get('transcend')):
             modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(gauge.get('element'))
         filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
-        self.effect_editor.load(player,enemy,modes)
-        filled['notes'].append('模式判断：'+str(modes)+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
+        self.pending_effects=[];self.pending_delta={}
+        self.damage_orb_enabled.set(False)
+        self.pending_context=(player,enemy,data.get('field_state'),modes,data.get('players',[]))
+        self.pending_base=filled
+        self.effect_editor.pending_list.delete(0,'end')
+        self.effect_editor.load_party(data.get('players',[]),player,enemy,modes)
+        filled['notes'].append('模式判断：'+str({k:v for k,v in modes.items() if k!='enemies'})+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
             v=filled['values'][k];var.set('' if v is None else f'{v:g}')
@@ -491,6 +505,36 @@ class DamageWindow(tk.Toplevel):
         self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
         self.refresh();self.compute()
 
+    def update_pending(self,action,payload):
+        from .effect_pending import pending_state,with_pending
+        if not hasattr(self,'pending_context'):raise ValueError('请先自动填充伤害角色和敌人')
+        player,enemy,fields,modes,party=self.pending_context
+        rows=list(self.pending_effects)
+        if action=='add':
+            item,amount=payload
+            if item.get('passive') and any(r['item'].get('source')==item.get('source') and r['item'].get('caster')==item.get('caster') and r['item']['part'].get('label')==item['part'].get('label') for r in rows):
+                raise ValueError('该来源被动已预添加；请删除后再修改，避免重复计入')
+            side,state=pending_state(item,amount,enemy if item['part'].get('skill_type') in ('DefenseDown','Fragile') else player)
+            if item.get('part',{}).get('_branch_path') and any(r['item'].get('source')==item.get('source') and
+                    r['item']['part'].get('_branch_path')!=item['part']['_branch_path'] for r in rows):
+                raise ValueError('同一技能已有另一个条件分支，请先删除再切换场景')
+            rows.append(dict(item=item,enemy=side,state=state,amount=amount))
+        else:rows.pop(payload)
+        p,e=with_pending(player,enemy,rows)
+        computed=autofill(p,e,fields,modes=modes,party=party)
+        keys=('attack','element_attack','mind_eye','critical_bonus','element_critical_bonus','defense_down','element_defense_down','fragile')
+        delta={k:computed['values'][k]-self.pending_base['values'][k] for k in keys}
+        # Reconcile only the preview contribution; preserve unrelated manual edits.
+        updates={k:float(self.values[k].get())-self.pending_delta.get(k,0)+delta[k] for k in keys}
+        for k,v in updates.items():self.values[k].set(f'{v:.10g}')
+        self.hp_adjustments=computed.get('hp_adjustments',{})
+        self.pending_effects=rows;self.pending_delta=delta
+        self.effect_editor.pending_list.delete(0,'end')
+        for row in rows:
+            self.effect_editor.pending_list.insert('end',('敌方' if row['enemy'] else '当前伤害角色')+' ← '+row['item']['title']+f' {row["amount"]:.3f}%')
+        self.effect_editor.result.configure(text='已重新筛选覆盖。实际乘区净变化：'+', '.join(f'{k} {v:+.3f}%' for k,v in delta.items() if v) if any(delta.values()) else '已记录预添加；净变化为零（同源已自动计入、被覆盖或属性不适用）。')
+        self.compute()
+
     def compute(self):
         try:
             if self.use_pool_simulation.get() and not self.use_destruction.get():
@@ -502,7 +546,9 @@ class DamageWindow(tk.Toplevel):
             values={k:float(v.get()) for k,v in self.values.items() if k!='base'}
             base=self.values['base'].get().strip()
             if self.use_skill.get():
-                computed,weighted=skill_base({k:v.get() for k,v in self.params.items()},self.flags['critical'].get())
+                skill_params={k:v.get() for k,v in self.params.items()}
+                if not self.damage_orb_enabled.get():skill_params['orb']='0'
+                computed,weighted=skill_base(skill_params,self.flags['critical'].get())
                 base=str(computed);self.values['base'].set(f'{computed:.8g}')
             values.update(base=float(base) if base else None,target_pool=self.pool.get(),
                           **{k:v.get() for k,v in self.flags.items()})

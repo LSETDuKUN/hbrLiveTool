@@ -104,7 +104,7 @@ def filter_confirmed_only_funnels(statuses):
             comparable.setdefault((v['numValue'],v['rateValueInt']),[]).append(status)
         for duplicates in comparable.values():
             if len(duplicates)<2:continue
-            winner=max(duplicates,key=lambda s:s.get('remaining',0))
+            winner=max(duplicates,key=lambda s:s.get('remaining') or 0)
             for status in duplicates:
                 if status is winner:continue
                 status['effective']=False
@@ -119,16 +119,17 @@ def infer_suppressed_attacks(statuses):
     finite attack buff. Permanent effects and ambiguous conditions stay separate.
     Recompute on every sample so an expired covering buff releases the old one.
     """
+    from .status_rules import independent
     for status in statuses:
-        if status.get('effective_basis') == 'attack_only_rule':
+        if status.get('effective_basis') in ('attack_only_rule','debuff_top_two_rule'):
             for key in ('effective', 'effective_reason', 'effective_basis'):
                 status.pop(key, None)
 
     def key(s):
-        if (s.get('label') not in ('SpecialStatus.AttackUp',
+        if (independent(s) or s.get('label') not in ('SpecialStatus.AttackUp',
                 'SpecialStatus.AttackUpIncludeNormal', 'SpecialStatus.AttackUpOnlyNormal')
                 or s.get('duration_kind') not in ('turn', 'count')
-                or s.get('remaining', 0) <= 0 or s.get('hidden')
+                or (s.get('remaining') or 0) <= 0 or s.get('hidden')
                 or s.get('pending_add') or s.get('pending_remove')
                 or s.get('element_type') is None
                 or s.get('source_effect', {}).get('target_condition')):
@@ -155,6 +156,27 @@ def infer_suppressed_attacks(statuses):
                     '原状态及剩余次数保留，覆盖效果结束后重新判断。覆盖来源：'
                     + (other.get('source_name') or other.get('source') or '未确认'))
                 break
+    groups={}
+    for s in statuses:
+        if (s.get('label') not in ('SpecialStatus.DefenseDown','SpecialStatus.Fragile')
+                or s.get('duration_kind') not in ('turn','count') or (s.get('remaining') or 0)<=0
+                or s.get('effective') is False or s.get('pending_add') or s.get('pending_remove')
+                or any(s.get('source_effect',{}).get(k) for k in ('condition','target_condition','hit_condition'))):continue
+        element=s.get('element_key') or {0:'Normal',1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(s.get('element_type'))
+        if element is None:continue
+        v=s.get('values',{})
+        nums=[v.get('rateValueInt')]*2 if s['label']=='SpecialStatus.Fragile' else [v.get('amountOnDpDamageInt'),v.get('amountOnHpDamageInt')]
+        if not all(isinstance(n,(int,float)) for n in nums):continue
+        groups.setdefault((s['label'],element),[]).append((s,[abs(n) for n in nums]))
+    for group in groups.values():
+        winners=set()
+        for pool in (0,1):
+            regular=sorted((i for i,(s,v) in enumerate(group) if s.get('buff_limit_type')!=4),key=lambda i:group[i][1][pool],reverse=True)[:2]
+            only=max((i for i,(s,v) in enumerate(group) if s.get('buff_limit_type')==4),key=lambda i:group[i][1][pool],default=None)
+            winners.update([only] if only is not None and group[only][1][pool]>=sum(group[i][1][pool] for i in regular) else regular)
+        for i,(s,_) in enumerate(group):
+            if i not in winners:
+                s.update(effective=False,effective_basis='debuff_top_two_rule',effective_reason='同类有限期减益只取最高两层（规则推断）；永久效果另计，状态保留。')
     return statuses
 
 

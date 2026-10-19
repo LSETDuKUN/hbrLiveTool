@@ -14,11 +14,19 @@ FIELDS=(('效果基础', (('minimum','一级下限 / 固定量 %'),('maximum','�
 
 
 class EffectEditor(tk.Frame):
-    def __init__(self,parent):
+    def __init__(self,parent,on_pending=None):
         super().__init__(parent,bg=theme.BG)
         self.items=[];self.values={};self.kind=tk.StringVar(self,value='buff')
-        tk.Label(self,text='单项效果试算 · 不写入伤害乘区，不模拟施加顺序与覆盖',bg=theme.BG,fg=theme.DIM,
+        self.on_pending=on_pending
+        self.orb_enabled=tk.BooleanVar(self,value=False)
+        self.orb_level=tk.StringVar(self,value='5')
+        tk.Label(self,text='单项效果试算 · 手动预添加到当前伤害目标；重新自动填充会清空预添加',bg=theme.BG,fg=theme.DIM,
                  font=theme.ui(12)).pack(anchor='w',pady=8)
+        self.caster_box=ttk.Combobox(self,state='readonly',style='Panel.TCombobox')
+        self.caster_box.pack(fill='x',pady=4)
+        self.caster_box.bind('<<ComboboxSelected>>',self.change_caster)
+        self.target_note=tk.Label(self,text='',bg=theme.BG,fg=theme.CYAN,anchor='w',font=theme.ui(10))
+        self.target_note.pack(fill='x')
         self.selector=ttk.Combobox(self,state='readonly',style='Panel.TCombobox')
         self.selector.pack(fill='x',pady=8);self.selector.bind('<<ComboboxSelected>>',self.choose)
         self.overview=tk.Label(self,text='',bg=theme.BG,fg=theme.DIM,justify='left',anchor='w',font=theme.ui(10))
@@ -42,10 +50,22 @@ class EffectEditor(tk.Frame):
             for n,(key,title) in enumerate(fields,1):
                 tk.Label(body,text=title,bg=theme.CARD,fg=theme.DIM,font=theme.ui(10)).grid(row=n,column=0,sticky='w',pady=5)
                 var=tk.StringVar(self,value=str(defaults[key]));self.values[key]=var
-                ttk.Entry(body,textvariable=var,width=12,justify='right',style='Panel.TEntry').grid(row=n,column=1,sticky='e',padx=5)
+                if key=='orb':
+                    controls=tk.Frame(body,bg=theme.CARD);controls.grid(row=n,column=1,sticky='e')
+                    tk.Checkbutton(controls,text='启用',variable=self.orb_enabled,bg=theme.CARD,fg=theme.FG,
+                                   selectcolor=theme.BG,command=self.compute).pack(side='left')
+                    ttk.Combobox(controls,textvariable=self.orb_level,values=['1','2','3','4','5'],state='readonly',width=3,
+                                 style='Panel.TCombobox').pack(side='left')
+                    self.orb_level.trace_add('write',lambda *_:self.compute() if hasattr(self,'result') else None)
+                else:ttk.Entry(body,textvariable=var,width=12,justify='right',style='Panel.TEntry').grid(row=n,column=1,sticky='e',padx=5)
         self.result=tk.Label(self,text='选择效果，或手动输入参数。',bg=theme.BG,fg=theme.CYAN,
                              font=theme.ui(12,'bold'),anchor='w',justify='left')
         self.result.pack(fill='x',pady=12)
+        actions=tk.Frame(self,bg=theme.BG);actions.pack(fill='x')
+        RoundedButton(actions,'预添加当前效果',self.add_pending,theme.PINK_FILL,theme.on_fill,height=32).pack(side='left')
+        RoundedButton(actions,'删除所选预添加',self.remove_pending,theme.CARD,theme.FG,height=32).pack(side='left',padx=8)
+        self.pending_list=tk.Listbox(self,height=4,bg=theme.CARD,fg=theme.FG,exportselection=False)
+        self.pending_list.pack(fill='x',pady=6)
         self.notes=tk.Text(self,height=15,wrap='word',bg=theme.CARD,fg=theme.DIM,relief='flat',font=theme.ui(10),padx=12,pady=12)
         self.notes.pack(fill='both',expand=True,pady=8)
         self.set_notes('点击顶部“自动填充”读取预选技能与已持有被动。效果量提升范围未确认时，请人工核对；场地和固定被动不默认增强。')
@@ -53,7 +73,37 @@ class EffectEditor(tk.Frame):
     def set_notes(self,text):
         self.notes.configure(state='normal');self.notes.delete('1.0','end');self.notes.insert('end',text);self.notes.configure(state='disabled')
 
+    def load_party(self,party,player,enemy,modes):
+        self.party=party or [player];self.enemy=enemy;self.modes=modes
+        self.target_note.configure(text='预添加目标：角色 '+str(player.get('actor') or player.get('name') or player.get('actor_id'))+
+                                   ' / 敌人 '+str(enemy.get('name') or enemy.get('address'))+'；更换目标需重新自动填充')
+        self.caster_box.configure(values=['施加者：'+str(p.get('actor') or p.get('name') or p.get('actor_id')) for p in self.party])
+        self.caster_box.current(next((i for i,p in enumerate(self.party) if p.get('actor_id')==player.get('actor_id')),0))
+        self.load(player,enemy,modes)
+
+    def change_caster(self,event=None):
+        i=self.caster_box.current()
+        if i>=0:self.load(self.party[i],self.enemy,self.modes)
+
+    def add_pending(self):
+        try:
+            index=self.selector.current()
+            if not 0<=index<len(self.items):raise ValueError('请先选择技能效果')
+            if self.on_pending:self.on_pending('add',(self.items[index],self.calculate()['final']))
+        except (ValueError,TypeError) as exc:self.result.configure(text=str(exc))
+
+    def remove_pending(self):
+        selected=self.pending_list.curselection()
+        try:
+            if selected and self.on_pending:self.on_pending('remove',selected[0])
+        except (ValueError,TypeError) as exc:self.result.configure(text=str(exc))
+
+    def calculate(self):
+        self.values['orb'].set(self.orb_level.get() if self.orb_enabled.get() else '0')
+        return calculate_effect(EffectInputs(kind=self.kind.get(),**{k:float(v.get()) for k,v in self.values.items()}))
+
     def load(self,player,enemy,modes):
+        self.orb_enabled.set(False);self.orb_level.set('5')
         self.items=proposals(player,enemy,modes)
         self.selector.configure(values=[item['title'] for item in self.items])
         summaries=[]
@@ -83,13 +133,14 @@ class EffectEditor(tk.Frame):
         index=self.selector.current()
         if not 0<=index<len(self.items):return
         item=self.items[index];self.kind.set(item['values']['kind'])
+        self.orb_enabled.set(False);self.orb_level.set('5')
         for key,var in self.values.items():
             value=item['values'][key];var.set('' if value is None else f'{value:g}')
         self.set_notes(item['notes']);self.compute()
 
     def compute(self):
         try:
-            result=calculate_effect(EffectInputs(kind=self.kind.get(),**{k:float(v.get()) for k,v in self.values.items()}))
+            result=self.calculate()
             diff='固定值' if result['difference'] is None else f'有效差值 {result["difference"]:.2f}'
             self.result.configure(text=f'预计效果量 {result["final"]:.3f}%  ·  {diff}\n'
                 f'基础 {result["base"]:.3f} + 宝珠 {result["orb"]:.3f} + 超差 {result["over"]:.3f}，再乘 (1 + {result["enhancement"]:g}%)')

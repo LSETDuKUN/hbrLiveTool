@@ -1,0 +1,894 @@
+{
+  "CReaperSkill53": {
+    "id": 46008110,
+    "label": "CReaperSkill53",
+    "name": "正义之雷",
+    "desc": "对敌方发动雷属性一击 [对HP+50%] SP0或以上即可使用\n攻击处于倒地回合的敌人时威力提升",
+    "hit_count": 1,
+    "target_type": "Single",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 17,
+    "is_adv": true,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 17,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "CReaperSkill53",
+        "skill_type": "DamageRateChangeAttackSkill",
+        "target_type": "Single",
+        "type": "Slash",
+        "elements": [
+          "Thunder"
+        ],
+        "power": [
+          7582.5,
+          15165.0
+        ],
+        "value": [
+          3.875,
+          1.4035609
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "TargetBreakDownTurn()>0",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.5,
+          "dr": 3.875
+        },
+        "diff_for_max": 152,
+        "parameters": {
+          "str": 2,
+          "wis": 0,
+          "dex": 1,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.05,
+          0.02
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      }
+    ],
+    "hits": [],
+    "in_date": "2025-09-04 18:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "CReaperWhiteSuit_R3_Thumbnail.webp",
+    "style": "Have no fear! I'm a hero!",
+    "role": "Attacker",
+    "team": "31X",
+    "chara": "卡罗尔・利帕 — Carole Reaper — キャロル Kyaroru"
+  },
+  "KAsakuraSkill55a": {
+    "id": 46001517,
+    "label": "KAsakuraSkill55a",
+    "name": "血腥燃烧",
+    "desc": "对敌人进行火属性攻击 [破坏率大] [对HP+30%] [可通过切换改变属性]\n攻击处于倒地回合的敌人时威力提升且 [破坏率特大]",
+    "hit_count": 10,
+    "target_type": "Single",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 13,
+    "is_adv": false,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 13,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "KAsakuraSkill55a",
+        "skill_type": "DamageRateChangeAttackSkill",
+        "target_type": "Single",
+        "type": "Slash",
+        "elements": [
+          "Fire"
+        ],
+        "power": [
+          4695.0,
+          9390.0
+        ],
+        "value": [
+          21.0,
+          1.3322684
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "TargetBreakDownTurn()>0",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.3,
+          "dr": 12.0
+        },
+        "diff_for_max": 141,
+        "parameters": {
+          "str": 2,
+          "wis": 0,
+          "dex": 1,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.05,
+          0.02
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      }
+    ],
+    "hits": [
+      {
+        "id": 1,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 2,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 3,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 4,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 5,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 6,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 7,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 8,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 9,
+        "type": "Main",
+        "power_ratio": 0.05
+      },
+      {
+        "id": 99,
+        "type": "Main",
+        "power_ratio": 0.55
+      }
+    ],
+    "in_date": "2025-02-20 18:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "is_strval": true
+  },
+  "AMizuharaSkill54": {
+    "id": 46005616,
+    "label": "AMizuharaSkill54",
+    "name": "彩虹奇迹滑行",
+    "desc": "降低敌方防御力和雷属性防御力2回合，发动雷属性8连击\n若存在处于倒地回合的敌人，则SP消耗为0且 [破坏率超特大]",
+    "hit_count": 8,
+    "target_type": "Single",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 16,
+    "is_adv": false,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 16,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "CountBC(IsPlayer()==0 && IsDead()==0 && BreakDownTurn()>0)>0",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "AMizuharaSkill54",
+        "skill_type": "SkillCondition",
+        "target_type": "Single",
+        "type": "Strike",
+        "elements": [
+          "Thunder"
+        ],
+        "power": [
+          0.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          {
+            "id": 46005617,
+            "label": "AMizuharaSkill54a",
+            "name": "彩虹奇迹滑行",
+            "desc": "存在处于倒地回合的敌人",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 16,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "AMizuharaSkill54a",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Strike",
+                "elements": [
+                  "Thunder"
+                ],
+                "power": [
+                  6255.0,
+                  12510.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 28.0
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "AMizuharaSkill54a_2",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [
+                  "Thunder"
+                ],
+                "power": [
+                  0.45,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "AMizuharaSkill54a_3",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.3,
+                  0.45
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 2,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2025-08-21 18:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          },
+          {
+            "id": 46005618,
+            "label": "AMizuharaSkill54b",
+            "name": "彩虹奇迹滑行",
+            "desc": "不存在处于倒地回合的敌人",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 16,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "AMizuharaSkill54b",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Strike",
+                "elements": [
+                  "Thunder"
+                ],
+                "power": [
+                  6255.0,
+                  12510.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 3.5
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "AMizuharaSkill54b_2",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [
+                  "Thunder"
+                ],
+                "power": [
+                  0.45,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "AMizuharaSkill54b_3",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.3,
+                  0.45
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 147,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 2,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2025-08-21 18:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          }
+        ],
+        "cond": "CountBC(IsDead()==0&&IsPlayer()==0&&BreakDownTurn()>0)>0",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        },
+        "sv": "AMizuharaSkill54a"
+      }
+    ],
+    "hits": [],
+    "in_date": "2025-08-21 18:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "AMizuharaSwim2025_R3_Thumbnail.webp",
+    "style": "跳进闪耀的夏天！",
+    "role": "Debuffer",
+    "team": "31D",
+    "chara": "瑞原 蓝娜 — Aina Mizuhara — あいちん Aichin"
+  },
+  "passive": {
+    "category": "Passive",
+    "id": 100810600,
+    "label": "Passive.BreakTurn_CriticalDamageUp01",
+    "name": "好机会",
+    "desc": "若行动开始时存在处于倒地回合的敌人\n则自身的暴击伤害+25%",
+    "info": "自身的暴击伤害+25%",
+    "timing": "OnPlayerTurnStart",
+    "condition": "CountBC(IsDead()==0 && IsPlayer()==0 && BreakDownTurn()>0)>0",
+    "activ_rate": 0,
+    "effect": "CriticalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.BreakTurn_CriticalDamageUp01",
+        "skill_type": "CriticalDamageUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.25,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2025-09-04 18:00:00+00:00",
+    "card_form": "",
+    "lb": 0,
+    "max": 4,
+    "pc": 0,
+    "ct": "SSR",
+    "image": "CReaperWhiteSuit_R3_Thumbnail.webp",
+    "style": "Have no fear! I'm a hero!",
+    "team": "31X",
+    "chara": "卡罗尔・利帕 — Carole Reaper — キャロル Kyaroru"
+  }
+}

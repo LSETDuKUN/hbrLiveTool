@@ -4,6 +4,7 @@ from .damage_autofill import catalog_skill, WEIGHTS
 from .effect_math import EffectInputs
 from .passive_audit import owned_audit
 from hbr_data.skill_tree import effects
+from .status_rules import active
 
 KINDS = {'AttackUp':'加攻', 'AttackUpIncludeNormal':'含普攻加攻', 'MindEye':'心眼',
          'CriticalRateUp':'暴击率', 'CriticalDamageUp':'暴伤', 'DefenseDown':'减防',
@@ -14,14 +15,10 @@ SCOPES = {'GiveAttackBuffUp': {'AttackUp','AttackUpIncludeNormal'},
           'GiveDebuffUp': {'DefenseDown','Fragile'}}
 
 
-def active(s):
-    return (s.get('effective') is not False and not s.get('pending_add') and not s.get('pending_remove')
-            and not (s.get('duration_kind') in ('turn','count') and s.get('remaining') is not None
-                     and s['remaining']<=0))
-
-
 def proposals(player, enemy, modes=None, lookup=None):
     lookup=lookup or catalog_skill; modes=modes or {}
+    from hbr_data.battle_conditions import context_for
+    modes=context_for(player,enemy,modes)
     inp=player.get('combat_inputs',player.get('inputs',{})); selected=inp.get('selected_skill',{})
     skill=lookup(selected.get('label')) if selected.get('label') else {}
     sources=[(skill,selected,False)] if skill else []
@@ -82,7 +79,7 @@ def proposals(player, enemy, modes=None, lookup=None):
                 rate=s.get('values',{}).get('rateValueInt')
                 scope=typ in SCOPES.get(boost,set()) and not passive
                 from .effect_passives import condition_check
-                conditional=any(condition_check(s.get('source_effect',{}).get(k),player) is not True
+                conditional=any(condition_check(s.get('source_effect',{}).get(k),player,modes) is not True
                                 for k in ('condition','target_condition','hit_condition')) or bool(s.get('element_type'))
                 if scope:
                     if not conditional and isinstance(rate,(int,float)) and rate>=0:applicable_boosts.append(rate/100)
@@ -105,7 +102,7 @@ def proposals(player, enemy, modes=None, lookup=None):
                 notes.append('存在多项提升或未确认条件，合计暂填 0；请核对叠加后填写，当前结果不含这些提升。')
             if not passive:
                 from .effect_passives import enhancements
-                passive_amount,passive_notes=enhancements(player,typ,SCOPES,states)
+                passive_amount,passive_notes=enhancements(player,typ,SCOPES,states,modes)
                 values['enhancement']+=passive_amount
                 notes.extend(passive_notes)
             notes.append('效果量提升候选：\n'+'\n'.join(boosts or ['未读到适用候选']))
@@ -114,5 +111,6 @@ def proposals(player, enemy, modes=None, lookup=None):
             element='/'.join(names.get(x,x) for x in part.get('elements') or []) or '普通'
             branch=' / '.join(part.get('_branch_path',[]))
             result.append(dict(title=f'{source.get("name") or source.get("label")} · {element}{KINDS[typ]} · {branch} · {part.get("label")}',
-                               values=values,notes='\n'.join(notes),part=part))
+                               values=values,notes='\n'.join(notes),part=part,passive=passive,
+                               source=source.get('label'),caster=player.get('actor_id')))
     return result

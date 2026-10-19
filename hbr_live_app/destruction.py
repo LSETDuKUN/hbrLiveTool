@@ -62,7 +62,7 @@ def dp_factor(current, maximum, at_zero, at_full):
 
 def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonus, maximum,
                    enemy_dp, enemy_hp=None, hp_adjustments=None):
-    """A shield-breaking hit loses overflow and grants no DR. Extras follow mains."""
+    """Resolve damage first; a hit that removes the shield then grants DR."""
     from dataclasses import replace
     from .damage_math import calculate
     if not math.isfinite(enemy_dp) or enemy_dp<0 or (enemy_hp is not None and (not math.isfinite(enemy_hp) or enemy_hp<0)):
@@ -82,13 +82,13 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
         before=rate
         raw=bases[pool]*item['weight']*(rate/100 if pool=='hp' else 1) if alive else 0
         if not math.isfinite(raw):raise ValueError('逐段伤害溢出')
-        increment=item['theoretical_increment'] if pool=='hp' and alive else 0
         if pool=='dp':
             applied=min(dp,raw);dp-=applied;total_dp+=applied;lost=raw-applied;overflow+=lost
         else:
             applied=raw if hp is None else min(hp,raw)
             if hp is not None:hp-=applied
             total_hp+=applied;lost=0
+        increment=item['theoretical_increment'] if dp<=0 and alive else 0
         rate+=min(increment,max(0,maximum-rate));theoretical+=increment
         rows.append(dict(item,pool=pool,before=before,after=rate,increment=rate-before,
                          theoretical_increment=increment,clipped=increment-(rate-before),

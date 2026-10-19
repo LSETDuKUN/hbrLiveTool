@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 import json
 from .assets import AssetStore
-from .store import Catalog, walk
+from .store import Catalog
 from .skill_tree import effects as tree_effects, roots
 
 
