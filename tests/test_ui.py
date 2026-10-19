@@ -117,7 +117,7 @@ class DashboardTests(unittest.TestCase):
             for child in widget.winfo_children():
                 yield child
                 yield from descendants(child)
-        cards=[w for w in descendants(window) if isinstance(w,RoundedCard)]
+        cards=[w for w in descendants(window.page_widgets['乘区试算'][1]) if isinstance(w,RoundedCard)]
         self.assertEqual(len(cards),8)
         self.assertTrue(all(c.find_withtag('shell') for c in cards))
         self.assertIn('运行时已加载',window.audit.get('1.0','end'))

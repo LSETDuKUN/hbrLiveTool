@@ -15,9 +15,12 @@ def catalog_skill(label):
         _,rows,_=catalog.query("SELECT raw_json FROM skill_catalog WHERE region='cn' AND label=?",(label,),limit=50)
         if not rows:
             _,rows,_=catalog.query("SELECT raw_json FROM skills WHERE region='cn' AND label=?",(label,),limit=50)
+        # Prefer the parent record over nested projections with the same label.
+        top=[row for row in rows if not json.loads(row[0]).get('is_strval')]
+        rows=top or rows
         candidates={}
         for row in rows:
-            s=json.loads(row[0]); candidates[json.dumps(s.get('parts',[]),sort_keys=True)]=s
+            s=json.loads(row[0]); candidates[json.dumps({k:s.get(k) for k in ('parts','hits','hit_count','sp_cost','max_level')},sort_keys=True)]=s
         return next(iter(candidates.values())) if len(candidates)==1 else {}
     except (OSError,ValueError,RuntimeError,sqlite3.Error):return {}
 
@@ -39,8 +42,14 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     values['element_critical_rate_bonus']=0
     inputs=player.get('combat_inputs',player.get('inputs',{}))
     selected=inputs.get('selected_skill',{}); db=lookup(selected.get('label','')) if selected.get('label') else {}
-    db=dict(db)
-    live_hits=selected.get('hit_count')
+    from hbr_data.skill_tree import resolve
+    branching=any(any(isinstance(child,dict) and 'parts' in child for child in p.get('strval',[])) for p in db.get('parts',[]))
+    db=resolve(db,modes)
+    live_hits=selected.get('hit_count') if not branching else None
+    if branching:
+        paths=list(dict.fromkeys(' / '.join(p.get('_branch_path',[])) for p in db.get('parts',[]) if p.get('_branch_path')))
+        if paths:notes.append('条件技能已选分支：'+'；'.join(paths)+'；段数采用该分支资料')
+        else:skipped.append('技能条件/切换分支尚未确定：未猜测攻击分支，请核对')
     if isinstance(live_hits,int) and 0<live_hits<=256:
         if db.get('hit_count') not in (None,live_hits):
             skipped.append(f'游戏段数 {live_hits} 与资料库 {db["hit_count"]} 不同：采用游戏段数，分布需核对')
@@ -52,7 +61,7 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     raw=[p for p in selected.get('parts',[]) if p.get('skill_type_raw')==10]
     part=attacks[0] if len(attacks)==1 else {}
     live=next((p for p in selected.get('parts',[]) if p.get('Label')==part.get('label')),None)
-    if live is None and len(raw)==1:live=raw[0]
+    if live is None and len(raw)==1 and not branching:live=raw[0]
     live=live or {}
     def pick(key, fallback):
         if live.get(key) is not None:

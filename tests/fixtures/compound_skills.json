@@ -1,0 +1,1637 @@
+{
+  "NNanaseSkill52": {
+    "id": 46041502,
+    "label": "NNanaseSkill52",
+    "name": "祈祷之花，托付于风",
+    "desc": "大幅提升全体友方的技能攻击力5回合[单独发动]\n同时雷属性技能攻击力大幅提升[单独发动] 自身以外的SP提升3",
+    "hit_count": -1,
+    "target_type": "AllyAll",
+    "consume_type": "Ep",
+    "is_restricted": 1,
+    "auto_priority": 15,
+    "is_adv": false,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 7,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "NNanaseSkill52",
+        "skill_type": "AttackUp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+          1.5,
+          1.8
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 216,
+        "parameters": {
+          "str": 0,
+          "wis": 1,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.03,
+          0.02
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "Only",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            5,
+            0
+          ]
+        }
+      },
+      {
+        "label": "NNanaseSkill52_2",
+        "skill_type": "AttackUp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [
+          "Thunder"
+        ],
+        "power": [
+          1.3,
+          1.6
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 216,
+        "parameters": {
+          "str": 0,
+          "wis": 1,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [
+          {
+            "id": 99,
+            "type": "Main",
+            "power_ratio": 0.0
+          }
+        ],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "Only",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            5,
+            0
+          ]
+        }
+      },
+      {
+        "label": "NNanaseSkill52_3",
+        "skill_type": "HealSp",
+        "target_type": "AllyAllWithoutSelf",
+        "type": null,
+        "elements": [],
+        "power": [
+          3.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [
+          {
+            "id": 1,
+            "type": "After",
+            "power_ratio": 0.0
+          }
+        ],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      }
+    ],
+    "hits": [],
+    "in_date": "2026-08-12 05:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "NNanasePure_R3_Thumbnail.webp",
+    "style": "约定在拂晓彼端",
+    "role": "Admiral",
+    "team": "司令部",
+    "chara": "七濑 七海 — Nanami Nanase — ななみん Nanamin"
+  },
+  "FMikotoSkill51": {
+    "id": 46005304,
+    "label": "FMikotoSkill51",
+    "name": "以灭亡道晚安",
+    "desc": "用无数的血红荆棘斩击敌方 使其进入脆弱状态 走向灭亡\n超频状态时威力提升 之后使其进入灾厄状态2回合",
+    "hit_count": 8,
+    "target_type": "Single",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 13,
+    "is_adv": false,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 13,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "FMikotoSkill51",
+        "skill_type": "SkillCondition",
+        "target_type": "Single",
+        "type": "Slash",
+        "elements": [],
+        "power": [
+          0.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          {
+            "id": 46005305,
+            "label": "FMikotoSkill51a",
+            "name": "以灭亡道晚安",
+            "desc": "超频状态",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 13,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "FMikotoSkill51a",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Slash",
+                "elements": [],
+                "power": [
+                  7125.0,
+                  14250.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 3.75
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51a_2",
+                "skill_type": "Fragile",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.42,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 1,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 2,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    1,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51a_3",
+                "skill_type": "Misfortune",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  2.0,
+                  0.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 20,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 0,
+                "parameters": {
+                  "str": 0,
+                  "wis": 0,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 99,
+                    "type": "Main",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2024-07-16 20:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          },
+          {
+            "id": 46005306,
+            "label": "FMikotoSkill51b",
+            "name": "以灭亡道晚安",
+            "desc": "非超频状态",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 13,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "FMikotoSkill51b",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Slash",
+                "elements": [],
+                "power": [
+                  5445.0,
+                  10890.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 3.25
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51b_2",
+                "skill_type": "Fragile",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.42,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 1,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 2,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    1,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2024-07-16 20:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          }
+        ],
+        "cond": "IsOverDrive()",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        },
+        "sv": "FMikotoSkill51a"
+      }
+    ],
+    "hits": [],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "FMikotoDefault_R3_Thumbnail.webp",
+    "style": "末日要干嘛？",
+    "role": "Debuffer",
+    "team": "31D",
+    "chara": "命 吹雪 — Fubuki Mikoto — ふぶきん Fubukin"
+  },
+  "FMikotoSkill51Ev1": {
+    "id": 46053161,
+    "label": "FMikotoSkill51Ev1",
+    "name": "以灭亡道晚安+",
+    "desc": "降低敌方防御力并使其进入脆弱状态2回合，以血红荆棘将敌方引向灭亡\n超频状态时威力提升且使敌方进入灾厄状态2回合",
+    "hit_count": 8,
+    "target_type": "Single",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 12,
+    "is_adv": false,
+    "use_count": [
+      4,
+      5,
+      6
+    ],
+    "sp_cost": 12,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "FMikotoSkill51Ev1",
+        "skill_type": "SkillCondition",
+        "target_type": "Single",
+        "type": "Slash",
+        "elements": [],
+        "power": [
+          0.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          {
+            "id": 46053162,
+            "label": "FMikotoSkill51Ev1a",
+            "name": "以灭亡道晚安+",
+            "desc": "超频状态",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 12,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "FMikotoSkill51Ev1a",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Slash",
+                "elements": [],
+                "power": [
+                  7125.0,
+                  14250.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 3.75
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51Ev1a_4",
+                "skill_type": "Misfortune",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  2.0,
+                  0.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 20,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 0,
+                "parameters": {
+                  "str": 0,
+                  "wis": 0,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51Ev1a_2",
+                "skill_type": "Fragile",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.42,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 1,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 2,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 2,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51Ev1a_3",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.3,
+                  0.45
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 3,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2024-12-12 18:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          },
+          {
+            "id": 46053163,
+            "label": "FMikotoSkill51Ev1b",
+            "name": "以灭亡道晚安+",
+            "desc": "非超频状态",
+            "hit_count": 8,
+            "target_type": "Single",
+            "consume_type": "Sp",
+            "is_restricted": 1,
+            "auto_priority": 0,
+            "is_adv": false,
+            "use_count": [
+              4,
+              5,
+              6
+            ],
+            "sp_cost": 12,
+            "max_level": 10,
+            "interval_turn": 0,
+            "overwrite": 0,
+            "overwrite_cond": "",
+            "effect": "",
+            "cond": "",
+            "passive": null,
+            "parts": [
+              {
+                "label": "FMikotoSkill51Ev1b",
+                "skill_type": "AttackSkill",
+                "target_type": "Single",
+                "type": "Slash",
+                "elements": [],
+                "power": [
+                  5445.0,
+                  10890.0
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 3.25
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 1,
+                  "wis": 0,
+                  "dex": 1,
+                  "spr": 0,
+                  "luk": 0,
+                  "con": 0
+                },
+                "growth": [
+                  0.05,
+                  0.02
+                ],
+                "hits": [],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "None",
+                  "exitCond": "None",
+                  "exitVal": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51Ev1b_2",
+                "skill_type": "Fragile",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.42,
+                  0.6
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 0.0,
+                  "hp": 0.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 1,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 2,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 1,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              },
+              {
+                "label": "FMikotoSkill51Ev1b_3",
+                "skill_type": "DefenseDown",
+                "target_type": "Single",
+                "type": null,
+                "elements": [],
+                "power": [
+                  0.3,
+                  0.45
+                ],
+                "value": [
+                  0.0,
+                  0.0
+                ],
+                "strval": [
+                  -1,
+                  -1
+                ],
+                "cond": "",
+                "sstl": null,
+                "dv": 0,
+                "multipliers": {
+                  "dp": 1.0,
+                  "hp": 1.0,
+                  "dr": 0.0
+                },
+                "diff_for_max": 150,
+                "parameters": {
+                  "str": 0,
+                  "wis": 2,
+                  "dex": 0,
+                  "spr": 0,
+                  "luk": 1,
+                  "con": 0
+                },
+                "growth": [
+                  0.0,
+                  0.0
+                ],
+                "hits": [
+                  {
+                    "id": 2,
+                    "type": "Before",
+                    "power_ratio": 0.0
+                  }
+                ],
+                "hit_condition": "",
+                "target_condition": "",
+                "effect": {
+                  "ir": false,
+                  "category": "None",
+                  "limitType": "Default",
+                  "exitCond": "EnemyTurnEnd",
+                  "exitVal": [
+                    2,
+                    0
+                  ]
+                }
+              }
+            ],
+            "hits": [
+              {
+                "id": 1,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 2,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 3,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 4,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 5,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 6,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 7,
+                "type": "Main",
+                "power_ratio": 0.05
+              },
+              {
+                "id": 8,
+                "type": "Main",
+                "power_ratio": 0.65
+              }
+            ],
+            "in_date": "2024-12-12 18:00:00+00:00",
+            "iuc_cond": "",
+            "card_form": "",
+            "is_strval": true
+          }
+        ],
+        "cond": "IsOverDrive()",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        },
+        "sv": "FMikotoSkill51Ev1a"
+      }
+    ],
+    "hits": [],
+    "in_date": "2024-12-12 18:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "FMikotoDefault_R3_Thumbnail.webp",
+    "style": "末日要干嘛？",
+    "role": "Debuffer",
+    "team": "31D",
+    "chara": "命 吹雪 — Fubuki Mikoto — ふぶきん Fubukin"
+  },
+  "STezukaSkill02": {
+    "id": 46041403,
+    "label": "STezukaSkill02",
+    "name": "凌空铁锤",
+    "desc": "降低敌方全体防御力，以雷枪贯穿 [破坏率特大]\n此外 鬼神状态中自身获得追加回合",
+    "hit_count": 1,
+    "target_type": "All",
+    "consume_type": "Sp",
+    "is_restricted": 1,
+    "auto_priority": 12,
+    "is_adv": false,
+    "use_count": -1,
+    "sp_cost": 12,
+    "max_level": 10,
+    "interval_turn": 0,
+    "overwrite": 0,
+    "overwrite_cond": "",
+    "effect": "",
+    "cond": "",
+    "passive": null,
+    "parts": [
+      {
+        "label": "STezukaSkill02",
+        "skill_type": "AttackSkill",
+        "target_type": "All",
+        "type": "Stab",
+        "elements": [
+          "Thunder"
+        ],
+        "power": [
+          3350.625,
+          6701.25
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 13.8
+        },
+        "diff_for_max": 140,
+        "parameters": {
+          "str": 1,
+          "wis": 0,
+          "dex": 1,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.05,
+          0.02
+        ],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "label": "STezukaSkill02_2",
+        "skill_type": "DefenseDown",
+        "target_type": "All",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.2,
+          0.3
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 140,
+        "parameters": {
+          "str": 0,
+          "wis": 2,
+          "dex": 0,
+          "spr": 0,
+          "luk": 1,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [
+          {
+            "id": 1,
+            "type": "Before",
+            "power_ratio": 0.0
+          }
+        ],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "Default",
+          "exitCond": "EnemyTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "label": "STezukaSkill02_3",
+        "skill_type": "AdditionalTurn",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          1.0,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 0.0,
+          "hp": 0.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [
+          0.0,
+          0.0
+        ],
+        "hits": [
+          {
+            "id": 1,
+            "type": "After",
+            "power_ratio": 0.0
+          }
+        ],
+        "hit_condition": "",
+        "target_condition": "IsReinforcedMode()",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "None",
+          "exitVal": [
+            0,
+            0
+          ]
+        }
+      }
+    ],
+    "hits": [],
+    "in_date": "2026-08-26 05:00:00+00:00",
+    "iuc_cond": "",
+    "card_form": "",
+    "image": "STezukaSoldier_R3_Thumbnail.webp",
+    "style": "希望的拂晓",
+    "role": "Attacker",
+    "team": "司令部",
+    "chara": "手冢 咲 — Saki Tezuka — づかっちゃん ZukaChan"
+  },
+  "resonance": {
+    "category": "Passive",
+    "id": 57009471,
+    "label": "Passive.SupportSkill_TTojo0100",
+    "name": "狂热夏日时光",
+    "desc": "若行动开始时自身DP为50%或以上\n则自身施加的技能升攻效果量+20%",
+    "info": "DP50%或以上：技能升攻效果+20%",
+    "timing": "OnPlayerTurnStart",
+    "condition": "DpRate()>=0.5",
+    "activ_rate": 0,
+    "effect": "NormalBuff_Up",
+    "auto_type": "None",
+    "limit": 0,
+    "labels": null,
+    "parts": [
+      {
+        "label": "Passive.SupportSkill_TTojo0100",
+        "skill_type": "GiveAttackBuffUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+          0.2,
+          0.0
+        ],
+        "value": [
+          0.0,
+          0.0
+        ],
+        "strval": [
+          -1,
+          -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+          "dp": 1.0,
+          "hp": 1.0,
+          "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+          "str": 0,
+          "wis": 0,
+          "dex": 0,
+          "spr": 0,
+          "luk": 0,
+          "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+          "ir": false,
+          "category": "None",
+          "limitType": "None",
+          "exitCond": "PlayerTurnEnd",
+          "exitVal": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "in_date": "2024-07-16 20:00:00+00:00",
+    "card_form": ""
+  }
+}

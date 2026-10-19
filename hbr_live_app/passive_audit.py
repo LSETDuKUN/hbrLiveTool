@@ -25,7 +25,7 @@ def passive_record(label):
         if len(unique)==1:return json.loads(next(iter(unique)))
         if unique:return {}
         # Equipment passives are nested inside accessory records, not top-level records.
-        _,rows,truncated=Catalog().query("SELECT raw_json FROM records WHERE region='cn' AND dataset='accessories' AND raw_json LIKE ?",('%'+label+'%',),limit=100)
+        _,rows,truncated=Catalog().query("SELECT raw_json FROM records WHERE region='cn' AND dataset IN ('accessories','support_skills') AND raw_json LIKE ?",('%'+label+'%',),limit=100)
         if truncated:return {}
         found={}
         def walk(value):

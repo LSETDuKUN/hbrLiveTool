@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import json
 from .assets import AssetStore
 from .store import Catalog, walk
+from .skill_tree import effects as tree_effects, roots
 
 
 @dataclass(frozen=True)
@@ -50,12 +51,12 @@ def hit_details(hits):
 
 def skill_detail(skill, pointer="", names=None, descriptions=None):
     effects = []
-    for i,part in enumerate(skill.get("parts") or []):
+    for i,part in enumerate(tree_effects(skill)):
         mult = part.get("multipliers") or {}
         effects.append(EffectDetail(i,part.get("skill_type"),tuple(part.get("power") or []),
             part.get("diff_for_max"),tuple((part.get("parameters") or {}).items()),
             tuple(part.get("elements") or []),part.get("type"),mult.get("dp"),mult.get("hp"),mult.get("dr"),
-            hit_details(part.get("hits")),part.get("cond") or "",tuple(part.get("growth") or []),part))
+            hit_details(part.get("hits")), '；'.join(part.get('_branch_path',[])+([part['cond']] if part.get('cond') else [])),tuple(part.get("growth") or []),part))
     label = skill.get("label")
     return SkillDetail(skill.get("id"),(names or {}).get(label) or skill.get("name") or label or "技能",
         (descriptions or {}).get(label) or skill.get("desc") or "",skill.get("hit_count"),skill.get("sp_cost"),
@@ -87,7 +88,7 @@ class DetailService:
         data = json.loads(raw)
         translations = self.translations() if region == "jp" else {}
         skills = [skill_detail(value,pointer,translations.get("name"),translations.get("info"))
-                  for pointer,value in walk(data) if "hit_count" in value and isinstance(value.get("parts"),list)]
+                  for pointer,value in roots(data)]
         owners = self.catalog.skill_owners(region, entity_id) if dataset == "skills" else []
         return {"region":region,"dataset":dataset,"id":entity_id,"name":name or (data.get("name") if isinstance(data,dict) else "资料"),
                 "source":source,"raw":data,"skills":skills,"owners":owners,

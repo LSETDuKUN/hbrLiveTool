@@ -309,19 +309,29 @@ class TabBar(tk.Canvas):
             x += width + 8
         return edges
 
-    def _hit(self, x):
-        for name, left, right in self._segments():
-            if left <= x <= right:
+    def _layout(self):
+        limit=max(1,self.winfo_width()-8)
+        x,y=8,0
+        result=[]
+        for name,left,right in self._segments():
+            width=right-left
+            if x>8 and x+width>limit:x,y=8,y+44
+            result.append((name,x,x+width,y));x+=width+8
+        return result
+
+    def _hit(self, x, y):
+        for name, left, right, top in self._layout():
+            if left <= x <= right and top+4 <= y <= top+40:
                 return name
         return None
 
     def _click(self, event):
-        name = self._hit(event.x)
+        name = self._hit(event.x,event.y)
         if name and name != self.current:
             self.select(name)
 
     def _motion(self, event):
-        self._set_hover(self._hit(event.x))
+        self._set_hover(self._hit(event.x,event.y))
 
     def _set_hover(self, name):
         if name != self._hover:
@@ -336,14 +346,17 @@ class TabBar(tk.Canvas):
 
     def draw(self):
         self.delete('all')
-        for name, left, right in self._segments():
+        layout=self._layout()
+        height=layout[-1][3]+44 if layout else 44
+        if int(self.cget('height'))!=height:self.configure(height=height)
+        for name, left, right, top in layout:
             active = name == self.current
             fill = theme.mix(theme.CARD, theme.PINK, .22) if active else theme.CARD
             if not active and name == self._hover:
                 fill = theme.lift(theme.CARD, .06)
-            rounded(self, left, 4, right, 40, 18, fill=fill,
+            rounded(self, left, top+4, right, top+40, 18, fill=fill,
                     outline=theme.mix(theme.PINK, theme.CARD, .7) if active else theme.LINE_SOFT)
-            self.create_text((left + right) / 2, 22, text=name, font=self.font,
+            self.create_text((left + right) / 2, top+22, text=name, font=self.font,
                              fill=theme.PINK if active else theme.DIM)
 
 

@@ -10,6 +10,7 @@ from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_re
 from .damage_probability import distribution
 from .destruction import apply_to_result, dp_factor, simulate_pools
 from .equipment_editor import EquipmentEditor
+from .effect_editor import EffectEditor
 from .passive_audit import audit_text
 from .damage_autofill import autofill, WEIGHTS, style_elements
 
@@ -119,7 +120,7 @@ class DamageWindow(tk.Toplevel):
                  font=theme.ui(10)).pack(side='left', padx=12)
 
     def build_pages(self):
-        self.tab_names = ['乘区试算', '技能与属性', '逐段破坏率', '饰品效果', '浮动概率曲线', '当前内存参数', '天赋与被动审查']
+        self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '逐段破坏率', '饰品效果', '浮动概率曲线', '当前内存参数', '天赋与被动审查']
         self.tabs = TabBar(self, self.tab_names, self.show_page, bg=theme.BG)
         self.tabs.pack(fill='x', padx=14, pady=(0, 6))
         self.pages = tk.Frame(self, bg=theme.BG)
@@ -135,6 +136,8 @@ class DamageWindow(tk.Toplevel):
         self.build_probability_page(*self.page_widgets['浮动概率曲线'])
         self.build_raw_page(*self.page_widgets['当前内存参数'])
         self.build_audit_page(*self.page_widgets['天赋与被动审查'])
+        self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1])
+        self.effect_editor.pack(fill='both', expand=True)
         self.show_page(self.tab_names[0])
 
     def show_page(self, name):
@@ -462,6 +465,7 @@ class DamageWindow(tk.Toplevel):
         if gauge.get('full') and (gauge.get('element')!=3 or modes.get('transcend')):
             modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(gauge.get('element'))
         filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
+        self.effect_editor.load(player,enemy,modes)
         filled['notes'].append('模式判断：'+str(modes)+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
