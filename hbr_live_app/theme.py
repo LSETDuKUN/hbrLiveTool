@@ -18,6 +18,18 @@ PALETTES = {
         pink_fill='#f7a9cd', cyan_fill='#8fe3ea', gold_fill='#ffd39b',
         mint_fill='#9fe6bf', on_fill='#2a2036', shadow='#0c0918',
     ),
+    'dawn': dict(
+        bg='#faf1e6', surface='#fffaf2', card='#fffdf8', card_hi='#f4e4d3',
+        line='#e7d4bf', line_soft='#f2e6d7',
+        fg='#4b3a2c', dim='#7d6757', muted='#a58f7c',
+        pink='#bf5f38', cyan='#2f8a83', gold='#a8731c', mint='#4f8a4a',
+        rose='#b04a3c', lavender='#7c6ab3',
+        pink_deep='#fbe7d8', cyan_deep='#e3f2f0', gold_deep='#fbeedb',
+        mint_deep='#e9f3e5', rose_deep='#f9e5e1', lavender_deep='#efedfa',
+        neutral_deep='#f4ece2',
+        pink_fill='#f2b48c', cyan_fill='#a9dcd8', gold_fill='#f3d59a',
+        mint_fill='#bfe0b4', on_fill='#4b3a2c', shadow='#e6d3bd',
+    ),
     'sakura': dict(
         bg='#f5ecf5', surface='#fbf5fb', card='#ffffff', card_hi='#efe1ee',
         line='#dfcddd', line_soft='#ecdfeb',
@@ -32,6 +44,11 @@ PALETTES = {
     ),
 }
 NAME = 'midnight'
+TITLES = {
+    'midnight': '深色 · 星夜',
+    'sakura': '浅色 · 樱粉',
+    'dawn': '暖色 · 晨露',
+}
 
 
 def use(name):
@@ -47,7 +64,9 @@ def use(name):
 
 
 def options():
-    return tuple(PALETTES)
+    order = ('midnight', 'sakura', 'dawn')
+    return tuple(name for name in order if name in PALETTES) + tuple(
+        name for name in PALETTES if name not in order)
 
 
 # ---- type scale ------------------------------------------------------------

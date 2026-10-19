@@ -12,6 +12,7 @@ from .cards import DetailCards
 from .assets import sync_portraits
 
 from hbr_live_app import theme
+from hbr_live_app.components import RoundedButton, RoundedEntry, RoundedSelect, TabBar
 
 # Browse only the main categories; other synced tables remain available via SQL.
 # Extend this mapping to expose another category in the browse menu later.
@@ -42,138 +43,191 @@ class LibraryWindow:
         self.window = w = tk.Toplevel(master)
         w.title("星屑资料室 · HBR QUEST")
         w.configure(bg=theme.BG)
-        w.geometry(f"{min(1120,w.winfo_screenwidth()-100)}x{min(850,w.winfo_screenheight()-120)}")
-        w.minsize(760, 560)
+        w.geometry(f"{min(1140,w.winfo_screenwidth()-100)}x{min(860,w.winfo_screenheight()-120)}")
+        w.minsize(820, 580)
         w.protocol("WM_DELETE_WINDOW", w.withdraw)
         style = ttk.Style(w)
         # Windows' native theme ignores Treeview fieldbackground on empty space.
         if "quest" not in style.theme_names():
             style.theme_create("quest",parent="clam")
         style.theme_use("quest")
-        field = theme.field()
-        style.configure("TNotebook",background=theme.BG,borderwidth=0)
-        style.configure("TNotebook.Tab",background=theme.CARD,foreground=theme.DIM,padding=(16,9),borderwidth=0,
-                        font=theme.ui(12,"bold"))
-        style.map("TNotebook.Tab",background=[("selected",theme.CARD_HI)],foreground=[("selected",theme.PINK)])
-        style.configure("TCombobox",fieldbackground=field,background=theme.CARD,foreground=theme.FG,arrowcolor=theme.DIM,
-                        bordercolor=theme.LINE,lightcolor=theme.LINE,darkcolor=theme.LINE,padding=5)
-        style.map("TCombobox",fieldbackground=[("readonly",field)],foreground=[("readonly",theme.FG)])
-        style.configure("TEntry",fieldbackground=field,foreground=theme.FG,insertcolor=theme.FG,
-                        bordercolor=theme.LINE,lightcolor=field,darkcolor=field,padding=6)
-        style.configure("TScrollbar",background=theme.CARD_HI,troughcolor=theme.SURFACE,arrowcolor=theme.DIM,
-                        bordercolor=theme.SURFACE,relief="flat")
-        style.configure("Treeview.Heading",background=theme.CARD_HI,foreground=theme.PINK,relief="flat",
-                        font=theme.ui(11,"bold"))
-        style.map("Quest.Browse.Treeview",background=[("selected",theme.CARD_HI)],foreground=[("selected",theme.FG)])
-        style.configure("Quest.Treeview", background=theme.CARD, fieldbackground=theme.CARD, foreground=theme.FG,
-                        rowheight=30, borderwidth=0, font=theme.ui(12))
-        style.configure("Quest.Treeview.Heading", font=theme.ui(11, "bold"))
-        style.configure("Quest.Browse.Treeview", background=theme.CARD, fieldbackground=theme.CARD, foreground=theme.FG,
-                        rowheight=52, borderwidth=0, font=theme.ui(12))
-        tk.Label(w, text="✦  星屑资料室", font=theme.ui(19, "bold"), bg=theme.BG, fg=theme.PINK).pack(anchor="w", padx=24, pady=(18, 2))
-        self.status = tk.StringVar(value="本地资料 · 查询无需联网")
-        top = tk.Frame(w, bg=theme.BG)
-        top.pack(fill="x", padx=22, pady=(0,12))
-        tk.Label(top, textvariable=self.status, bg=theme.BG, fg=theme.DIM, anchor="w",
-                 font=theme.ui(11)).pack(side="left", fill="x", expand=True)
-        self.update_button = tk.Button(top, text="同步网站资料", command=self.update, bg=theme.PINK_FILL, fg=theme.on_fill,
-                                       relief="flat", padx=14, pady=5, font=theme.ui(12, "bold"),
-                                       activebackground=theme.lift(theme.PINK, .1), activeforeground=theme.on_fill,
-                                       cursor="hand2", borderwidth=0, highlightthickness=0)
+        self.apply_style(style)
+        self.build_head()
+        self.build_pages()
+        w.after(100, self.pump)
+
+    def apply_style(self, style):
+        style.configure("Quest.Treeview", background=theme.CARD, fieldbackground=theme.CARD,
+                        foreground=theme.FG, rowheight=theme.px(32), borderwidth=0, font=theme.ui(12))
+        style.configure("Quest.Treeview.Heading", background=theme.CARD_HI, foreground=theme.PINK,
+                        font=theme.ui(11, "bold"), relief="flat", borderwidth=0)
+        style.map("Quest.Treeview", background=[("selected", theme.CARD_HI)],
+                  foreground=[("selected", theme.FG)])
+        style.configure("Quest.Browse.Treeview", background=theme.CARD, fieldbackground=theme.CARD,
+                        foreground=theme.FG, rowheight=theme.px(54), borderwidth=0, font=theme.ui(12))
+        style.configure("Quest.Browse.Treeview.Heading", background=theme.CARD_HI, foreground=theme.PINK,
+                        font=theme.ui(11, "bold"), relief="flat", borderwidth=0)
+        style.map("Quest.Browse.Treeview", background=[("selected", theme.CARD_HI)],
+                  foreground=[("selected", theme.FG)])
+        style.configure("TScrollbar", background=theme.mix(theme.CARD_HI, theme.LINE, .35),
+                        troughcolor=theme.SURFACE, bordercolor=theme.SURFACE, arrowcolor=theme.DIM,
+                        relief="flat", gripcount=0)
+
+    # ---- chrome ------------------------------------------------------------
+    def build_head(self):
+        w = self.window
+        head = tk.Frame(w, bg=theme.BG)
+        head.pack(fill="x", padx=26, pady=(20, 6))
+        tk.Label(head, text="✦", bg=theme.BG, fg=theme.PINK, font=theme.ui(19)).pack(side="left")
+        tk.Label(head, text="星屑资料室", bg=theme.BG, fg=theme.FG,
+                 font=theme.ui(19, "bold")).pack(side="left", padx=(9, 0))
+        tk.Label(head, text="HBR QUEST", bg=theme.BG, fg=theme.MUTED,
+                 font=theme.num(11)).pack(side="left", padx=(12, 0), pady=(4, 0))
+        self.update_button = RoundedButton(head, "同步网站资料", self.update, theme.PINK_FILL,
+                                           theme.on_fill, theme.ui(12, "bold"), height=theme.px(36))
         self.update_button.pack(side="right")
-        self.asset_button = tk.Button(top, text="同步头像", command=self.update_assets, bg=theme.CARD_HI, fg=theme.FG,
-                                      relief="flat", padx=14, pady=5, font=theme.ui(12),
-                                      activebackground=theme.mix(theme.CARD_HI, theme.PINK, .2),
-                                      activeforeground=theme.FG, cursor="hand2", borderwidth=0, highlightthickness=0)
-        self.asset_button.pack(side="right", padx=8)
-        self.tabs = ttk.Notebook(w)
-        self.tabs.pack(fill="both", expand=True, padx=18, pady=(0,18))
-        browse = tk.Frame(self.tabs, bg=theme.BG)
-        advanced = tk.Frame(self.tabs, bg=theme.BG)
-        coverage = tk.Frame(self.tabs, bg=theme.BG)
-        self.tabs.add(browse, text="  查资料  ")
-        self.tabs.add(advanced, text="  SQL 查询  ")
-        self.tabs.add(coverage, text="  来源与覆盖  ")
-        bar = tk.Frame(browse, bg=theme.BG)
-        bar.pack(fill="x", pady=12)
+        self.asset_button = RoundedButton(head, "同步头像", self.update_assets, theme.CARD_HI,
+                                          theme.FG, theme.ui(12), height=theme.px(36))
+        self.asset_button.pack(side="right", padx=(0, 8))
+        bar = tk.Frame(w, bg=theme.BG)
+        bar.pack(fill="x", padx=26, pady=(0, 10))
+        dot = tk.Canvas(bar, width=10, height=10, bg=theme.BG, highlightthickness=0, bd=0)
+        dot.pack(side="left", padx=(0, 8))
+        dot.create_oval(1, 1, 9, 9, fill=theme.MINT, outline="")
+        self.status = tk.StringVar(value="本地资料 · 查询无需联网")
+        tk.Label(bar, textvariable=self.status, bg=theme.BG, fg=theme.DIM, anchor="w",
+                 font=theme.ui(11)).pack(side="left", fill="x", expand=True)
+
+    def build_pages(self):
+        w = self.window
+        self.tab_names = ["查资料", "SQL 查询", "来源与覆盖"]
+        self.tab_bar = TabBar(w, self.tab_names, self.show_tab, bg=theme.BG)
+        self.tab_bar.pack(fill="x", padx=20, pady=(0, 10))
+        body = tk.Frame(w, bg=theme.BG)
+        body.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        browse = tk.Frame(body, bg=theme.BG)
+        advanced = tk.Frame(body, bg=theme.BG)
+        coverage = tk.Frame(body, bg=theme.BG)
+        self.page_frames = dict(zip(self.tab_names, (browse, advanced, coverage)))
+        self.build_browse(browse)
+        self.build_sql(advanced)
+        self.coverage = self.make_text(coverage)
+        self.coverage.master.pack(fill="both", expand=True)
+        self.show_tab(self.tab_names[0])
+        self.refresh()
+
+    def show_tab(self, name):
+        for key, frame in self.page_frames.items():
+            if key == name:
+                frame.pack(fill="both", expand=True)
+            else:
+                frame.pack_forget()
+        self.tab_bar.current = name
+        self.tab_bar.draw()
+
+    def show_detail(self, name):
+        for key, frame in self.detail_frames.items():
+            if key == name:
+                frame.pack(fill="both", expand=True)
+            else:
+                frame.pack_forget()
+        self.detail_tabs.current = name
+        self.detail_tabs.draw()
+
+    def build_browse(self, browse):
+        card = tk.Frame(browse, bg=theme.SURFACE, padx=16, pady=12)
+        card.pack(fill="x", pady=(0, 10))
+        row = tk.Frame(card, bg=theme.SURFACE)
+        row.pack(fill="x")
+        tk.Label(row, text="区域", bg=theme.SURFACE, fg=theme.DIM,
+                 font=theme.ui(11)).pack(side="left")
         self.region = tk.StringVar(value="jp · 日服")
-        ttk.Combobox(bar, textvariable=self.region, values=["jp · 日服", "cn · 国服", "en · 国际服"], state="readonly", width=13).pack(side="left", padx=5)
+        RoundedSelect(row, textvariable=self.region,
+                      values=["jp · 日服", "cn · 国服", "en · 国际服"],
+                      width=theme.px(132)).pack(side="left", padx=(8, 14))
+        tk.Label(row, text="分类", bg=theme.SURFACE, fg=theme.DIM,
+                 font=theme.ui(11)).pack(side="left")
         self.dataset = tk.StringVar(value="characters · 角色")
-        self.dataset_box = ttk.Combobox(bar, textvariable=self.dataset, state="readonly", width=24)
-        self.dataset_box.pack(side="left", padx=5)
+        self.dataset_box = RoundedSelect(row, textvariable=self.dataset, values=[],
+                                         width=theme.px(196))
+        self.dataset_box.pack(side="left", padx=(8, 14))
         self.dataset_box.bind("<<ComboboxSelected>>", self.change_dataset)
         self.region.trace_add("write", self.change_region)
         self.character_path = tk.StringVar(value="风格：全部角色")
-        self.back_button = tk.Button(bar, text="← 角色", command=self.back_to_characters, bg=theme.CARD_HI, fg=theme.PINK,
-                                     relief="flat", padx=10, pady=4, font=theme.ui(11),
-                                     activebackground=theme.mix(theme.CARD_HI, theme.PINK, .2),
-                                     activeforeground=theme.FG, cursor="hand2", borderwidth=0, highlightthickness=0)
-        self.back_button.pack(side="left", padx=5)
-        self.back_button.pack_forget()
+        self.back_button = RoundedButton(row, "← 角色", self.back_to_characters, theme.CARD_HI,
+                                         theme.PINK, theme.ui(11), height=theme.px(32))
         self.keyword = tk.StringVar()
-        entry = tk.Entry(bar, textvariable=self.keyword, bg=theme.field(), fg=theme.FG,
-                         insertbackground=theme.FG, relief="flat", font=theme.ui(12), borderwidth=0,
-                         highlightthickness=1, highlightbackground=theme.LINE, highlightcolor=theme.PINK)
-        self.keyword_entry = entry
-        entry.pack(side="left", fill="x", expand=True, ipady=7, padx=5)
-        entry.bind("<Return>", lambda e: self.search())
-        tk.Button(bar, text="搜索", command=self.search, bg=theme.PINK_FILL, fg=theme.on_fill, relief="flat", padx=16,
-                  pady=5, font=theme.ui(11, "bold"), activebackground=theme.lift(theme.PINK, .1),
-                  activeforeground=theme.on_fill, cursor="hand2", borderwidth=0, highlightthickness=0).pack(side="left", padx=5)
-        tk.Label(browse, text="按名称、ID、角色名或原文内容搜索；不同服务器独立保存。选择角色后可查看其风格。",
-                 bg=theme.BG, fg=theme.MUTED, anchor="w", font=theme.ui(10)).pack(fill="x", padx=6)
-        tk.Label(browse, textvariable=self.character_path, bg=theme.BG, fg=theme.PINK, anchor="w",
-                 font=theme.ui(10, "bold")).pack(fill="x", padx=6, pady=(2, 0))
-        panes = tk.PanedWindow(browse, orient="horizontal", bg=theme.BG, sashwidth=8)
-        panes.pack(fill="both", expand=True, pady=8)
-        left = tk.Frame(panes, bg=theme.BG)
-        right = ttk.Notebook(panes)
-        panes.add(left, minsize=230, width=340)
-        panes.add(right, minsize=340)
-        self.tree = self.make_tree(left, ("id", "name"))
-        self.tree.configure(show="tree headings", style="Quest.Browse.Treeview")
-        self.tree.heading("#0",text="头像")
-        self.tree.column("#0",width=72,minwidth=72,stretch=False)
-        self.tree.heading("id",text="ID")
-        self.tree.column("id",width=100,minwidth=75,stretch=False)
-        self.tree.heading("name",text="名称")
+        self.keyword_entry = RoundedEntry(row, textvariable=self.keyword, width=theme.px(240),
+                                          justify="left")
+        self.keyword_entry.pack(side="left", fill="x", expand=True, padx=8)
+        self.keyword_entry.entry.bind("<Return>", lambda e: self.search())
+        RoundedButton(row, "搜索", self.search, theme.PINK_FILL, theme.on_fill,
+                      theme.ui(11, "bold"), height=theme.px(32)).pack(side="left")
+        hints = tk.Frame(card, bg=theme.SURFACE)
+        hints.pack(fill="x", pady=(10, 0))
+        tk.Label(hints, text="按名称、ID、角色名或原文内容搜索；不同服务器独立保存。选择角色后可查看其风格。",
+                 bg=theme.SURFACE, fg=theme.MUTED, anchor="w", font=theme.ui(10),
+                 justify="left").pack(fill="x")
+        tk.Label(hints, textvariable=self.character_path, bg=theme.SURFACE, fg=theme.PINK,
+                 anchor="w", font=theme.ui(10, "bold")).pack(fill="x", pady=(2, 0))
+        panes = tk.PanedWindow(browse, orient="horizontal", bg=theme.BG, sashwidth=10,
+                               sashrelief="flat", borderwidth=0, showhandle=False)
+        panes.pack(fill="both", expand=True)
+        left = tk.Frame(panes, bg=theme.CARD)
+        right = tk.Frame(panes, bg=theme.BG)
+        panes.add(left, minsize=260, width=380)
+        panes.add(right, minsize=380)
+        # footer controls first so the list can never squeeze them out
+        paging = tk.Frame(left, bg=theme.CARD)
+        paging.pack(side="bottom", fill="x", pady=(0, 8), padx=4)
+        RoundedButton(paging, "上一页", lambda: self.page(-1), theme.CARD_HI, theme.DIM,
+                      theme.ui(10), height=theme.px(26)).pack(side="left")
+        RoundedButton(paging, "下一页", lambda: self.page(1), theme.CARD_HI, theme.DIM,
+                      theme.ui(10), height=theme.px(26)).pack(side="right")
+        self.page_label = tk.Label(paging, bg=theme.CARD, fg=theme.MUTED, font=theme.ui(10))
+        self.page_label.pack()
+        self.styles_button = RoundedButton(left, "查看该角色的风格 →", self.open_character_styles,
+                                           theme.CARD_HI, theme.PINK, theme.ui(11),
+                                           height=theme.px(34))
+        self.styles_button.pack(side="bottom", fill="x", pady=(6, 2), padx=4)
+        self.tree = self.make_tree(left, ("id", "name"), horizontal=False)
+        self.tree.configure(show="tree headings", style="Quest.Browse.Treeview", height=6)
+        self.tree.heading("#0", text="头像")
+        self.tree.column("#0", width=theme.px(76), minwidth=theme.px(76), stretch=False)
+        self.tree.heading("id", text="ID")
+        self.tree.column("id", width=theme.px(92), minwidth=theme.px(70), stretch=False)
+        self.tree.heading("name", text="名称")
+        self.tree.column("name", width=theme.px(180), minwidth=theme.px(90), stretch=True)
         self.tree_photos = []
         self.tree.bind("<<TreeviewSelect>>", self.select)
         self.tree.bind("<Double-1>", self.open_character_styles)
-        self.styles_button = tk.Button(left, text="查看该角色的风格 →", command=self.open_character_styles,
-                                       bg=theme.CARD_HI, fg=theme.PINK, relief="flat", pady=5, font=theme.ui(11),
-                                       activebackground=theme.mix(theme.CARD_HI, theme.PINK, .2),
-                                       activeforeground=theme.FG, cursor="hand2", borderwidth=0, highlightthickness=0)
-        self.styles_button.pack(fill="x", pady=4, padx=6)
-        paging = tk.Frame(left, bg=theme.BG)
-        paging.pack(fill="x")
-        pager = dict(bg=theme.CARD_HI, fg=theme.DIM, relief="flat", padx=10, font=theme.ui(10), cursor="hand2",
-                     activebackground=theme.mix(theme.CARD_HI, theme.PINK, .18), activeforeground=theme.FG,
-                     borderwidth=0, highlightthickness=0)
-        tk.Button(paging, text="上一页", command=lambda: self.page(-1), **pager).pack(side="left")
-        tk.Button(paging, text="下一页", command=lambda: self.page(1), **pager).pack(side="right")
-        self.page_label = tk.Label(paging, bg=theme.BG, fg=theme.MUTED, font=theme.ui(10))
-        self.page_label.pack()
-        self.summary = DetailCards(right)
-        self.raw = self.make_text(right)
-        right.add(self.summary, text="  技能与数值  ")
-        right.add(self.raw.master, text="  原始数据（高级）  ")
-        tk.Label(advanced, text="只读 SQLite · 单次最多 500 行 / 3 秒；支持 JOIN、聚合、JSON 查询。所有原始字段位于 raw_json。",
-                 bg=theme.BG, fg=theme.MUTED, font=theme.ui(11), anchor="w").pack(anchor="w", padx=8, pady=8)
-        self.sql = tk.Text(advanced, height=8, bg=theme.mix(theme.CARD, "#000000", .25), fg=theme.FG, insertbackground=theme.FG,
+        self.detail_tabs = TabBar(right, ["技能与数值", "原始数据"], self.show_detail, bg=theme.BG)
+        self.detail_tabs.pack(fill="x", pady=(0, 8))
+        self.detail_pages = tk.Frame(right, bg=theme.BG)
+        self.detail_pages.pack(fill="both", expand=True)
+        self.summary = DetailCards(self.detail_pages)
+        self.raw = self.make_text(self.detail_pages)
+        self.detail_frames = {"技能与数值": self.summary, "原始数据": self.raw.master}
+        tk.Label(self.summary.body, text="← 在左侧选择一个条目\n查看技能、数值与来源",
+                 bg=theme.CARD, fg=theme.MUTED, font=theme.ui(12), justify="left",
+                 anchor="w").pack(anchor="w", padx=18, pady=(28, 0))
+        self.show_detail("技能与数值")
+
+    def build_sql(self, advanced):
+        card = tk.Frame(advanced, bg=theme.SURFACE, padx=16, pady=12)
+        card.pack(fill="x", pady=(0, 10))
+        tk.Label(card, text="只读 SQLite · 单次最多 500 行 / 3 秒；支持 JOIN、聚合、JSON 查询。所有原始字段位于 raw_json。",
+                 bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11), anchor="w",
+                 justify="left").pack(fill="x", pady=(0, 8))
+        self.sql = tk.Text(card, height=7, bg=theme.field(), fg=theme.FG, insertbackground=theme.FG,
                            font=theme.mono(12), relief="flat", padx=12, pady=10, borderwidth=0,
-                           selectbackground=theme.mix(theme.CARD, theme.PINK, .3), highlightthickness=0)
-        self.sql.pack(fill="x", padx=8)
+                           selectbackground=theme.mix(theme.CARD, theme.PINK, .3),
+                           highlightthickness=0)
+        self.sql.pack(fill="x")
         self.sql.insert("1.0", EXAMPLE)
-        tk.Button(advanced, text="运行查询", command=self.run_sql, bg=theme.PINK_FILL, fg=theme.on_fill, relief="flat",
-                  padx=16, pady=5, font=theme.ui(11, "bold"), activebackground=theme.lift(theme.PINK, .1),
-                  activeforeground=theme.on_fill, cursor="hand2", borderwidth=0,
-                  highlightthickness=0).pack(anchor="e", padx=8, pady=8)
+        RoundedButton(advanced, "运行查询", self.run_sql, theme.PINK_FILL, theme.on_fill,
+                      theme.ui(11, "bold"), height=theme.px(34)).pack(anchor="e", pady=(0, 8))
         self.sql_tree = self.make_tree(advanced, ("结果",))
-        self.coverage = self.make_text(coverage)
-        self.coverage.master.pack(fill="both", expand=True)
-        self.refresh()
-        w.after(100, self.pump)
 
     def make_text(self, parent):
         frame = tk.Frame(parent, bg=theme.BG)
@@ -188,15 +242,17 @@ class LibraryWindow:
         text.tag_configure("head", foreground=theme.CYAN, font=theme.ui(12, "bold"))
         return text
 
-    def make_tree(self, parent, columns):
-        frame = tk.Frame(parent, bg=theme.BG)
+    def make_tree(self, parent, columns, horizontal=True):
+        frame = tk.Frame(parent, bg=theme.CARD)
         frame.pack(fill="both", expand=True)
         tree = ttk.Treeview(frame, columns=columns, show="headings", style="Quest.Treeview")
         vertical = ttk.Scrollbar(frame, command=tree.yview)
-        horizontal = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
-        tree.configure(yscrollcommand=vertical.set, xscrollcommand=horizontal.set)
+        tree.configure(yscrollcommand=vertical.set)
         vertical.pack(side="right", fill="y")
-        horizontal.pack(side="bottom", fill="x")
+        if horizontal:
+            bar = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+            tree.configure(xscrollcommand=bar.set)
+            bar.pack(side="bottom", fill="x")
         tree.pack(fill="both", expand=True)
         for column in columns:
             tree.heading(column, text=column)

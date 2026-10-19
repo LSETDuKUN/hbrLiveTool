@@ -136,8 +136,9 @@ class App:
                                       command=lambda: self.root.attributes('-alpha', self.opacity.get()))
         self.menu.add_separator()
         self.theme_var = tk.StringVar(master=self.root, value=theme.NAME)
-        for value, title in (('midnight', '深色 · 星夜'), ('sakura', '浅色 · 樱粉')):
-            self.menu.add_radiobutton(label='外观：' + title, variable=self.theme_var, value=value,
+        for value in theme.options():
+            self.menu.add_radiobutton(label='外观：' + theme.TITLES.get(value, value),
+                                      variable=self.theme_var, value=value,
                                       command=lambda v=value: self.set_theme(v))
         self.menu.add_separator()
         self.menu.add_command(label='导出本场摘要…', command=self.export)

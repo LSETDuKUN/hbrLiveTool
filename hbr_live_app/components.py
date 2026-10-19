@@ -90,6 +90,7 @@ class RoundedButton(tk.Canvas):
         self._height = height
         self._radius = radius
         self._hover = False
+        self._state = kwargs.pop('state', 'normal')
         self._explicit_width = 'width' in kwargs
         if not self._explicit_width:
             kwargs['width'] = tkfont.Font(font=self._font).measure(text or '确定') + 46
@@ -106,6 +107,8 @@ class RoundedButton(tk.Canvas):
 
     def configure(self, cnf=None, **kwargs):
         relabel = None
+        if 'state' in kwargs:
+            self._state = kwargs.pop('state')
         for option, attr in (('text', '_text'), ('bg', '_color'), ('fg', '_fg')):
             if option in kwargs:
                 setattr(self, attr, kwargs.pop(option))
@@ -126,6 +129,8 @@ class RoundedButton(tk.Canvas):
             self._command()
 
     def _invoke(self, event=None):
+        if self._state == 'disabled':
+            return
         self.invoke()
 
     def _enter(self, event=None):
@@ -141,6 +146,10 @@ class RoundedButton(tk.Canvas):
         width = max(2, self.winfo_width())
         height = self._height
         color = theme.lift(self._color, .10) if self._hover else self._color
+        label = self._fg
+        if self._state == 'disabled':
+            color = theme.mix(self._color, theme.BG, .55)
+            label = theme.mix(self._fg, theme.BG, .45)
         radius = self._radius if self._radius is not None else height / 2
         if self.focus_get() is self:
             outline = theme.lift(color, .35)
@@ -150,7 +159,7 @@ class RoundedButton(tk.Canvas):
         rounded(self, 1, 1, width - 1, height - 2, radius, fill=color, outline=outline)
         self.create_line(radius, 2.5, width - radius, 2.5,
                          fill=theme.mix(color, '#ffffff', .18))
-        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=self._fg)
+        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=label)
 
 
 class Pill(tk.Canvas):
@@ -182,7 +191,7 @@ class Pill(tk.Canvas):
         self.configure(width=width)
         height = self._height
         rounded(self, 1, 1, width - 1, height - 1, height / 2, fill=self._bg, outline='')
-        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=self._fg)
+        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=label)
 
 
 class ToggleChip(tk.Canvas):
