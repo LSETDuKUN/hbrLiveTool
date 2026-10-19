@@ -3,6 +3,7 @@ import tkinter as tk
 
 from . import theme
 from .components import RoundedCard, RoundedButton
+from .fx import GlowBorder
 from .portraits import Portraits
 from .statuses import status_details
 from .status_groups import StatusGroups
@@ -19,6 +20,7 @@ class PlayerPanel(tk.Frame):
         self.tiles = {}
         self.players = {}
         self.selected = None
+        self.glow = None
         self.previous_gauge = None
         self.configure(bg=parent.cget('bg'))
         self.gauge = tk.Label(self, bg=self.cget('bg'), fg=theme.GOLD, anchor='w',
@@ -94,6 +96,15 @@ class PlayerPanel(tk.Frame):
             selected=key==self.selected
             tile['frame'].configure(outline=theme.PINK if selected else (theme.CYAN if front else theme.LINE))
             tile['frame'].draw()
+            if selected:
+                if self.glow is None or self.glow.card is not tile['frame']:
+                    if self.glow is not None:
+                        self.glow.show(False)
+                    self.glow = GlowBorder(tile['frame'], color=theme.PINK)
+                self.glow.show(True)
+            elif self.glow is not None and self.glow.card is tile['frame']:
+                self.glow.show(False)
+                self.glow = None
             photo=self.portraits.get(p.get('style_label')) if p else None
             tile['portrait'].configure(image=photo or '',text='' if photo else (p.get('actor','未知角色') if p else '暂不可读'),
                                        fg=theme.MUTED,font=theme.ui(10))
@@ -138,6 +149,10 @@ class PlayerPanel(tk.Frame):
         self.caption.configure(text=p['actor']+' / '+p.get('style_name',''))
         self.pools.configure(text='   '.join(pools))
         self.groups.update_state(p)
+
+    def tick_effects(self):
+        if self.glow is not None:
+            self.glow.update()
 
     def status_details(self,status):
         self.show_details(status['name'],status_details(dict(statuses_available=True,statuses=[status])))

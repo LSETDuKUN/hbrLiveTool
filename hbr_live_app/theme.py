@@ -203,8 +203,9 @@ def configure(style):
     style.configure('TButton', background=CARD_HI, foreground=FG, padding=(12, 6), relief='flat',
                     borderwidth=0, font=ui(12))
     style.map('TButton', background=[('active', mix(CARD_HI, PINK, .16))])
-    style.configure('TScrollbar', background=mix(CARD_HI, LINE, .35), troughcolor=SURFACE,
-                    bordercolor=SURFACE, arrowcolor=DIM, relief='flat', gripcount=0, arrowsize=11)
+    style.configure('TScrollbar', background=mix(CARD_HI, PINK, .4), troughcolor=LINE_SOFT,
+                    bordercolor=BG, arrowcolor=mix(PINK, CARD, .3), width=12,
+                    relief='flat', gripcount=0, arrowsize=11)
     style.configure('Live.Treeview', background=CARD, fieldbackground=CARD, foreground=FG,
                     rowheight=px(52), borderwidth=0, font=ui(13), indent=14)
     style.configure('Live.Treeview.Heading', background=CARD_HI, foreground=PINK,

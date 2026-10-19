@@ -10,6 +10,7 @@ from tkinter import ttk, filedialog, messagebox
 
 from . import theme
 from .components import RoundedCard, RoundedButton, Pill, ToggleChip, rounded
+from .fx import DeltaDisplay, NumberDisplay
 from .model import BattleModel
 from .enemy_cards import EnemyCard
 from .turns import context_label
@@ -61,6 +62,7 @@ class App:
         self._restore_geometry()
         self.root.after(60, self.pump)
         self.root.after(160, self.watch_layout)
+        self.root.after(90, self.animate)
 
     def _load_settings(self):
         try:
@@ -170,8 +172,7 @@ class App:
         self.label(top, 'TURN MAX DAMAGE', theme.MUTED, 9).pack(side='left', padx=(8, 0), pady=(2, 0))
         self.od_label = self.label(top, 'OD · 等待采样', theme.CYAN, 11, bold=True)
         self.od_label.pack(side='right')
-        self.total_label = tk.Label(hero, text='0', bg=self.hero.background, fg=theme.PINK,
-                                    font=theme.num(34), anchor='w')
+        self.total_label = NumberDisplay(hero, size=34, color=theme.PINK)
         self.total_label.pack(fill='x', pady=(2, 0))
         meta = tk.Frame(hero, bg=self.hero.background)
         meta.pack(fill='x')
@@ -188,8 +189,7 @@ class App:
         top.pack(fill='x')
         self.label(top, '当前指令伤害', theme.CYAN, 12, bold=True).pack(side='left')
         self.label(top, 'TURN DAMAGE', theme.MUTED, 9).pack(side='left', padx=(8, 0), pady=(2, 0))
-        self.current_damage_label = tk.Label(current, text='0', bg=self.current_damage_card.background,
-                                             fg=theme.CYAN, font=theme.num(23), anchor='w')
+        self.current_damage_label = DeltaDisplay(current, size=23, color=theme.CYAN)
         self.current_damage_label.pack(fill='x', pady=(4, 0))
         self.label(current, '含追击与连击珠', theme.MUTED, 10).pack(anchor='w', pady=(2, 0))
 
@@ -358,6 +358,19 @@ class App:
         self._player_fit_pending = True
         self.root.after_idle(self._apply_player_fit)
 
+    def animate(self):
+        """Drive the small presentation effects; cheap and frame-bounded."""
+        if self.closing:
+            return
+        try:
+            if self.root.winfo_exists():
+                self.total_label.tick()
+                self.current_damage_label.tick()
+                self.player_panel.tick_effects()
+        except tk.TclError:
+            return
+        self.root.after(60, self.animate)
+
     def watch_layout(self):
         """Content height changes without a Configure event; poll for it."""
         if self.closing:
@@ -395,7 +408,7 @@ class App:
         if event.widget is self.root:
             self.status.configure(wraplength=max(240, event.width - 110))
             size = 24 if event.width < 620 else (28 if event.width < 820 else 34)
-            self.total_label.configure(font=theme.num(size))
+            self.total_label.set_font(theme.num(size))
             self.layout_hero(event.width < 900)
             narrow = event.width < 760
             self.export_button.configure(text='保存' if narrow else '保存行动轴…')

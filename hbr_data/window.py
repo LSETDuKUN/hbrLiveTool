@@ -69,9 +69,11 @@ class LibraryWindow:
                         font=theme.ui(11, "bold"), relief="flat", borderwidth=0)
         style.map("Quest.Browse.Treeview", background=[("selected", theme.CARD_HI)],
                   foreground=[("selected", theme.FG)])
-        style.configure("TScrollbar", background=theme.mix(theme.CARD_HI, theme.LINE, .35),
-                        troughcolor=theme.SURFACE, bordercolor=theme.SURFACE, arrowcolor=theme.DIM,
-                        relief="flat", gripcount=0)
+        style.configure("TScrollbar", background=theme.mix(theme.CARD_HI, theme.PINK, .45),
+                        troughcolor=theme.LINE_SOFT, bordercolor=theme.BG,
+                        arrowcolor=theme.mix(theme.PINK, theme.CARD, .3), width=14,
+                        relief="flat", gripcount=0, arrowsize=12)
+        style.map("TScrollbar", background=[("active", theme.PINK)])
 
     # ---- chrome ------------------------------------------------------------
     def build_head(self):
@@ -105,6 +107,9 @@ class LibraryWindow:
         self.tab_bar.pack(fill="x", padx=20, pady=(0, 10))
         body = tk.Frame(w, bg=theme.BG)
         body.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # Let the page fill whatever the window gives it instead of demanding
+        # its children's preferred height and spilling past the bottom edge.
+        body.pack_propagate(False)
         browse = tk.Frame(body, bg=theme.BG)
         advanced = tk.Frame(body, bg=theme.BG)
         coverage = tk.Frame(body, bg=theme.BG)
@@ -157,12 +162,12 @@ class LibraryWindow:
         self.back_button = RoundedButton(row, "← 角色", self.back_to_characters, theme.CARD_HI,
                                          theme.PINK, theme.ui(11), height=theme.px(32))
         self.keyword = tk.StringVar()
-        self.keyword_entry = RoundedEntry(row, textvariable=self.keyword, width=theme.px(240),
-                                          justify="left")
-        self.keyword_entry.pack(side="left", fill="x", expand=True, padx=8)
-        self.keyword_entry.entry.bind("<Return>", lambda e: self.search())
         RoundedButton(row, "搜索", self.search, theme.PINK_FILL, theme.on_fill,
-                      theme.ui(11, "bold"), height=theme.px(32)).pack(side="left")
+                      theme.ui(11, "bold"), height=theme.px(32)).pack(side="right")
+        self.keyword_entry = RoundedEntry(row, textvariable=self.keyword, width=theme.px(180),
+                                          justify="left")
+        self.keyword_entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
+        self.keyword_entry.entry.bind("<Return>", lambda e: self.search())
         hints = tk.Frame(card, bg=theme.SURFACE)
         hints.pack(fill="x", pady=(10, 0))
         tk.Label(hints, text="按名称、ID、角色名或原文内容搜索；不同服务器独立保存。选择角色后可查看其风格。",
@@ -175,7 +180,7 @@ class LibraryWindow:
         panes.pack(fill="both", expand=True)
         left = tk.Frame(panes, bg=theme.CARD)
         right = tk.Frame(panes, bg=theme.BG)
-        panes.add(left, minsize=260, width=380)
+        panes.add(left, minsize=300, width=440)
         panes.add(right, minsize=380)
         # footer controls first so the list can never squeeze them out
         paging = tk.Frame(left, bg=theme.CARD)
@@ -190,7 +195,7 @@ class LibraryWindow:
                                            theme.CARD_HI, theme.PINK, theme.ui(11),
                                            height=theme.px(34))
         self.styles_button.pack(side="bottom", fill="x", pady=(6, 2), padx=4)
-        self.tree = self.make_tree(left, ("id", "name"), horizontal=False)
+        self.tree = self.make_tree(left, ("id", "name"))
         self.tree.configure(show="tree headings", style="Quest.Browse.Treeview", height=6)
         self.tree.heading("#0", text="头像")
         self.tree.column("#0", width=theme.px(76), minwidth=theme.px(76), stretch=False)
