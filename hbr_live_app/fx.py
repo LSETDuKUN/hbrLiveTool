@@ -1,35 +1,129 @@
 """Animated displays and a travelling border. Presentation only."""
+import os
 import tkinter as tk
-from tkinter import font as tkfont
+
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageTk
 
 from . import theme
 
-
-def outline_points(x1, y1, x2, y2, radius):
-    """Same silhouette as components.rounded(), as a closed point list."""
-    r = max(0, min(radius, (x2 - x1) / 2, (y2 - y1) / 2))
-    return [x1 + r, y1, x2 - r, y1, x2, y1, x2, y1 + r,
-            x2, y2 - r, x2, y2, x2 - r, y2, x1 + r, y2,
-            x1, y2, x1, y2 - r, x1, y1 + r, x1, y1,
-            x1 + r, y1, x2 - r, y1]
+FONT_DIR = os.path.join(os.environ.get('WINDIR', r'C:\Windows'), 'Fonts')
+FONT_FILES = {
+    'bold': ('seguisbi.ttf', 'segoeuib.ttf', 'arialbi.ttf'),
+    'normal': ('segoeuii.ttf', 'segoeui.ttf', 'ariali.ttf'),
+}
 
 
-class NumberDisplay(tk.Canvas):
-    """Large number with a highlight that sweeps across the digits."""
+def _font_path(weight='bold'):
+    for name in FONT_FILES.get(weight, FONT_FILES['bold']):
+        path = os.path.join(FONT_DIR, name)
+        if os.path.exists(path):
+            return path
+    return None
 
-    def __init__(self, master, size=46, color=None, height=None, **kwargs):
+
+def _load_font(size, weight='bold'):
+    path = _font_path(weight)
+    if path:
+        try:
+            return ImageFont.truetype(path, int(size))
+        except OSError:
+            pass
+    return ImageFont.load_default()
+
+
+def gradient_image(width, height, colors):
+    """Horizontal multi-stop gradient, one pixel column at a time."""
+    width = max(1, int(width))
+    height = max(1, int(height))
+    stops = [theme.hex_to_rgb(colour) for colour in colors]
+    if len(stops) == 1:
+        stops = stops * 2
+    strip = Image.new('RGB', (width, 1))
+    pixels = strip.load()
+    span = width - 1 if width > 1 else 1
+    for x in range(width):
+        position = x / span * (len(stops) - 1)
+        index = min(int(position), len(stops) - 2)
+        blend = position - index
+        a, b = stops[index], stops[index + 1]
+        pixels[x, 0] = tuple(int(a[i] + (b[i] - a[i]) * blend) for i in range(3))
+    return strip.resize((width, height))
+
+
+class _Bitmap:
+    """Shared glyph rendering for the two damage readouts."""
+
+    weight = 'bold'
+    shadow_blur = 2.4
+
+    def _render(self, main, delta='', delta_scale=0.6):
+        size = max(9, int(self._size * theme.SCALE))
+        font = _load_font(size, self.weight)
+        small = _load_font(max(8, int(size * delta_scale)), self.weight)
+        ascent, descent = font.getmetrics()
+        main_box = font.getbbox(main) if main else (0, 0, 0, 0)
+        main_w = max(0, main_box[2] - main_box[0])
+        gap = int(size * 0.22)
+        delta_text = ('+ ' + delta) if delta else ''
+        delta_box = small.getbbox(delta_text) if delta_text else (0, 0, 0, 0)
+        delta_w = max(0, delta_box[2] - delta_box[0])
+        pad = int(size * 0.16) + 6
+        width = int(pad * 2 + main_w + (gap + delta_w if delta_text else 0))
+        height = int((ascent + descent) * 1.18 + pad)
+        mask = Image.new('L', (width, height), 0)
+        delta_mask = Image.new('L', (width, height), 0)
+        draw = ImageDraw.Draw(mask)
+        base_y = pad / 2 + ascent
+        draw.text((pad - main_box[0], base_y), main, font=font, fill=255, anchor='ls')
+        if delta_text:
+            draw = ImageDraw.Draw(delta_mask)
+            draw.text((pad + main_w + gap - delta_box[0], base_y), delta_text,
+                      font=small, fill=255, anchor='ls')
+        canvas = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+        shadow_mask = ImageChops.lighter(mask, delta_mask).filter(
+            ImageFilter.GaussianBlur(self.shadow_blur))
+        shadow = Image.new('RGBA', (width, height), self._shadow_rgb() + (150,))
+        shadow.putalpha(shadow_mask.point(lambda value: int(value * 0.55)))
+        canvas = Image.alpha_composite(canvas, shadow)
+        fill = gradient_image(width, height, self._colors)
+        fill.putalpha(mask)
+        canvas = Image.alpha_composite(canvas, fill)
+        if delta_text:
+            flat = Image.new('RGBA', (width, height), self._delta_rgb() + (255,))
+            flat.putalpha(delta_mask)
+            canvas = Image.alpha_composite(canvas, flat)
+        return canvas
+
+    def _shadow_rgb(self):
+        return theme.hex_to_rgb(theme.SHADOW)
+
+    def _delta_rgb(self):
+        return theme.hex_to_rgb(theme.mix(self.cget('bg'), self._colors[-1], .78))
+
+    def _present(self, image):
+        self._photo = ImageTk.PhotoImage(image, master=self)
+        if self._image_item is None:
+            self._image_item = self.create_image(2, 0, anchor='nw', image=self._photo)
+        else:
+            self.itemconfigure(self._image_item, image=self._photo)
+            self.coords(self._image_item, 2, 0)
+
+
+class NumberDisplay(_Bitmap, tk.Canvas):
+    """Large damage number: italic face with a gradient fill."""
+
+    def __init__(self, master, size=38, colors=None, height=None, **kwargs):
         self._text = '0'
-        self._color = color or theme.PINK
         self._size = size
-        self._font = tkfont.Font(font=theme.num(size))
-        self._phase = 0.0
-        self._items = []
-        self._spacing = ()
+        self._colors = colors or (theme.CYAN, theme.LAVENDER, theme.PINK)
+        self._photo = None
+        self._image_item = None
+        font = _load_font(int(size * theme.SCALE), self.weight)
+        ascent, descent = font.getmetrics()
         super().__init__(master, bg=master.cget('bg'), highlightthickness=0, bd=0,
-                         height=height or int(size * theme.SCALE * 1.35), **kwargs)
-        self.bind('<Configure>', lambda e: self.redraw())
+                         height=height or int((ascent + descent) * 1.3), **kwargs)
+        self.bind('<Configure>', lambda e: self.refresh())
 
-    # -- compatibility with the label it replaces -------------------------
     def cget(self, key):
         if key == 'text':
             return self._text
@@ -40,73 +134,41 @@ class NumberDisplay(tk.Canvas):
             self.set_text(kwargs.pop('text'))
         if 'font' in kwargs:
             self.set_font(kwargs.pop('font'))
+        if 'colors' in kwargs:
+            self._colors = kwargs.pop('colors')
+            self.refresh()
         return super().configure(cnf, **kwargs)
 
     config = configure
 
     def set_font(self, font):
-        self._font = tkfont.Font(font=font)
-        self._size = abs(int(font[1])) if isinstance(font, tuple) and len(font) > 1 else self._size
-        self.configure(height=int(self._font.metrics('linespace') * 1.25))
-        self.redraw()
+        size = abs(int(font[1])) if isinstance(font, (tuple, list)) and len(font) > 1 else None
+        if size:
+            self._size = size / theme.SCALE
+        self.refresh()
 
     def set_text(self, text):
-        text = str(text)
-        if text == self._text and self._items:
+        self._text = str(text)
+        self.refresh()
+
+    def refresh(self):
+        if not self.winfo_exists():
             return
-        self._text = text
-        self.redraw()
-
-    # -- drawing -----------------------------------------------------------
-    def _base_color(self):
-        return self._color
-
-    def redraw(self):
-        self.delete('digits')
-        self._items = []
-        text = self._text
-        if len(self._spacing) != len(text):
-            self._spacing = tuple(self._font.measure(char) for char in text)
-        total = sum(self._spacing)
-        width = self.winfo_width()
-        height = self.winfo_height() or self._font.metrics('linespace')
-        x = 2
-        for char, advance in zip(text, self._spacing):
-            item = self.create_text(x, height / 2, text=char, anchor='w',
-                                    font=self._font, fill=self._base_color(), tags='digits')
-            self._items.append(item)
-            x += advance
-        self.paint()
-
-    def paint(self):
-        base = self._base_color()
-        width = max(1, len(self._items))
-        cycle = self._phase % 1.0
-        for index, item in enumerate(self._items):
-            frac = (index + 0.5) / width
-            distance = abs(frac - cycle)
-            distance = min(distance, 1 - distance)
-            glow = max(0.0, 1 - distance / 0.28)
-            fill = theme.mix(base, '#ffffff', .60 * glow) if glow > 0.01 else base
-            self.itemconfigure(item, fill=fill)
+        self._present(self._render(self._text))
 
     def tick(self):
-        if not self._items:
-            return
-        self._phase += 0.0125
-        self.paint()
+        """Nothing moves on its own; the readout is a still gradient."""
+        if self._image_item is None and self.winfo_exists():
+            self.refresh()
 
 
 class DeltaDisplay(NumberDisplay):
-    """Current-command damage: running total plus a smaller, fainter delta."""
+    """Current-command damage: gradient total with a softer delta beside it."""
 
-    def __init__(self, master, size=30, color=None, **kwargs):
+    def __init__(self, master, size=25, colors=None, **kwargs):
         self._main = '0'
         self._delta = ''
-        self._delta_alpha = 0.0
-        self._flash = 0.0
-        self._delta_items = []
-        super().__init__(master, size=size, color=color, **kwargs)
+        super().__init__(master, size=size, colors=colors, **kwargs)
 
     def cget(self, key):
         if key == 'text':
@@ -116,136 +178,102 @@ class DeltaDisplay(NumberDisplay):
     def set_text(self, text):
         text = str(text)
         if ' + ' in text:
-            main, delta = text.split(' + ', 1)
-            if delta != self._delta:
-                self._delta_alpha = 0.0
-                self._flash = 1.0
-            self._main, self._delta = main, delta
+            self._main, self._delta = text.split(' + ', 1)
         else:
-            if self._delta:
-                self._flash = 0.9
             self._main, self._delta = text, ''
-            self._delta_alpha = 0.0
-        self.redraw()
+        self.refresh()
 
-    def redraw(self):
-        self.delete('digits')
-        self._items = []
-        self._delta_items = []
-        main_font = self._font
-        small_size = max(9, int(self._size * 0.6 * theme.SCALE))
-        small = tkfont.Font(family=main_font.actual('family'), size=-small_size)
-        main_space = tuple(main_font.measure(char) for char in self._main)
-        delta_text = ('+ ' + self._delta) if self._delta else ''
-        gap = small_size * 0.45
-        delta_space = tuple(small.measure(char) for char in delta_text)
-        total = sum(main_space) + ((gap + sum(delta_space)) if delta_text else 0)
-        width = self.winfo_width()
-        height = self.winfo_height() or int(self._size * theme.SCALE * 1.3)
-        x = 2
-        for char, advance in zip(self._main, main_space):
-            self._items.append(self.create_text(x, height / 2, text=char, anchor='w',
-                                                font=main_font, fill=self._base_color(),
-                                                tags='digits'))
-            x += advance
-        if delta_text:
-            self._delta_items = []
-            x += gap
-            for char, advance in zip(delta_text, delta_space):
-                self._delta_items.append(self.create_text(x, height / 2 + 1, text=char,
-                                                          anchor='w', font=small,
-                                                          fill=self._base_color(), tags='digits'))
-                x += advance
-        self.paint()
-
-    def paint(self):
-        super().paint()
-        if self._flash > 0 and self._items:
-            for item in self._items:
-                current = self.itemcget(item, 'fill')
-                self.itemconfigure(item, fill=theme.mix(current, '#ffffff', .45 * self._flash))
-        if not self._delta_items:
+    def refresh(self):
+        if not self.winfo_exists():
             return
-        alpha = max(0.0, min(1.0, self._delta_alpha))
-        soft = theme.mix(theme.mix(theme.BG, self._color, .25), self._color, alpha)
-        for item in self._delta_items:
-            self.itemconfigure(item, fill=soft)
-
-    def tick(self):
-        dirty = False
-        if self._delta and self._delta_alpha < 1.0:
-            self._delta_alpha = min(1.0, self._delta_alpha + 0.16)
-            dirty = True
-        elif not self._delta and self._delta_alpha > 0.0:
-            self._delta_alpha = max(0.0, self._delta_alpha - 0.16)
-            dirty = True
-        if self._flash > 0:
-            self._flash = max(0.0, self._flash - 0.09)
-            dirty = True
-        if dirty:
-            self.paint()
-            return
-        super().tick()
+        self._present(self._render(self._main, self._delta))
 
 
-def rounded_path(x1, y1, x2, y2, radius, step=3):
-    """Dense point list around a rounded rectangle, for a travelling light."""
-    import math
+def shaped_points(x1, y1, x2, y2, radius):
+    """The exact control points components.rounded() hands to the canvas."""
     r = max(0, min(radius, (x2 - x1) / 2, (y2 - y1) / 2))
-    points = []
-
-    def arc(cx, cy, start_angle):
-        span = 90
-        count = max(2, int((math.pi * r / 2) / max(1, step)))
-        for index in range(count + 1):
-            angle = math.radians(start_angle + span * index / count)
-            points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
-
-    def line(ax, ay, bx, by):
-        count = max(1, int(math.hypot(bx - ax, by - ay) / max(1, step)))
-        for index in range(count + 1):
-            points.append((ax + (bx - ax) * index / count, ay + (by - ay) * index / count))
-
-    arc(x1 + r, y1 + r, 180)
-    line(x1 + r, y1, x2 - r, y1)
-    arc(x2 - r, y1 + r, 270)
-    line(x2, y1 + r, x2, y2 - r)
-    arc(x2 - r, y2 - r, 0)
-    line(x2 - r, y2, x1 + r, y2)
-    arc(x1 + r, y2 - r, 90)
-    line(x1, y2 - r, x1, y1 + r)
-    return points
+    return [(x1 + r, y1), (x2 - r, y1), (x2, y1), (x2, y1 + r),
+            (x2, y2 - r), (x2, y2), (x2 - r, y2), (x1 + r, y2),
+            (x1, y2), (x1, y2 - r), (x1, y1 + r), (x1, y1)]
 
 
-class GlowBorder:
-    """A short bright segment that travels around a RoundedCard outline."""
+def smoothed_path(points, steps=24):
+    """Sample the same quadratic B-spline Tk draws for a smooth polygon."""
+    count = len(points)
+    path = []
+    for index in range(count):
+        previous = points[index - 1]
+        corner = points[index]
+        following = points[(index + 1) % count]
+        start = ((previous[0] + corner[0]) / 2, (previous[1] + corner[1]) / 2)
+        stop = ((corner[0] + following[0]) / 2, (corner[1] + following[1]) / 2)
+        for step in range(steps):
+            t = step / steps
+            inverse = 1 - t
+            path.append((inverse * inverse * start[0] + 2 * inverse * t * corner[0] + t * t * stop[0],
+                         inverse * inverse * start[1] + 2 * inverse * t * corner[1] + t * t * stop[1]))
+    return path
 
-    def __init__(self, card, color=None, width=3, span=64):
+
+class BorderLight:
+    """The outline itself, lit: a soft bright arc laps the full border."""
+
+    SEGMENTS = 64
+    SPREAD = 0.22
+    SPEED = 2.6
+
+    def __init__(self, card, accent=None, base=None, width=1.8):
         self.card = card
-        self.color = color or theme.PINK
+        self.accent = accent or theme.PINK
+        self.base = base or theme.LINE
         self.width = width
-        self.span = span
-        self.phase = 0
-        self.item = None
-        self.path = []
+        self.phase = 0.0
+        self.items = []
+        self.applied = []
         self.active = False
         self._size = (0, 0)
 
     def show(self, active):
         self.active = active
-        if not active and self.item is not None:
+        if not active:
+            self._clear()
+        elif not self.items:
+            self._build()
+
+    def _clear(self):
+        for item in self.items:
             try:
-                self.card.delete(self.item)
+                self.card.delete(item)
             except tk.TclError:
                 pass
-            self.item = None
-        if active:
-            self.update()
+        self.items = []
+        self.applied = []
 
-    def _rebuild(self, width, height):
-        self.path = rounded_path(2, 2, width - 2, height - 2, self.card.radius, step=7)
+    def _build(self):
+        card = self.card
+        try:
+            width = max(40, card.winfo_width())
+            height = max(20, card.winfo_height())
+        except tk.TclError:
+            return
+        self._clear()
+        control = shaped_points(1, 1, width - 2, height - 2, card.radius)
+        path = smoothed_path(control, steps=24)
+        total = len(path)
         self._size = (width, height)
-        self.count = max(2, len(self.path) // max(1, self.span // 3))
+        base_rgb = theme.hex_to_rgb(self.base)
+        for index in range(self.SEGMENTS):
+            start = int(index * total / self.SEGMENTS) % total
+            stop = int((index + 1) * total / self.SEGMENTS) % total
+            span = (stop - start) % total or 1
+            coords = []
+            for offset in range(span + 1):
+                x, y = path[(start + offset) % total]
+                coords.extend((x, y))
+            item = card.create_line(coords, width=self.width, capstyle='round',
+                                    fill=self.base)
+            self.items.append(item)
+            self.applied.append(-1.0)
 
     def update(self):
         if not self.active:
@@ -256,20 +284,22 @@ class GlowBorder:
             height = max(20, card.winfo_height())
         except tk.TclError:
             return
-        if not self.path or (width, height) != self._size:
-            self._rebuild(width, height)
-        total = len(self.path)
-        keep = max(2, self.count)
-        start = self.phase % total
-        coords = []
-        for offset in range(keep):
-            x, y = self.path[int(start + offset) % total]
-            coords.extend((x, y))
-        if self.item is None:
-            self.item = card.create_line(coords, width=self.width, fill=self.color,
-                                         capstyle='round', joinstyle='round')
-        else:
-            card.coords(self.item, *coords)
-            card.itemconfigure(self.item, fill=self.color)
-        card.tag_raise(self.item)
-        self.phase = (self.phase + 3) % total
+        if not self.items or (width, height) != self._size:
+            self._build()
+            if not self.items:
+                return
+        head = self.phase % 1.0
+        for index, item in enumerate(self.items):
+            centre = (index + 0.5) / self.SEGMENTS
+            distance = abs(centre - head)
+            distance = min(distance, 1 - distance)
+            glow = 0.0
+            if distance < self.SPREAD:
+                glow = 1.0 - distance / self.SPREAD
+                glow = glow * glow
+            if abs(glow - self.applied[index]) < 0.02:
+                continue
+            self.applied[index] = glow
+            card.itemconfigure(item, fill=theme.mix(self.base, self.accent, glow),
+                               width=self.width + 1.8 * glow)
+        self.phase = (self.phase + self.SPEED / 100.0) % 1.0

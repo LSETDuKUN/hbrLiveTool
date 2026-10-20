@@ -74,6 +74,7 @@ def options():
 # scale so text keeps its apparent size on 125% / 150% desktops.
 UI_FAMILY = 'Microsoft YaHei UI'
 NUM_CANDIDATES = ('Segoe UI Variable Display', 'Segoe UI', 'Arial')
+DISPLAY_CANDIDATES = ('Segoe UI Black', 'Segoe UI Semibold', 'Segoe UI Variable Display', 'Arial Black', 'Arial')
 MONO_CANDIDATES = ('Cascadia Code', 'Consolas', 'Courier New')
 SCALE = 1.0
 _families = None
@@ -123,6 +124,14 @@ def ui(size=12, weight='normal'):
     return (UI_FAMILY, -px(size), weight) if weight != 'normal' else (UI_FAMILY, -px(size))
 
 
+def display_family():
+    return _resolved.setdefault('display', _first(DISPLAY_CANDIDATES, 'Segoe UI'))
+
+
+def display(size=34):
+    return (display_family(), -px(size))
+
+
 def num(size=15, weight='bold', slant='roman'):
     return (num_family(), -px(size), weight, slant)
 
@@ -139,6 +148,13 @@ RADIUS_SM = 14
 
 
 # ---- helpers ---------------------------------------------------------------
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    if len(value) == 3:
+        value = ''.join(char * 2 for char in value)
+    return tuple(int(value[index:index + 2], 16) for index in (0, 2, 4))
+
+
 def mix(first, second, ratio):
     ratio = max(0.0, min(1.0, ratio))
     a = tuple(int(first[i:i + 2], 16) for i in (1, 3, 5))

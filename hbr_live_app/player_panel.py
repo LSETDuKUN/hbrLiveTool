@@ -3,7 +3,7 @@ import tkinter as tk
 
 from . import theme
 from .components import RoundedCard, RoundedButton
-from .fx import GlowBorder
+from .fx import BorderLight
 from .portraits import Portraits
 from .statuses import status_details
 from .status_groups import StatusGroups
@@ -94,13 +94,17 @@ class PlayerPanel(tk.Frame):
             pos=p.get('actor_position') if p else None
             front=pos in (0,1,2)
             selected=key==self.selected
-            tile['frame'].configure(outline=theme.PINK if selected else (theme.CYAN if front else theme.LINE))
+            # The selected tile strokes the same colour the light rests at, so
+            # the border and the travelling highlight read as one stroke.
+            tile['frame'].configure(outline=theme.mix(theme.CARD, theme.PINK, .72) if selected
+                                    else (theme.CYAN if front else theme.LINE))
             tile['frame'].draw()
             if selected:
                 if self.glow is None or self.glow.card is not tile['frame']:
                     if self.glow is not None:
                         self.glow.show(False)
-                    self.glow = GlowBorder(tile['frame'], color=theme.PINK)
+                    self.glow = BorderLight(tile['frame'], accent=theme.PINK,
+                                            base=theme.mix(theme.CARD, theme.PINK, .72))
                 self.glow.show(True)
             elif self.glow is not None and self.glow.card is tile['frame']:
                 self.glow.show(False)
