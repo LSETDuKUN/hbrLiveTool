@@ -298,7 +298,10 @@ class RoundedEntry(tk.Canvas):
         self._var.set(value)
 
     def draw(self):
-        self.delete('all')
+        # Keep the embedded entry alive across focus/resize repaints.
+        for item in self.find_all():
+            if item != self._slot:
+                self.delete(item)
         width = max(40, self.winfo_width())
         height = self._height
         radius = self._radius if self._radius is not None else min(height / 2, theme.RADIUS_SM)
@@ -308,6 +311,8 @@ class RoundedEntry(tk.Canvas):
             rounded(self, 3, 3, width - 3, height - 3, max(3, radius - 2), fill='',
                     outline=theme.mix(theme.field(), theme.PINK, .45))
         self.itemconfigure(self._slot, width=max(20, width - 24))
+        self.coords(self._slot, 12, height / 2)
+        self.tag_raise(self._slot)
 
 
 class RoundedSelect(tk.Canvas):
