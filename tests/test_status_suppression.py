@@ -12,6 +12,32 @@ def attack(amount, **changes):
 
 
 class SuppressionTests(unittest.TestCase):
+    def test_debuff_targets_share_two_slots_and_permanent_is_separate(self):
+        for kind in ('DefenseDown','Fragile','ResistDown'):
+            with self.subTest(kind=kind):
+                states=[]
+                for i,amount in enumerate((1000,3000,2000)):
+                    states.append(attack(amount,label='SpecialStatus.'+kind,
+                        values=dict(amountOnDpDamageInt=-amount,amountOnHpDamageInt=-amount,
+                                    rateValueInt=-amount if kind=='ResistDown' else amount),
+                        duration_kind='turn',remaining=2,
+                        source_effect=dict(condition='IsOverDrive()',target_type='All' if i else 'Single',
+                                           target_condition='IsWeakElement()' if kind=='ResistDown' else '')))
+                permanent=dict(states[0],duration_kind='permanent')
+                infer_suppressed_attacks(states+[permanent])
+                self.assertFalse(states[0]['effective'])
+                self.assertNotIn('effective',permanent)
+                self.assertTrue(all(s.get('effective') is not False for s in states[1:]))
+                states[1]['remaining']=0
+                infer_suppressed_attacks(states+[permanent])
+                self.assertNotIn('effective',states[0])
+
+    def test_debuff_elements_do_not_cover_each_other(self):
+        states=[attack(n,label='SpecialStatus.DefenseDown',element_type=e)
+                for n,e in ((100,0),(200,0),(300,3))]
+        infer_suppressed_attacks(states)
+        self.assertTrue(all(s.get('effective') is not False for s in states))
+
     def test_weaker_count_is_retained_and_returns_after_turn_buff_expires(self):
         low = attack(13575)
         high = attack(31623, duration_kind='turn', remaining=4, buff_limit_type=4)

@@ -315,6 +315,8 @@ class LibraryWindow:
             counts[key] = counts.get(key, 0) + 1
         report = ("来源与覆盖报告\n\nhttps://hbr.quest/\nhttps://master.hbr.quest/v1/\n\n"
                   + f"快照 {manifest['created']} · {len(manifest['sources'])} 个已获取来源 · {unavailable} 个未获取来源")
+        if manifest.get('talents_updated'):
+            report+='\n风格 / 天赋表更新：'+manifest['talents_updated']+'（其余表仍为原快照）'
         if unavailable and all("HTTP Error 404:" in error for error in manifest["errors"].values()):
             report += "\n未获取来源均返回 404，表示对应路径未提供数据；不代表本地资料查询失败。"
         report += "\n\n范围：站点公开模块引用的 JSON 表及表中列出的详细资料。头像与敌人图标可通过「同步头像」独立缓存；不下载立绘、音视频。无法发现的服务器文件不声称已覆盖。\n原始 JSON、页面脚本、SHA256、下载时间与历史版本均保存在 data/quest。\n\n"

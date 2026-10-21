@@ -289,6 +289,23 @@ class DetailCards(tk.Frame):
                     self.row(frame,label,number((data.get("base_param") or {}).get(key)))
             if not record["skills"] and data.get("desc"):
                 self.label(frame,data["desc"])
+        talents=record.get('talents',[])
+        if talents:
+            frame=self.card('风格天赋 · 按解锁阶段')
+            self.label(frame,'资料展示全部阶段，不代表当前角色已解锁；计算器仍以实际持有天赋为准。',9,theme.DIM)
+            for talent in talents:
+                value=talent['data'];tier=talent['tier']
+                title=talent['group']+(f' {tier} 突' if talent['group'] in ('上限突破','共鸣天赋') and tier is not None else '')
+                self.label(frame,title+' · '+str(value.get('name') or value.get('label') or '未命名'),11,theme.PINK,True)
+                self.label(frame,value.get('desc') or value.get('info') or '效果说明未收录')
+                def detail(panel,value=value,talent=talent):
+                    for key,label in [('timing','触发时机'),('condition','生效条件')]:
+                        if value.get(key):self.row(panel,label,friendly(value[key]))
+                    for part in value.get('parts',[]):
+                        self.row(panel,'效果 / 对象',friendly(part.get('skill_type'))+' / '+friendly(part.get('target_type')))
+                        self.row(panel,'数值 / 限制',friendly(part.get('power'))+' / '+friendly(part.get('effect')))
+                    self.row(panel,'原始位置',talent['path'])
+                self.fold(frame,'条件、效果与来源',detail)
         for index,skill in enumerate(record["skills"],1):
             self.render_skill(skill,index)
         extras = self.card("资料备注")
@@ -298,7 +315,7 @@ class DetailCards(tk.Frame):
             self.row(panel,"服务器",record["region"])
             if isinstance(data,dict):
                 for key,value in data.items():
-                    if key not in {"skills","parts","hits"}:
+                    if key not in {"skills","parts","hits","passives","limit_break","roleabi","resonance"}:
                         self.row(panel,key,friendly(value))
         self.fold(extras,"来源与其他资料",more)
         self.canvas.yview_moveto(0)

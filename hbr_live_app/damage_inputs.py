@@ -49,6 +49,14 @@ def read_inputs(reader, actor):
                     audit.append(audit_entry(label,runtime))
         result['passive_labels']=labels
         result['passive_audit']=audit
+    result.update(read_selection(reader,actor))
+    return result
+
+
+def read_selection(reader, actor):
+    """Read the live command separately from cached stats and equipment."""
+    from .source import members
+    result={}
     pointer = reader.prop(actor, 'frontSkillList')
     index = reader.prop(actor, 'selectedCommandIndex')
     if not pointer or reader.r.cls(pointer) != 'List`1':

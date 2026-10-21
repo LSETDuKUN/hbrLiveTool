@@ -3,6 +3,7 @@ import tkinter as tk
 
 from . import theme
 from .statuses import status_line
+from .status_rules import active
 
 def group_list():
     """Resolved per draw so a palette switch is picked up immediately."""
@@ -30,6 +31,20 @@ KINDS = {
     'negative': {'AttackDown','ConfusionRandom','StunRandom','SuperStun','Misfortune',
                  'ImprisonRandom','BindRandom','VirusRandom','IllusionRandom','Fatigue','Restraint','RestraintRandom','FearOfDevil'}}
 
+# Explicit text plus contrasting outline stays readable in both palettes.
+ELEMENT_BADGES = {
+    'Fire': ('火', '#a82e38', '#ffe2df'),
+    'Thunder': ('雷', '#755300', '#fff0ad'),
+    'Ice': ('冰', '#215ca0', '#dceeff'),
+    'Dark': ('暗', '#ece5fa', '#302a3e'),
+    'Light': ('光', '#5d5239', '#fffdf2'),
+}
+
+
+def element_badge(status):
+    key=status.get('element_key') or {1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(status.get('element_type'))
+    return ELEMENT_BADGES.get(key)
+
 
 def group_statuses(state):
     groups = {key: [] for key,_,_ in group_list()}
@@ -37,7 +52,7 @@ def group_statuses(state):
     for status in state.get('statuses', []):
         kind = status.get('label','').removeprefix('SpecialStatus.')
         key = next((key for key, kinds in KINDS.items() if kind in kinds), None)
-        if key and status.get('effective') is not False and not status.get('hidden') and not status.get('pending_add') and not status.get('pending_remove'):
+        if key and active(status) and not status.get('hidden'):
             groups[key].append(status)
         else:
             other.append(status)
@@ -46,6 +61,8 @@ def group_statuses(state):
 
 def effect_line(status):
     text = status_line(status)
+    if status.get('buff_limit_type')==4 or status.get('source_effect',{}).get('effect',{}).get('limitType')=='Only':
+        text+='【单独发动】'
     if status.get('label')=='SpecialStatus.ResistDown' and status.get('values',{}).get('rateValueInt',0)<0:
         text=text.replace('抗性降低','弱点加深 / 抗性降低')
     if not status.get('value'):
@@ -54,12 +71,12 @@ def effect_line(status):
     if status.get('element_name'):
         text = status['element_name']+'属性 · '+text
     elif element is not None:
-        text = ({0:'普通',3:'雷属性'}.get(element, f'属性 #{element}'))+' · '+text
+        text = ({0:'普通',1:'火属性',2:'冰属性',3:'雷属性',4:'光属性',5:'暗属性'}.get(element, f'属性 #{element}'))+' · '+text
     duration = status.get('duration','')
     if duration:
         text += ' · '+duration.replace('（消耗规则待核实）','')
     if status.get('effective') is False:
-        text += (' · 暂被覆盖（规则推断）' if status.get('effective_basis') == 'attack_only_rule'
+        text += (' · 暂被覆盖（规则推断）' if status.get('effective_basis') in ('attack_only_rule','debuff_top_two_rule')
                  else ' · 不重复计入（规则筛选）')
     return text
 
@@ -101,7 +118,7 @@ class StatusGroups(tk.Frame):
             self.row(title, color, bold=True, parent=body)
             # Each applied effect remains separate, including different durations.
             for status in items:
-                self.row(effect_line(status), theme.FG, callback=lambda s=status:self.details(s), parent=body)
+                self.status_row(status, body)
         if not shown:
             self.row('主要乘区暂无已确认状态', theme.MUTED)
         if self.enemy:
@@ -112,7 +129,22 @@ class StatusGroups(tk.Frame):
                 activebackground=self.cget('bg'),activeforeground=theme.FG,font=theme.ui(11)).pack(fill='x',pady=3)
             if self.expanded:
                 for status in other:
-                    self.row(effect_line(status), theme.MUTED, callback=lambda s=status:self.details(s))
+                    self.status_row(status, self, muted=True)
+
+    def status_row(self, status, parent, muted=False):
+        line=tk.Frame(parent,bg=parent.cget('bg'))
+        line.pack(fill='x',pady=1)
+        badge=element_badge(status)
+        if badge:
+            name,fg,bg=badge
+            tag=tk.Label(line,text=name,bg=bg,fg=fg,font=theme.ui(10,'bold'),
+                         padx=5,pady=1,highlightthickness=1,highlightbackground=fg,cursor='hand2')
+            tag.pack(side='left',anchor='n',padx=(0,5),pady=2)
+            tag.bind('<Button-1>',lambda e:self.details(status))
+        body=tk.Frame(line,bg=line.cget('bg'))
+        body.pack(side='left',fill='x',expand=True)
+        self.row(effect_line(status),theme.MUTED if muted else theme.FG,
+                 callback=lambda:self.details(status),parent=body)
 
     def toggle(self):
         self.expanded = not self.expanded

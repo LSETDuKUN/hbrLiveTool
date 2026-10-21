@@ -20,6 +20,33 @@ def setup():
 
 
 class AutofillTests(unittest.TestCase):
+    def test_command_buff_adds_to_only_attack_without_covering(self):
+        from hbr_live_app.statuses import infer_suppressed_attacks
+        p,e,lookup=setup()
+        command=status('AttackUpIncludeNormal',15,source='NNanaseCommandBuff')
+        command.update(duration_kind='turn',remaining=1)
+        strong=status('AttackUpIncludeNormal',300,buff_limit_type=4)
+        strong.update(duration_kind='turn',remaining=1)
+        p['statuses']=infer_suppressed_attacks([command,strong])
+        self.assertNotEqual(command.get('effective'),False)
+        self.assertEqual(autofill(p,e,lookup=lookup)['values']['attack'],315)
+
+    def test_enemy_finite_passive_debuffs_and_weakness_use_top_two(self):
+        from hbr_live_app.statuses import infer_suppressed_attacks
+        for kind,key in [('DefenseDown','defense_down'),('Fragile','fragile'),('ResistDown','weakness_deepen')]:
+            with self.subTest(kind=kind):
+                p,e,lookup=setup()
+                for amount in (10,20,30,5):
+                    s=status(kind,amount,source='Passive.Test')
+                    if amount!=5:s.update(duration_kind='turn',remaining=2)
+                    if kind=='ResistDown':
+                        s.update(element_key='Thunder',element_type=3)
+                        s['values']['rateValueInt']=-amount*100
+                    e['statuses'].append(s)
+                self.assertEqual(autofill(p,e,lookup=lookup)['values'][key],55)
+                infer_suppressed_attacks(e['statuses'])
+                self.assertEqual(autofill(p,e,lookup=lookup)['values'][key],55)
+
     def test_hp_accessory_is_retained_while_enemy_still_has_dp(self):
         p,e,lookup=setup();e['dp']=40
         accessory=status('AttackUpIncludeNormal',source='AccessoryHp')

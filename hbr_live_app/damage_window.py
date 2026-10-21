@@ -17,7 +17,7 @@ from .damage_autofill import autofill, WEIGHTS, style_elements
 
 GROUPS = (
     ('基础伤害', theme.DIM, (('base','基础伤害（可空）'),)),
-    ('连击乘区', theme.CYAN, (('chain','追加 Hit 权重合计 %'),)),
+    ('连击乘区', theme.CYAN, (('chain','颗数 × 每颗倍率'),)),
     ('加攻乘区', theme.PINK, (('attack','普通加攻 %'),('element_attack','元素加攻 %'),
         ('mind_eye','心眼 %'),('servant_mind_eye','仆人心眼（另加）%'),('field','场地 %'),('charge','充能 %'))),
     ('技能独立修正', theme.MINT, (('token_bonus','Token 增伤 %'),('dp_bonus','对 DP 特攻 %'),('hp_bonus','对 HP 特攻 %'),
@@ -180,6 +180,9 @@ class DamageWindow(tk.Toplevel):
         self.summary=tk.Label(self.result_area,text='尚无计算结果',bg=theme.BG,fg=theme.FG,
                               font=theme.ui(13,'bold'),justify='left',anchor='w')
         self.summary.pack(fill='x',pady=6)
+        self.damage_metric=tk.StringVar(self,value='raw')
+        Segment(self.result_area,[('raw','打出伤害（含溢出）'),('applied','实际扣除 DP＋HP')],
+                self.damage_metric,command=self.compute,accent=theme.CYAN).pack(anchor='w')
         self.summary.bind('<Configure>',lambda e:self.summary.configure(wraplength=max(300,e.width-12)))
         self.result_details=self.fold(form,'计算明细与备注')
         self.note(self.result_details, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
@@ -211,6 +214,11 @@ class DamageWindow(tk.Toplevel):
                 value = getattr(defaults, key)
                 var = tk.StringVar(self, value='' if value is None else str(value))
                 self.values[key] = var
+                if key=='chain':
+                    self.chain_expression=tk.StringVar(self,value='0 × 25%')
+                    self.chain_dirty=False
+                    self.chain_expression.trace_add('write',lambda *_:setattr(self,'chain_dirty',True))
+                    var=self.chain_expression
                 RoundedEntry(rows, textvariable=var, width=theme.px(132)).grid(
                     row=row, column=1, sticky='e', padx=(10, 0), pady=3)
         options = tk.Frame(form, bg=theme.SURFACE, padx=14, pady=10)
@@ -502,12 +510,21 @@ class DamageWindow(tk.Toplevel):
         if gauge.get('full') and (gauge.get('element')!=3 or modes.get('transcend')):
             modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(gauge.get('element'))
         filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
-        self.pending_effects=[];self.pending_delta={}
+        from .effect_pending import with_pending,PREVIEW_KEYS
+        identity=data.get('run_id') or tuple(p.get('actor_id') for p in data.get('players',[]))
+        if getattr(self,'pending_battle',identity)!=identity:self.pending_effects=[]
+        self.pending_battle=identity
+        self.pending_delta={}
         self.damage_orb_enabled.set(False)
         self.pending_context=(player,enemy,data.get('field_state'),modes,data.get('players',[]))
         self.pending_base=filled
+        if self.pending_effects:
+            p,e=with_pending(player,enemy,self.pending_effects)
+            filled=autofill(p,e,data.get('field_state'),modes=modes,party=data.get('players',[]))
+            self.pending_delta={k:filled['values'][k]-self.pending_base['values'][k] for k in PREVIEW_KEYS}
         self.effect_editor.pending_list.delete(0,'end')
         self.effect_editor.load_party(data.get('players',[]),player,enemy,modes)
+        self.render_pending()
         filled['notes'].append('模式判断：'+str({k:v for k,v in modes.items() if k!='enemies'})+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
@@ -537,12 +554,14 @@ class DamageWindow(tk.Toplevel):
         self.equipment_text.insert('end','饰品贡献已计入相应乘区，不需要再次相加。\n按运行时已装备被动匹配；实际状态优先于预填。\n\n'+'\n\n'.join(filled.get('equipment_notes') or ['未读到可确认的饰品效果']))
         self.equipment_text.configure(state='disabled')
         self.filled_chain=filled['values']['chain']
+        self.pending_chain_weights=filled.get('chain_weights',[])
+        self.show_chain(filled)
         self.use_skill.set(True);self.skill_title.configure(text=filled['skill'])
         self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
         self.refresh();self.compute()
 
     def update_pending(self,action,payload):
-        from .effect_pending import pending_state,with_pending
+        from .effect_pending import targeted_row,with_pending,PREVIEW_KEYS
         if not hasattr(self,'pending_context'):raise ValueError('请先自动填充伤害角色和敌人')
         player,enemy,fields,modes,party=self.pending_context
         rows=list(self.pending_effects)
@@ -550,29 +569,64 @@ class DamageWindow(tk.Toplevel):
             item,amount=payload
             if item.get('passive') and any(r['item'].get('source')==item.get('source') and r['item'].get('caster')==item.get('caster') and r['item']['part'].get('label')==item['part'].get('label') for r in rows):
                 raise ValueError('该来源被动已预添加；请删除后再修改，避免重复计入')
-            side,state=pending_state(item,amount,enemy if item['part'].get('skill_type') in ('DefenseDown','Fragile') else player)
+            recipient=next((p for p in party if p.get('actor_id')==item.get('recipient_id')),player)
+            row=targeted_row(item,amount,party or [player],modes.get('enemies') or [enemy],recipient,enemy)
             if item.get('part',{}).get('_branch_path') and any(r['item'].get('source')==item.get('source') and
                     r['item']['part'].get('_branch_path')!=item['part']['_branch_path'] for r in rows):
                 raise ValueError('同一技能已有另一个条件分支，请先删除再切换场景')
-            rows.append(dict(item=item,enemy=side,state=state,amount=amount))
+            rows.append(row)
         else:rows.pop(payload)
         p,e=with_pending(player,enemy,rows)
         computed=autofill(p,e,fields,modes=modes,party=party)
-        keys=('attack','element_attack','mind_eye','critical_bonus','element_critical_bonus','defense_down','element_defense_down','fragile')
+        keys=PREVIEW_KEYS
         delta={k:computed['values'][k]-self.pending_base['values'][k] for k in keys}
         # Reconcile only the preview contribution; preserve unrelated manual edits.
         updates={k:float(self.values[k].get())-self.pending_delta.get(k,0)+delta[k] for k in keys}
         for k,v in updates.items():self.values[k].set(f'{v:.10g}')
         self.hp_adjustments=computed.get('hp_adjustments',{})
+        beads=computed.get('chain_weights',[])
+        chain_changed=(delta['chain']!=self.pending_delta.get('chain',0) or
+                       beads!=getattr(self,'pending_chain_weights',self.pending_base.get('chain_weights',[])))
+        self.pending_chain_weights=beads
         self.pending_effects=rows;self.pending_delta=delta
-        self.effect_editor.pending_list.delete(0,'end')
-        for row in rows:
-            self.effect_editor.pending_list.insert('end',('敌方' if row['enemy'] else '当前伤害角色')+' ← '+row['item']['title']+f' {row["amount"]:.3f}%')
-        self.effect_editor.result.configure(text='已重新筛选覆盖。实际乘区净变化：'+', '.join(f'{k} {v:+.3f}%' for k,v in delta.items() if v) if any(delta.values()) else '已记录预添加；净变化为零（同源已自动计入、被覆盖或属性不适用）。')
+        if chain_changed:
+            count=int(computed.get('params',{}).get('main_hits') or 0)
+            raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
+            current=[float(w) for w in raw.split(',') if w.strip()]
+            new=computed.get('hit_weights',[])
+            weights=current[:count]+beads if count and len(current)>=count else new
+            self.hit_weights.set(', '.join(f'{w:.8g}' for w in weights))
+            self.filled_chain=computed['values']['chain']
+            self.show_chain(dict(computed,hit_weights=weights))
+        self.render_pending()
+        self.effect_editor.result.configure(text='已按施加对象保存，并重新筛选覆盖；切换角色自动填充后仍保留。当前乘区净变化：'+', '.join(f'{k} {v:+.3f}%' for k,v in delta.items() if v))
         self.compute()
+
+    def render_pending(self):
+        self.effect_editor.pending_list.delete(0,'end')
+        for row in self.pending_effects:
+            amount=f'{row["amount"]:g}%'
+            if row['state']['label']=='SpecialStatus.Funnel':amount=f'{row["state"]["values"]["numValue"]} 颗 × '+amount
+            self.effect_editor.pending_list.insert('end','、'.join(row.get('target_names',[]))+' ← '+row['item']['title']+' '+amount)
+
+    def show_chain(self,filled):
+        from .funnels import describe
+        count=filled.get('params',{}).get('main_hits') or 0
+        self.chain_expression.set(describe(filled.get('chain_weights',filled.get('hit_weights',[])[int(count):])))
+        self.chain_dirty=False
 
     def compute(self):
         try:
+            if self.chain_dirty:
+                from .funnels import parse
+                beads=parse(self.chain_expression.get())
+                self.values['chain'].set(f'{sum(beads)*100:g}')
+                raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
+                weights=[float(w) for w in raw.split(',') if w.strip()]
+                count=int(float(self.params['main_hits'].get() or 0))
+                if count>0 and len(weights)>=count:
+                    self.hit_weights.set(', '.join(str(w) for w in weights[:count]+beads))
+                self.chain_dirty=False
             self.destruction_report.configure(state='normal');self.destruction_report.delete('1.0','end')
             self.destruction_report.configure(state='disabled')
             auto=self.pool.get()=='auto'
@@ -632,13 +686,25 @@ class DamageWindow(tk.Toplevel):
                 self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='吸收情景不输出伤害概率曲线')
             elif detail and detail.get('segmented'):
                 from .pool_probability import pool_distribution
-                data=pool_distribution(detail);self.plot_data=data;self.plot_damage=1
-                branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in data['branches'])
-                summary=f"破盾分支数值卷积 · 有效 DP+HP 伤害均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
-                if data['kill_probability'] is not None:summary+=f"\n当前模型击杀概率 {data['kill_probability']:.3%}（固定增益、当前已识别盾机制）"
+                data=pool_distribution(detail)
+                applied_data=data
+                if self.damage_metric.get()=='raw':
+                    from .raw_probability import raw_distribution
+                    data=raw_distribution(detail)
+                self.plot_data=data;self.plot_damage=1
+                branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in applied_data['branches'])
+                if data.get('raw'):
+                    summary=f"打出伤害：{data['samples']:,} 次固定种子抽样，含破盾及锁盾溢出；击杀后停止后续段。\n平均值抽样标准误约 {data['mean_error']:,.2f}；极小尾部概率不能视为精确值。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
+                else:
+                    summary=f"破盾分支数值卷积 · 实际扣除均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
+                if applied_data['kill_probability'] is not None:
+                    summary+=f"\n当前模型击杀概率 {applied_data['kill_probability']:.3%}（按实际扣除判断）"
                 if data['atoms']:summary+='\n集中概率：'+'；'.join(f'{x:,.4g} 伤害 {p:.3%}' for x,p in data['atoms'])
                 self.prob_summary.configure(text=summary);self.draw_plot()
-            else:self.update_probability(result['damage'],detail['weights'] if detail else None)
+            else:
+                self.update_probability(result['damage'],detail['weights'] if detail else None)
+                if self.damage_metric.get()=='applied':
+                    self.prob_summary.configure(text=self.prob_summary.cget('text')+'\n当前为单池参考计算，仅显示打出伤害；实际扣除量需启用自动跨 DP/HP。')
             text='弱点条件：'+('满足' if result['weak'] else '不满足（不计心眼／脆弱）')+'\n'
             if detail and detail.get('segmented'):text+='跨池各段分别采用 DP/HP 特攻，下面单池乘区仅供参考。\n'
             text+='  ×  '.join(f'{NAMES[k]} {v:.4g}' for k,v in result['factors'].items())+'\n\n'
@@ -650,7 +716,10 @@ class DamageWindow(tk.Toplevel):
                 if not math.isfinite(gain) or gain<0:raise ValueError('OD 获取增幅必须为有限非负数')
                 text+=f'OD 饰品获取倍率：×{1+gain/100:g}（例如原获取 20% → {20*(1+gain/100):g}%；不影响伤害）\n'
             if result['damage'] is not None:
-                text+=f"未衰减试算伤害：{result['damage']:,.2f}\n"
+                if detail and detail.get('segmented'):
+                    text+=f"无浮动基准打出伤害（含溢出）：{detail['raw_damage']:,.2f}\n实际扣除 DP＋HP：{result['damage']:,.2f}\n"
+                else:
+                    text+=f"未衰减试算伤害：{result['damage']:,.2f}\n"
                 if result['minimum'] is not None:
                     text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
                     text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
@@ -664,7 +733,8 @@ class DamageWindow(tk.Toplevel):
         if self.plot_data:
             data=self.plot_data;scale=self.plot_damage if self.plot_damage is not None else 1
             mean=data['mean'] if data.get('absolute') else self.plot_damage
-            self.summary.configure(text=(f'平均伤害  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
+            title='平均打出伤害（抽样估计）' if data.get('raw') else '平均实际扣除' if data.get('absolute') else '平均打出伤害'
+            self.summary.configure(text=(f'{title}  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
                 f"\n伤害浮动区间（中央 90%）  {data['low']*scale:,.2f} – {data['high']*scale:,.2f}")
         else:self.summary.configure(text='暂无法生成完整结果：'+self.prob_summary.cget('text'))
         self.result.configure(state='normal');self.result.delete('1.0','end')

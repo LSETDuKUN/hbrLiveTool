@@ -77,7 +77,7 @@ class App:
         if window is not None and window.winfo_exists():
             window.deiconify();window.lift();return
         def snapshot():
-            return dict(connected=self.connected,
+            return dict(connected=self.connected,run_id=self.model.run_id,
                 players=[dict(p,name=p.get('actor'), inputs=p.get('combat_inputs', {})) for p in self.model.players],
                 enemies=[dict(e,inputs=e.get('combat_inputs', {}))
                          for e in self.model.enemies.values() if e.get('active')],field_state=self.model.field_state,
@@ -311,6 +311,13 @@ class App:
         self.history = tk.Frame(self.history_window, bg=theme.BG, padx=16, pady=12)
         self.history.pack(fill='both', expand=True)
         self.label(self.history, '行动记录', theme.PINK, 14, bold=True).pack(anchor='w', pady=(2, 10))
+        self.history_mode=tk.StringVar(self.root,value='actual')
+        modes=tk.Frame(self.history,bg=theme.BG)
+        modes.pack(anchor='w')
+        for value,title in [('actual','实际行动'),('planned','预选行动')]:
+            tk.Radiobutton(modes,text=title,variable=self.history_mode,value=value,
+                command=self.refresh_history,bg=theme.BG,fg=theme.FG,selectcolor=theme.CARD,
+                font=theme.ui(12)).pack(side='left')
         RoundedButton(self.history, '切换头像 / 角色风格', lambda: self.tree.toggle_portraits(),
                       theme.CARD_HI, theme.DIM, theme.ui(12), height=32).pack(anchor='e')
         tree_wrap = tk.Frame(self.history, bg=theme.CARD)
@@ -572,6 +579,18 @@ class App:
         if not self.closing:
             self.root.after(60, self.pump)
 
+    def history_events(self):
+        if self.history_mode.get()=='planned':
+            return self.model.planned_actions.values()
+        return self.model.actions.values()
+
+    def refresh_history(self):
+        self.history_rows=table_rows(self.history_events())
+        self.tree.set_rows(self.history_rows)
+        self.detail_caption.configure(text=('预选行动：开始前最后一次采样，不代表实际发动；旧记录未采集预选时此处为空。'
+            if self.history_mode.get()=='planned' else '实际行动：一行一次行动 · / 表示未观测到行动 · 双击查看详情。'))
+        self.render_details()
+
     def render(self, events=()):
         self.update_damage()
         batches = {e['command']['id'] for e in self.model.actions.values() if e.get('command') and e['command'].get('kind') != 'instant'}
@@ -588,9 +607,8 @@ class App:
         from .statuses import status_line
         self.field_label.configure(text='场地 · '+('  /  '.join(status_line(s)+' · '+s.get('duration','持续待确认') for s in active)
             if active else '未观测到场地' if field.get('available') else '暂不可读'))
-        if events:
-            self.history_rows = table_rows(self.model.actions.values())
-            self.tree.set_rows(self.history_rows)
+        if events or self.history_mode.get()=='planned':
+            self.refresh_history()
         self.render_details()
 
     def update_damage(self):
@@ -680,6 +698,8 @@ class App:
         return text + '\n'.join(self.event_detail_text(event) for event in events)
 
     def event_detail_text(self, event):
+        if event.get('planned'):
+            return f'{event["actor"]} · 预选：{event["skill"]}\n开始行动前最后一次有效采样；不代表实际发动，不计入伤害。\n'
         text = f'{event["actor"]} · {event["skill"]}\n显示伤害 {event["value"]:,}  ·  {"已结算" if event["settled"] else "命中进行中"}\n\n'
         if event.get('style_label') or event.get('style_name'):
             text += f'风格：{event.get("style_name") or "名称未收录"}\n风格标识：{event.get("style_label") or "未确认"}\n\n'
@@ -767,7 +787,7 @@ class App:
         self.style()
         self.build()
         self.layout()
-        self.history_rows = table_rows(self.model.actions.values())
+        self.history_rows = table_rows(self.history_events())
         self.tree.set_rows(self.history_rows)
         self.render(getattr(self, 'last_events', []))
         if self.history_visible.get():
@@ -806,6 +826,8 @@ class App:
 
     def export_axis(self, data=None):
         data = data or self.model.export()
+        if self.history_mode.get()=='planned':
+            data=dict(data,actions=data.get('planned_actions',[]))
         if not data['actions']:
             self.set_status('尚无角色行动可保存。')
             return

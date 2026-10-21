@@ -152,7 +152,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     def aggregate(entries):
         permanent=[]; groups={}
         for s,key,value in entries:
-            if independent(s) or (s.get('duration_kind')=='permanent' and s.get('buff_limit_type')!=4):
+            enemy_debuff=s.get('label') in ('SpecialStatus.DefenseDown','SpecialStatus.Fragile','SpecialStatus.ResistDown')
+            if (independent(s) and not enemy_debuff) or (s.get('duration_kind')=='permanent' and s.get('buff_limit_type')!=4):
                 permanent.append((s,key,value));continue
             # Numeric and named element encodings describe the same stacking pool.
             element_id=s.get('element_key') or {1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(s.get('element_type'))
@@ -372,7 +373,7 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
                 equipment_owned=list(set(inputs.get('passive_labels',[])) | {p['label'] for p in inputs.get('passive_audit',[])}
                                      | {s.get('source') for s in player.get('statuses',[]) if s.get('source')}),
                 values=values,params=params,notes=notes,skipped=list(dict.fromkeys(skipped)),
-                hit_weights=hit_weights,hit_note=hit_note,skill=selected.get('name','未选技能'))
+                chain_weights=chain_weights,hit_weights=hit_weights,hit_note=hit_note,skill=selected.get('name','未选技能'))
     result['hp_adjustments']={}
     if _compare_pools and enemy.get('dp',0)>0:
         hp=autofill(player,dict(enemy,dp=0),fields,lookup,modes,party,_compare_pools=False)['values']

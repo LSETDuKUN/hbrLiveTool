@@ -112,4 +112,5 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
                 maximum=maximum,final=rate,initial=inputs.destruction,theoretical_increment=theoretical,
                 theoretical_final=inputs.destruction+theoretical,actual_increment=rate-inputs.destruction,
                 clipped=theoretical-(rate-inputs.destruction),dp_damage=total_dp,hp_damage=total_hp,
-                damage=total_dp+total_hp,overflow=overflow,remaining_dp=dp,remaining_hp=hp,segmented=True)
+                damage=total_dp+total_hp,raw_damage=sum(row['raw_damage'] for row in rows),
+                overflow=overflow,remaining_dp=dp,remaining_hp=hp,segmented=True)

@@ -90,7 +90,19 @@ class DetailService:
         skills = [skill_detail(value,pointer,translations.get("name"),translations.get("info"))
                   for pointer,value in roots(data)]
         owners = self.catalog.skill_owners(region, entity_id) if dataset == "skills" else []
+        talents=[]
+        if dataset=='styles' and isinstance(data,dict):
+            from .talents import style_talents
+            talents=style_talents(data)
+            for talent in talents:
+                value=talent['data']
+                if value.get('label') and not value.get('desc'):
+                    _,found,_=self.catalog.query("SELECT raw_json FROM records WHERE region=? AND label=? AND dataset IN ('passives','support_skills','role_abilities')",(region,value['label']),limit=2)
+                    if len(found)==1:talent['data']=json.loads(found[0][0])
+            from .talents import expand_resonance
+            talents=expand_resonance(talents)
         return {"region":region,"dataset":dataset,"id":entity_id,"name":name or (data.get("name") if isinstance(data,dict) else "资料"),
+                "talents":talents,
                 "source":source,"raw":data,"skills":skills,"owners":owners,
                 "portrait":self.assets.get(region,dataset,entity_id)}
 

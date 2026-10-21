@@ -20,13 +20,19 @@ class EffectEditor(tk.Frame):
         self.on_pending=on_pending
         self.orb_enabled=tk.BooleanVar(self,value=False)
         self.orb_level=tk.StringVar(self,value='5')
-        tk.Label(self,text='单项效果试算 · 手动预添加到当前伤害目标；重新自动填充会清空预添加',bg=theme.BG,fg=theme.DIM,
+        tk.Label(self,text='效果试算 · 按技能对象预添加；切换角色保留，删除可撤销（仅试算，不修改实时状态）',bg=theme.BG,fg=theme.DIM,
                  font=theme.ui(12)).pack(anchor='w',pady=8)
         self.caster_box=RoundedSelect(self,values=(),width=theme.px(260))
         self.caster_box.pack(anchor='w',pady=4)
         self.caster_box.bind('<<ComboboxSelected>>',self.change_caster)
         self.target_note=tk.Label(self,text='',bg=theme.BG,fg=theme.CYAN,anchor='w',font=theme.ui(10))
         self.target_note.pack(fill='x')
+        self.recipient_box=RoundedSelect(self,values=(),width=theme.px(300))
+        self.recipient_box.pack(anchor='w',pady=4)
+        self.funnel_count=tk.StringVar(self,value='3')
+        self.funnel_row=tk.Frame(self,bg=theme.BG)
+        tk.Label(self.funnel_row,text='连击珠颗数（效果量为每颗 %）',bg=theme.BG,fg=theme.DIM).pack(side='left')
+        RoundedEntry(self.funnel_row,textvariable=self.funnel_count,width=80).pack(side='left')
         self.selector=RoundedSelect(self,values=(),width=theme.px(520))
         self.selector.pack(anchor='w',pady=8);self.selector.bind('<<ComboboxSelected>>',self.choose)
         self.overview=tk.Label(self,text='',bg=theme.BG,fg=theme.DIM,justify='left',anchor='w',font=theme.ui(10))
@@ -80,8 +86,9 @@ class EffectEditor(tk.Frame):
 
     def load_party(self,party,player,enemy,modes):
         self.party=party or [player];self.enemy=enemy;self.modes=modes
-        self.target_note.configure(text='预添加目标：角色 '+str(player.get('actor') or player.get('name') or player.get('actor_id'))+
-                                   ' / 敌人 '+str(enemy.get('name') or enemy.get('address'))+'；更换目标需重新自动填充')
+        self.target_note.configure(text='群体效果按预添加时的站位分配；自身效果给施加者。单体增益请选择下方受益者。')
+        self.recipient_box.configure(values=['单体受益者：'+str(p.get('actor') or p.get('name') or p.get('actor_id')) for p in self.party])
+        self.recipient_box.current(next((i for i,p in enumerate(self.party) if p.get('actor_id')==player.get('actor_id')),0))
         self.caster_box.configure(values=['施加者：'+str(p.get('actor') or p.get('name') or p.get('actor_id')) for p in self.party])
         self.caster_box.current(next((i for i,p in enumerate(self.party) if p.get('actor_id')==player.get('actor_id')),0))
         self.load(player,enemy,modes)
@@ -94,7 +101,11 @@ class EffectEditor(tk.Frame):
         try:
             index=self.selector.current()
             if not 0<=index<len(self.items):raise ValueError('请先选择技能效果')
-            if self.on_pending:self.on_pending('add',(self.items[index],self.calculate()['final']))
+            item=dict(self.items[index])
+            if item['part'].get('skill_type')=='Funnel':item['funnel_count']=float(self.funnel_count.get())
+            i=self.recipient_box.current()
+            if i>=0:item['recipient_id']=self.party[i].get('actor_id')
+            if self.on_pending:self.on_pending('add',(item,self.calculate()['final']))
         except (ValueError,TypeError) as exc:self.result.configure(text=str(exc))
 
     def remove_pending(self):
@@ -127,6 +138,7 @@ class EffectEditor(tk.Frame):
         self.overview.configure(text='所有可计算效果（条件分支分别展示，不相加）：\n'+'\n'.join(summaries) if summaries else '')
         if self.items:self.selector.current(0);self.choose()
         else:
+            self.funnel_row.pack_forget()
             self.selector.set('未找到支持的效果；可手填')
             self.kind.set('buff')
             for k,v in asdict(EffectInputs()).items():
@@ -138,6 +150,10 @@ class EffectEditor(tk.Frame):
         index=self.selector.current()
         if not 0<=index<len(self.items):return
         item=self.items[index];self.kind.set(item['values']['kind'])
+        if item['part'].get('skill_type')=='Funnel':
+            count=item.get('funnel_count');self.funnel_count.set('' if count is None else f'{count:g}')
+            self.funnel_row.pack(fill='x',before=self.result)
+        else:self.funnel_row.pack_forget()
         self.orb_enabled.set(False);self.orb_level.set('5')
         for key,var in self.values.items():
             value=item['values'][key];var.set('' if value is None else f'{value:g}')
@@ -146,6 +162,10 @@ class EffectEditor(tk.Frame):
     def compute(self):
         try:
             result=self.calculate()
+            index=self.selector.current()
+            if 0<=index<len(self.items) and self.items[index]['part'].get('skill_type')=='Funnel':
+                self.result.configure(text=f'连击珠：{self.funnel_count.get() or "待核对"} 颗 × {result["final"]:g}% / 颗')
+                return
             diff='固定值' if result['difference'] is None else f'有效差值 {result["difference"]:.2f}'
             self.result.configure(text=f'预计效果量 {result["final"]:.3f}%  ·  {diff}\n'
                 f'基础 {result["base"]:.3f} + 宝珠 {result["orb"]:.3f} + 超差 {result["over"]:.3f}，再乘 (1 + {result["enhancement"]:g}%)')

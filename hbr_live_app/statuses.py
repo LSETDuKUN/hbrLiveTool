@@ -49,7 +49,7 @@ def status_value(kind, values):
         if dp is not None and hp is not None:
             return f'{abs(dp)/100:g}%' if dp == hp else f'DP {abs(dp)/100:g}% / HP {abs(hp)/100:g}%'
     if kind == 'Funnel' and 'numValue' in values and 'rateValueInt' in values:
-        return f'{values["numValue"]} Hit · {values["rateValueInt"]/100:g}%'
+        return f'{values["numValue"]} 颗 × {values["rateValueInt"]/100:g}% / 颗'
     if 'numValue' in values:
         return str(values['numValue'])
     return ''
@@ -158,14 +158,15 @@ def infer_suppressed_attacks(statuses):
                 break
     groups={}
     for s in statuses:
-        if (s.get('label') not in ('SpecialStatus.DefenseDown','SpecialStatus.Fragile')
+        if (s.get('label') not in ('SpecialStatus.DefenseDown','SpecialStatus.Fragile','SpecialStatus.ResistDown')
                 or s.get('duration_kind') not in ('turn','count') or (s.get('remaining') or 0)<=0
-                or s.get('effective') is False or s.get('pending_add') or s.get('pending_remove')
-                or any(s.get('source_effect',{}).get(k) for k in ('condition','target_condition','hit_condition'))):continue
+                or s.get('effective') is False or s.get('pending_add') or s.get('pending_remove')):continue
         element=s.get('element_key') or {0:'Normal',1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(s.get('element_type'))
         if element is None:continue
         v=s.get('values',{})
-        nums=[v.get('rateValueInt')]*2 if s['label']=='SpecialStatus.Fragile' else [v.get('amountOnDpDamageInt'),v.get('amountOnHpDamageInt')]
+        if s['label']=='SpecialStatus.ResistDown' and not isinstance(v.get('rateValueInt'),(int,float)):continue
+        if s['label']=='SpecialStatus.ResistDown' and v['rateValueInt']>=0:continue
+        nums=[v.get('rateValueInt')]*2 if s['label'] in ('SpecialStatus.Fragile','SpecialStatus.ResistDown') else [v.get('amountOnDpDamageInt'),v.get('amountOnHpDamageInt')]
         if not all(isinstance(n,(int,float)) for n in nums):continue
         groups.setdefault((s['label'],element),[]).append((s,[abs(n) for n in nums]))
     for group in groups.values():

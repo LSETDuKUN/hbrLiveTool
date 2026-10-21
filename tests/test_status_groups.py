@@ -1,5 +1,5 @@
 import unittest
-from hbr_live_app.status_groups import group_statuses, effect_line
+from hbr_live_app.status_groups import group_statuses, effect_line, element_badge
 
 
 def status(kind,**kwargs):
@@ -7,6 +7,16 @@ def status(kind,**kwargs):
 
 
 class StatusGroupTests(unittest.TestCase):
+    def test_only_label_from_runtime_or_catalog(self):
+        self.assertIn('【单独发动】',effect_line(status('AttackUp',buff_limit_type=4)))
+        self.assertIn('【单独发动】',effect_line(status('MindEye',source_effect={'effect':{'limitType':'Only'}})))
+
+    def test_element_badges_support_named_and_numeric_elements(self):
+        for number,key,name in [(1,'Fire','火'),(2,'Ice','冰'),(3,'Thunder','雷'),(4,'Light','光'),(5,'Dark','暗')]:
+            self.assertEqual(element_badge(dict(element_type=number)),element_badge(dict(element_key=key)))
+            self.assertEqual(element_badge(dict(element_key=key))[0],name)
+        self.assertIsNone(element_badge(dict(element_type=0)))
+
     def test_groups_keep_instances_durations_and_elements_separate(self):
         states=[status('AttackUp',element_type=0),status('AttackUp',element_type=3),
                 status('MindEye'),status('Zone'),status('Funnel'),status('CriticalRateUp'),

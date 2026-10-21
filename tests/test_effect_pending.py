@@ -53,7 +53,7 @@ class PendingTests(unittest.TestCase):
         root=tk.Tk();root.withdraw()
         try:
             w=DamageWindow(root,lambda:{})
-            p,e=actors('STezukaSkill02');p['actor_id']=1
+            p,e=actors('STezukaSkill02');p['actor_id']=1;e['address']=2
             e['statuses']=[debuff(10),debuff(20)]
             base=autofill(p,e,lookup=DATA.get)
             w.pending_context=(p,e,None,{},[p]);w.pending_base=base

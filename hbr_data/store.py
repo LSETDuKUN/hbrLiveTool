@@ -16,6 +16,9 @@ CREATE TABLE records(record_key TEXT PRIMARY KEY, source_url TEXT REFERENCES sou
 CREATE TABLE translations(language TEXT, category TEXT, field TEXT, label TEXT, text TEXT,
  PRIMARY KEY(language,category,field,label));
 CREATE INDEX records_lookup ON records(region,dataset,name);
+CREATE TABLE style_talents(record_key TEXT REFERENCES records(record_key), region TEXT, style_label TEXT,
+ talent_group TEXT, unlock_tier INTEGER, json_pointer TEXT, label TEXT, raw_json TEXT NOT NULL,
+ PRIMARY KEY(record_key,json_pointer));
 CREATE TABLE skills(skill_key TEXT PRIMARY KEY, source_url TEXT REFERENCES sources(url),
  json_pointer TEXT, region TEXT, dataset TEXT, id TEXT, label TEXT, name TEXT,
  description TEXT, hit_count INTEGER, sp_cost REAL, max_level INTEGER, target TEXT,
@@ -99,6 +102,12 @@ def build_database(root, manifest, destination):
                     f"{url}#/{index}", url, region, dataset, index,
                     str(fields.get("id", "")), str(fields.get("label", "")),
                     str(fields.get("name", "")), translated, encode(item)))
+                if dataset=='styles':
+                    from .talents import style_talents
+                    for talent in style_talents(fields):
+                        db.execute('INSERT INTO style_talents VALUES (?,?,?,?,?,?,?,?)',
+                            (f'{url}#/{index}',region,fields.get('label'),talent['group'],talent['tier'],
+                             talent['path'],talent['data'].get('label'),encode(talent['data'])))
             for pointer, skill in walk(data):
                 if "hit_count" not in skill or not isinstance(skill.get("parts"), list):
                     continue

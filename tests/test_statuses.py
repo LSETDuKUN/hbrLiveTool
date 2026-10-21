@@ -91,7 +91,7 @@ class StatusTests(unittest.TestCase):
         items=next(iter(reader.cache[manager].values()))
         visible=[s for s in items if s.get('effective') is not False]
         self.assertEqual(len(visible),1)
-        self.assertEqual(visible[0]['value'],'5 Hit · 12%')
+        self.assertEqual(visible[0]['value'],'5 颗 × 12% / 颗')
         self.assertEqual(visible[0]['remaining'],2)
         self.assertEqual(len(items),2)
 

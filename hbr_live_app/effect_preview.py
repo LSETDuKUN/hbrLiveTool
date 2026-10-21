@@ -8,7 +8,7 @@ from .status_rules import active
 
 KINDS = {'AttackUp':'加攻', 'AttackUpIncludeNormal':'含普攻加攻', 'MindEye':'心眼',
          'CriticalRateUp':'暴击率', 'CriticalDamageUp':'暴伤', 'DefenseDown':'减防',
-         'Fragile':'脆弱', 'Zone':'场地'}
+         'Fragile':'脆弱', 'Zone':'场地', 'Funnel':'连击珠'}
 SCOPES = {'GiveAttackBuffUp': {'AttackUp','AttackUpIncludeNormal'},
           'GiveCriticalDamageBuffUp': {'CriticalDamageUp'},
           'GiveDefenseDebuffUp': {'DefenseDown'},
@@ -55,6 +55,12 @@ def proposals(player, enemy, modes=None, lookup=None):
             elif all(w is not None for w in weights.values()) and required and all(stats.get(k) is not None for k in required):
                 attribute=sum((stats[k]+morale*5)*weights[k] for k in required)/sum(weights.values())
             notes.append('权重 '+str(weights)+'；原始属性 '+str(stats)+f'；士气 {morale} 层，每项 +{morale*5}')
+            funnel_count=None
+            if typ=='Funnel':
+                funnel_count=low if low==high or (not high and threshold==0) else None
+                low=high=(part.get('value') or [None])[0]
+                threshold=0;fixed=True;attribute=0;growth=[0,0]
+                notes.append('连击珠按颗数 × 每颗倍率计算；颗数随属性变化时请手动核实，不将颗数当作百分比。')
             kind='fixed' if fixed else 'debuff' if typ in ('DefenseDown','Fragile') else 'buff'
             enemy_value=enemy.get('combat_inputs',enemy.get('inputs',{})).get('_defenseRefParam') if kind=='debuff' else 0
             values=asdict(EffectInputs(kind=kind,minimum=None if low is None else low*100,
@@ -110,7 +116,8 @@ def proposals(player, enemy, modes=None, lookup=None):
             names={'Thunder':'雷','Fire':'火','Ice':'冰','Light':'光','Dark':'暗'}
             element='/'.join(names.get(x,x) for x in part.get('elements') or []) or '普通'
             branch=' / '.join(part.get('_branch_path',[]))
-            result.append(dict(title=f'{source.get("name") or source.get("label")} · {element}{KINDS[typ]} · {branch} · {part.get("label")}',
+            only='【单独发动】' if part.get('effect',{}).get('limitType')=='Only' else ''
+            result.append(dict(title=f'{source.get("name") or source.get("label")} · {element}{KINDS[typ]}{only} · {branch} · {part.get("label")}',
                                values=values,notes='\n'.join(notes),part=part,passive=passive,
-                               source=source.get('label'),caster=player.get('actor_id')))
+                               source=source.get('label'),caster=player.get('actor_id'),funnel_count=funnel_count))
     return result

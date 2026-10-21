@@ -6,15 +6,59 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_targeted_funnel_survives_role_switch_and_updates_hit_weights(self):
+        from copy import deepcopy
+        from test_damage_autofill import setup
+        from hbr_live_app.damage_window import DamageWindow
+        from hbr_live_app.damage_autofill import autofill
+        p,e,lookup=setup();p.update(actor='前排',actor_position=0)
+        q=deepcopy(p);q.update(actor_id=2,actor='后排',actor_position=3)
+        snapshot=dict(connected=False,run_id='preview-test',players=[p,q],enemies=[e])
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)):
+            w=DamageWindow(self.root,lambda:snapshot)
+            try:
+                snapshot['connected']=True
+                w.fill()
+                item=dict(title='连击',caster=1,source='beads',funnel_count=3,
+                          part=dict(label='beads',skill_type='Funnel',target_type='AllyFront',
+                                    effect=dict(limitType='Only',exitCond='PlayerTurnEnd')))
+                w.update_pending('add',(item,25))
+                self.assertEqual(float(w.values['chain'].get()),75)
+                w.player_box.current(1);w.fill()
+                self.assertEqual(len(w.pending_effects),1)
+                self.assertEqual(float(w.values['chain'].get()),0)
+                w.player_box.current(0);w.fill()
+                self.assertEqual(float(w.values['chain'].get()),75)
+                w.update_pending('remove',0)
+                self.assertEqual(float(w.values['chain'].get()),0)
+                w.chain_expression.set('3 × 25%')
+                w.hit_weights.set('1');w.params['main_hits'].set('1')
+                w.pool.set('hp');w.use_destruction.set(False);w.use_skill.set(False);w.values['base'].set('100')
+                w.compute()
+                self.assertEqual([float(v) for v in w.hit_weights.get().split(',')],[1,.25,.25,.25])
+            finally:w.destroy()
+
+    def test_history_can_switch_intent_and_observed_actions(self):
+        event=dict(event_id='intent:1',actor_id=1,actor='咲',actor_position=0,
+                   skill='铁锤',planned=True,value=0,hits=[],targets=[],settled=True,
+                   command=dict(id=1,turn=1))
+        self.app.model.update(dict(enemies=[],planned_events=[event]))
+        self.app.history_mode.set('planned');self.app.refresh_history()
+        self.assertIn('铁锤',str(self.app.tree.rows))
+        self.assertIn('不代表实际发动',self.app.event_detail_text(event))
+        self.app.history_mode.set('actual');self.app.refresh_history()
+        self.assertFalse(self.app.tree.rows)
+        self.assertEqual(self.app.model.total,0)
+
     def test_auto_pool_and_main_page_probability_with_collapsed_notes(self):
         self.app.open_damage_calculator();w=self.app.damage_window
         w.values['base'].set('100');w.values['hp_bonus'].set('65')
-        w.flags['critical'].set(False);w.pool.set('auto');w.use_destruction.set(True)
+        w.flags['critical'].set(False);w.pool.set('auto');w.damage_metric.set('applied');w.use_destruction.set(True)
         w.hit_weights.set('.5,.5')
         for k,v in dict(main_hits=2,skill_dr=0,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
         w.compute();self.root.update_idletasks()
         self.assertAlmostEqual(w.plot_data['mean'],122.5,delta=.01)
-        self.assertIn('平均伤害',w.summary.cget('text'))
+        self.assertIn('平均实际扣除',w.summary.cget('text'))
         self.assertIn('中央 90%',w.summary.cget('text'))
         self.assertNotIn('浮动概率曲线',w.tab_names)
         self.assertTrue(str(w.plot).startswith(str(w.page_widgets['乘区试算'][1])))
@@ -54,7 +98,7 @@ class DashboardTests(unittest.TestCase):
     def test_pool_simulation_and_skill_dp_controls(self):
         self.app.open_damage_calculator();w=self.app.damage_window
         w.values['base'].set('100');w.flags['critical'].set(False)
-        w.hit_weights.set('.25,.25,.25,.25');w.use_destruction.set(True);w.pool.set('auto')
+        w.hit_weights.set('.25,.25,.25,.25');w.use_destruction.set(True);w.pool.set('auto');w.damage_metric.set('applied')
         for k,v in dict(main_hits=4,skill_dr=12,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
         w.compute()
         self.assertIn('丢弃破盾溢出 10.00',w.destruction_report.get('1.0','end'))

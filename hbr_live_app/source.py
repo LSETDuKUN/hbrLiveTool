@@ -120,6 +120,8 @@ def run(stop, paused, emit, outdir):
     run_id = time.strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6]
     ledger = ActionLedger()
     commands = CommandLedger()
+    from .planned_actions import PlannedActions
+    planned = PlannedActions()
     names = Names()
     enemy_reader = EnemyReader(r)
     from .player_transitions import PlayerTransitions
@@ -160,6 +162,7 @@ def run(stop, paused, emit, outdir):
             previous_od = None
             while not stop.is_set():
                 if paused.is_set():
+                    planned.pending=None
                     enemy_reader.observations.invalidate()
                     player_transitions.invalidate()
                     stop.wait(0.1)
@@ -210,16 +213,23 @@ def run(stop, paused, emit, outdir):
                 for player in player_states:
                     try:
                         player.update(status_reader.sample(player['actor_id'], resources=True))
+                        if context and context.get('selecting'):
+                            from .damage_inputs import read_selection
+                            inputs=dict(player.get('combat_inputs',{}))
+                            inputs.pop('selected_skill',None)
+                            inputs.update(read_selection(status_reader,player['actor_id']))
+                            player['combat_inputs']=inputs
                     except (RuntimeError, ValueError, TypeError, KeyError):
                         player.update(statuses=[], statuses_available=False)
                 for state in states:
                     state.update(status_reader.sample(state['address']))
+                planned_events=planned.update(context,player_states)
                 gauge = status_reader.element_gauge(module)
                 fields = status_reader.sample_fields(module)
                 od_state=read_overdrive(status_reader,module)
-                if states != previous or events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields or od_state != previous_od:
+                if states != previous or events or planned_events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields or od_state != previous_od:
                     packet = dict(time=time.time(), enemies=states, events=events, turn_context=context,
-                                  player_states=player_states, element_gauge=gauge, field_state=fields,od_state=od_state)
+                                  player_states=player_states, planned_events=planned_events, element_gauge=gauge, field_state=fields,od_state=od_state)
                     emit(('snapshot', packet))
                     log.write(json.dumps(packet, ensure_ascii=False)+'\n')
                     log.flush()

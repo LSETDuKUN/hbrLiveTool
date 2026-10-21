@@ -71,7 +71,23 @@ class TurnReader:
             self.last_selection = selection
             self.command_count = phase_count
         self.was_selecting = selecting
+        extra_actors=None
+        if flag(64) or flag(32):
+            try:
+                from .source import members
+                if not hasattr(self,'additional_field'):
+                    fields={f['name']:f for f in r.fields(info)['fields']}
+                    self.additional_field=fields.get('<additionalTurnCharacters>k__BackingField')
+                field=self.additional_field
+                if field and field['type']==21:
+                    pointer=r.q(info+field['offset'])
+                    if r.cls(pointer)=='List`1':
+                        values=members(r,pointer)
+                        if values and all(r.cls(p)=='BattlePlayerData' for p in values):extra_actors=values
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                pass  # Optional membership must not disable the turn reader.
         return dict(command_count=self.command_count, command_visit=self.visit, turn=turn,
+                    extra_actor_ids=extra_actors,
                     od=flag(44), bonus=bonus, bonus_max=maximum, od_activation=number(48),
                     od_before_enemy=flag(45), additional=flag(64), extra=flag(32),
                     extra_turn=number(28), selecting=selecting, phase=phase,

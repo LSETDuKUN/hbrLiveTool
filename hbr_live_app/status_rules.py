@@ -11,6 +11,7 @@ def active(status):
 
 def independent(status):
     source=status.get('source') or ''
+    if source.endswith('CommandBuff') and status.get('label')=='SpecialStatus.AttackUpIncludeNormal':return True
     if source in COUNTED_PASSIVES:return False
     limit=status.get('source_effect',{}).get('effect',{}).get('limitType')
     if limit in ('Default','Once','Only'):return False

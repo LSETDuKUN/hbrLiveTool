@@ -5,6 +5,7 @@ from collections import OrderedDict
 class BattleModel:
     def __init__(self):
         self.actions = OrderedDict()
+        self.planned_actions = OrderedDict()
         self.enemies = OrderedDict()
         self.run_id = None
         self.turn_context = None
@@ -38,6 +39,10 @@ class BattleModel:
             self.enemies[key] = data
         for event in packet.get('events', []):
             self.actions[event['event_id']] = event
+            if event.get('instant'):
+                self.planned_actions[event['event_id']] = event
+        for event in packet.get('planned_events', []):
+            self.planned_actions[event['event_id']] = event
 
     @property
     def total(self):
@@ -63,4 +68,5 @@ class BattleModel:
                 'element_gauge': self.element_gauge,
                 'field_state': self.field_state,
                 'od_state': self.od_state,
+                'planned_actions': list(self.planned_actions.values()),
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}
