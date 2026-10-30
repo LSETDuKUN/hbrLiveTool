@@ -67,11 +67,20 @@ def read_selection(reader, actor):
     skill = skills[index]
     if reader.r.cls(skill) != 'BattleSkill':
         return result
-    domain = reader.prop(skill, 'domainSkillOverwrite') or reader.prop(skill, 'domainSkill')
+    original = reader.prop(skill, 'domainSkill')
+    domain = reader.prop(skill, 'domainSkillOverwrite') or original
     if not domain: return result
     master = reader.get(domain, 'master')
     selected = dict(label=reader.get(master, 'Label'), name=reader.get(master, 'Name'),
                     level=reader.prop(skill, 'skillLevel'),base_sp_cost=reader.get(master,'Sp'), parts=[])
+    # Overwrite masters may intentionally omit their display name. Keep their
+    # effective parts/label, using only the selected base skill's name as fallback.
+    if not selected['name'] and original and original!=domain:
+        base_master=reader.get(original,'master')
+        if base_master:
+            selected['base_label']=reader.get(base_master,'Label')
+            selected['name']=reader.get(base_master,'Name')
+            if selected['name']:selected['name_source']='selected_base_skill'
     hit_count=reader.get(master,'HitCount')
     if isinstance(hit_count,int) and 0<hit_count<=256:selected['hit_count']=hit_count
     # Do not attach _allyAim: it may be a previous command's cached target.

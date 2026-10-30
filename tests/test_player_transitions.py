@@ -7,6 +7,20 @@ from hbr_live_app.formation import FormationReader
 
 
 class PlayerTransitionTests(unittest.TestCase):
+    def test_initial_used_button_is_explicitly_marked_not_invented_activation(self):
+        from hbr_live_app.turns import CommandLedger,context_label
+        from hbr_live_app.model import BattleModel
+        t=PlayerTransitions();p=dict(actor_id=1,actor='咲',style_label='STezuka03',style_name='风格',mode_count=1,actor_position=0)
+        events=t.update([p],now=0)
+        events=CommandLedger().update(events,dict(turn=2,command_count=1,selecting=True))
+        self.assertTrue(events[0]['observed_before_connection'])
+        self.assertNotIn('turn',events[0]['command'])
+        self.assertIn('时点未知',context_label(events[0]['command']))
+        model=BattleModel();model.update(dict(enemies=[],events=events))
+        self.assertEqual(len(model.planned_actions),1)
+        self.assertEqual(model.total,0)
+        t.invalidate();self.assertFalse(t.update([p],now=2))
+        self.assertEqual(t.update([dict(p,mode_count=2)],now=2.1)[0]['skill'],'鬼神化')
     def test_recorded_saki_activation_without_action_entry_is_recorded_once(self):
         frames = json.loads((Path(__file__).parent/'fixtures/saki_mode.json').read_text(encoding='utf-8'))
         tracker = PlayerTransitions()

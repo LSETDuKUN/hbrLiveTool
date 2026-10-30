@@ -78,6 +78,7 @@ class App:
             window.deiconify();window.lift();return
         def snapshot():
             return dict(connected=self.connected,run_id=self.model.run_id,
+                execution_revision=self.model.execution_revision,turn_context=self.model.turn_context,
                 players=[dict(p,name=p.get('actor'), inputs=p.get('combat_inputs', {})) for p in self.model.players],
                 enemies=[dict(e,inputs=e.get('combat_inputs', {}))
                          for e in self.model.enemies.values() if e.get('active')],field_state=self.model.field_state,
@@ -318,6 +319,12 @@ class App:
             tk.Radiobutton(modes,text=title,variable=self.history_mode,value=value,
                 command=self.refresh_history,bg=theme.BG,fg=theme.FG,selectcolor=theme.CARD,
                 font=theme.ui(12)).pack(side='left')
+        for mode,title in [('actual','导出实际行动'),('planned','导出计划轴')]:
+            RoundedButton(modes,title,lambda m=mode:self.export_axis(mode=m),
+                          theme.CARD_HI,theme.FG,height=32).pack(side='left',padx=5)
+        self.label(self.history,'OD 行底色：1 级浅红 · 2 级浅绿 · 3 级黄色',theme.DIM,10).pack(anchor='w')
+        from .plan_summary import PlanSummary
+        self.plan_summary=PlanSummary(self.history)
         RoundedButton(self.history, '切换头像 / 角色风格', lambda: self.tree.toggle_portraits(),
                       theme.CARD_HI, theme.DIM, theme.ui(12), height=32).pack(anchor='e')
         tree_wrap = tk.Frame(self.history, bg=theme.CARD)
@@ -549,6 +556,8 @@ class App:
                     self.set_status('内存已连接 · 可以行动', theme.CYAN)
                 elif kind == 'snapshot':
                     self.model.update(data)
+                    window=getattr(self,'damage_window',None)
+                    if window is not None and window.winfo_exists():window.observe_live()
                     self.last_packet = data
                     self.last_events = data.get('events', [])
                     self.render(data.get('events', []))
@@ -585,6 +594,10 @@ class App:
         return self.model.actions.values()
 
     def refresh_history(self):
+        if self.history_mode.get()=='planned':
+            self.plan_summary.pack(fill='x',before=self.tree.master,pady=5)
+            self.plan_summary.update_events(self.model.planned_actions.values())
+        else:self.plan_summary.pack_forget()
         self.history_rows=table_rows(self.history_events())
         self.tree.set_rows(self.history_rows)
         self.detail_caption.configure(text=('预选行动：开始前最后一次采样，不代表实际发动；旧记录未采集预选时此处为空。'
@@ -824,15 +837,18 @@ class App:
         if messagebox.askyesno('战斗结束', '是否保存本场行动轴？\n可保存为图片或表格。', parent=self.root):
             self.export_axis(data)
 
-    def export_axis(self, data=None):
+    def export_axis(self, data=None, mode=None):
         data = data or self.model.export()
-        if self.history_mode.get()=='planned':
-            data=dict(data,actions=data.get('planned_actions',[]))
+        mode=mode or self.history_mode.get()
+        if mode=='planned':
+            data=dict(data,actions=data.get('planned_actions',[]),history_mode='planned')
+        else:data=dict(data,history_mode='actual')
         if not data['actions']:
             self.set_status('尚无角色行动可保存。')
             return
-        path = filedialog.asksaveasfilename(parent=self.root, title='保存行动轴',
-            initialfile=(data['run_id'] or 'battle')+'-行动轴.png', defaultextension='.png',
+        title='计划轴' if mode=='planned' else '实际行动'
+        path = filedialog.asksaveasfilename(parent=self.history_window, title='保存'+title,
+            initialfile=(data['run_id'] or 'battle')+'-'+title+'.png', defaultextension='.png',
             filetypes=[('行动轴图片', '*.png'), ('行动轴表格', '*.html')])
         if path:
             try:

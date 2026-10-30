@@ -209,6 +209,9 @@ def run(stop, paused, emit, outdir):
                     transitions = player_transitions.update(player_states)
                 except (RuntimeError, ValueError, TypeError, KeyError):
                     player_transitions.invalidate()
+                od_state=read_overdrive(status_reader,module)
+                if context and context.get('od') and od_state.get('active'):
+                    context['od_level']=od_state.get('level')
                 events = commands.update(transitions + ledger.update(actions, known_enemies), context)
                 for player in player_states:
                     try:
@@ -226,7 +229,6 @@ def run(stop, paused, emit, outdir):
                 planned_events=planned.update(context,player_states)
                 gauge = status_reader.element_gauge(module)
                 fields = status_reader.sample_fields(module)
-                od_state=read_overdrive(status_reader,module)
                 if states != previous or events or planned_events or context != previous_context or player_states != previous_players or gauge != previous_gauge or fields != previous_fields or od_state != previous_od:
                     packet = dict(time=time.time(), enemies=states, events=events, turn_context=context,
                                   player_states=player_states, planned_events=planned_events, element_gauge=gauge, field_state=fields,od_state=od_state)

@@ -13,8 +13,20 @@ class BattleModel:
         self.element_gauge = None
         self.field_state = None
         self.od_state = None
+        self.execution_revision=0
+        self.executions=set()
 
     def update(self, packet):
+        context=packet.get('turn_context') or {}
+        keys=set()
+        visit=context.get('command_visit',context.get('command_count'))
+        if visit and context.get('selecting') is False:keys.add((context.get('turn'),visit))
+        for event in packet.get('events',[]):
+            group=event.get('command') or {}
+            if not event.get('instant') and group.get('id') is not None:
+                keys.add((group.get('turn'),group['id']))
+        fresh=keys-self.executions
+        if fresh:self.execution_revision+=1;self.executions.update(fresh)
         if 'od_state' in packet:self.od_state=packet['od_state']
         if 'field_state' in packet:
             self.field_state = packet['field_state']

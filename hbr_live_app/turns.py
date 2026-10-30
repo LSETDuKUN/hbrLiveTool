@@ -131,8 +131,9 @@ class CommandLedger:
             if key not in self.events:
                 group = None
                 if event.get('instant'):
-                    group = copy.deepcopy(context or {})
+                    group = {} if event.get('observed_before_connection') else copy.deepcopy(context or {})
                     group.update(id=f'instant:{key}', kind='instant')
+                    if event.get('observed_before_connection'):group['observed_before_connection']=True
                     bucket = next(iter(self.pending_instants.values()))['damage_group_id'] if self.pending_instants else f'pending:{key}'
                     self.damage_groups[key] = bucket
                 elif context and context.get('command_visit', context['command_count']) > 0:
@@ -169,8 +170,12 @@ class CommandLedger:
 def context_label(group):
     if not group:
         return '回合未识别'
+    if group.get('observed_before_connection'):return '接入前 · 小按钮（时点未知）'
     parts = [f'Turn {group["turn"]}'] if group.get('turn') else ['回合未识别']
     if group.get('od'):
+        from .overdrive import action_od_level
+        level=action_od_level(group)
+        if level:parts.append(f'OD {level}')
         parts.append(f'Bonus {group["bonus"]}')
     if group.get('additional') or group.get('extra'):
         parts.append('Extra')

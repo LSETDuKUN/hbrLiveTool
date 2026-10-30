@@ -4,6 +4,7 @@ from tkinter import font as tkfont
 from . import theme
 from .history import actor_title, skill_title, beneficiary, beneficiary_title
 from .turns import context_label
+from .overdrive import action_background,action_od_level
 
 
 class BattleTable(tk.Frame):
@@ -168,7 +169,7 @@ class BattleTable(tk.Frame):
                     available-edges[1], row['events'][0])
                 height = max(84, content_height+20)
                 rect = self.canvas.create_rectangle(0, y, available, y+height,
-                    fill=theme.mix(theme.CARD, theme.PINK, .18) if key in self.selected else theme.mix(theme.CARD, theme.BG, .35), outline=theme.LINE)
+                    fill=action_background(row['group'],theme.mix(theme.CARD, theme.PINK, .18) if key in self.selected else theme.mix(theme.CARD, theme.BG, .35)), outline=theme.LINE)
                 self.canvas.tag_lower(rect)
                 self.canvas.create_text(edges[1]/2, y+height/2, text=context_label(row['group']),
                     width=edges[1]-20, font=self.badge_font, fill=theme.GOLD, justify='center')
@@ -192,6 +193,8 @@ class BattleTable(tk.Frame):
             group = row['group'] or {}
             badges = [(f'Turn {group["turn"]}', theme.CYAN, theme.CYAN_DEEP)] if group.get('turn') else [('回合待确认', theme.LAVENDER, theme.LAVENDER_DEEP)]
             if group.get('od'):
+                level=action_od_level(group)
+                if level:badges.append((f'OD {level}',theme.GOLD,theme.GOLD_DEEP))
                 badges.append((f'Bonus {group["bonus"]}', theme.GOLD, theme.GOLD_DEEP))
             if group.get('additional') or group.get('extra'):
                 badges.append(('Extra', theme.PINK, theme.PINK_DEEP))
@@ -200,7 +203,7 @@ class BattleTable(tk.Frame):
             body_height = max(82, content_height+22)
             height = body_height + (24 if row['unplaced'] else 0)
             fill = theme.mix(theme.CARD, theme.PINK, .18) if key in self.selected else (theme.CARD if number % 2 == 0 else theme.mix(theme.CARD, theme.BG, .35))
-            rect = self.canvas.create_rectangle(0, y, available, y+height, fill=fill, outline=theme.LINE)
+            rect = self.canvas.create_rectangle(0, y, available, y+height, fill=action_background(group,fill), outline=theme.LINE)
             self.canvas.tag_lower(rect)
             for ids, block_height in blocks:
                 for item in ids:

@@ -6,6 +6,28 @@ DISPLAY_POSITIONS = (1, 0, 2)
 POSITION_NAMES = {1: '左', 0: '中', 2: '右'}
 
 
+def skill_summary(events):
+    """Unique chosen skills per actor/style, retaining first-use order."""
+    actors=OrderedDict()
+    for event in events:
+        if is_pursuit(event):continue
+        key=(event.get('actor_id',event.get('actor')),event.get('style_label'))
+        actor=actors.setdefault(key,dict(actor=event.get('actor','角色'),style_label=event.get('style_label'),
+                                        style_name=event.get('style_name'),skills=OrderedDict(),unknown=0))
+        name=event.get('skill')
+        if not name or name in ('未知技能','预选未读到'):
+            actor['unknown']+=1;continue
+        skill_key=(event.get('skill_label') or name,bool(event.get('instant')))
+        actor['skills'].setdefault(skill_key,dict(name=name,instant=bool(event.get('instant'))))
+    return [dict(actor,skills=list(actor['skills'].values())) for actor in actors.values()]
+
+
+def summary_text(actor):
+    parts=[s['name']+('（小按钮）' if s['instant'] else '') for s in actor['skills']]
+    if actor['unknown']:parts.append('预选未读到')
+    return ' / '.join(parts)
+
+
 def actor_title(event):
     style = event.get('style_name') or event.get('style_label')
     return event['actor'] + (f' / {style}' if style else '')

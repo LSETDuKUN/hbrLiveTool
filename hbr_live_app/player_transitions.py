@@ -8,6 +8,7 @@ class PlayerTransitions:
         self.serial = 0
         self.layouts = {}
         self.last_time = None
+        self.initial_sample=True
 
     def invalidate(self):
         self.previous.clear()
@@ -47,6 +48,12 @@ class PlayerTransitions:
         events = []
         for state in states:
             old = self.previous.get(state['actor_id'])
+            if self.initial_sample and state.get('mode_count',0)>0:
+                self.serial+=1
+                title='鬼神化' if state['style_label']=='STezuka03' else '强化模式'
+                events.append(dict(state,event_id=f'state:{self.serial}',skill=title+'（接入前已使用，时点未知）',
+                    skill_label='Observed.InitialModeUse',instant=True,observed_before_connection=True,
+                    value=0,hits=[],targets=[],settled=True))
             if old:
                 labels = []
                 if state.get('mode_count', 0) > old.get('mode_count', state.get('mode_count', 0)):
@@ -62,4 +69,5 @@ class PlayerTransitions:
                         skill_label='Observed.PlayerTransition', instant=True, value=0, hits=[], targets=[],
                         settled=True, transition_before=dict(old), transition_after=dict(state)))
         self.previous = {s['actor_id']: dict(s) for s in states}
+        if states:self.initial_sample=False
         return events

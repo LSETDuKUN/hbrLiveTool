@@ -1,3 +1,5 @@
+from . import theme
+from .overdrive import action_background
 """Self-contained portrait exports, using the same local style identity as the UI."""
 import base64
 import html
@@ -71,21 +73,21 @@ def save_portrait_png(data, rows, path):
             parts.append((photo, 56, 56, None, None))
             text_width = min(max(100, width-(216 if target else 100)), measure.textlength(skill_title(event), font=bold)+4)
             lines = wrap(skill_title(event), bold, text_width)
-            parts.append((lines, text_width, len(lines)*32, bold, '#ffd398'))
+            parts.append((lines, text_width, len(lines)*32, bold, theme.GOLD))
             if target:
-                parts.append((['→'], 26, 32, normal, '#83e5ed'))
+                parts.append((['→'], 26, 32, normal, theme.CYAN))
                 target_photo = images.get(target.get('style_label'))
                 if target_photo:
                     parts.append((target_photo, 56, 56, None, None))
                 else:
                     lines = wrap(target.get('name') or '友方', normal, 66)
-                    parts.append((lines, 66, len(lines)*28, normal, '#83e5ed'))
+                    parts.append((lines, 66, len(lines)*28, normal, theme.CYAN))
         else:
             text = skill_title(event)+'\n'+actor_title(event)
             if target:
                 text += '\n→ '+beneficiary_title(event)
             lines = wrap(text, normal, width-40)
-            parts.append((lines, width-40, len(lines)*32, normal, '#ffd398'))
+            parts.append((lines, width-40, len(lines)*32, normal, theme.GOLD))
         height = int(max(80, max(p[2] for p in parts)+24))
         tile = Image.new('RGB', (width, height), bg)
         draw = ImageDraw.Draw(tile)
@@ -110,19 +112,19 @@ def save_portrait_png(data, rows, path):
         tile = Image.new('RGB', (1600, height), bg)
         draw = ImageDraw.Draw(tile)
         for n,line in enumerate(labels):
-            draw.text((110, height/2+(n-(len(labels)-1)/2)*28), line, font=normal, fill='#83e5ed', anchor='mm')
+            draw.text((110, height/2+(n-(len(labels)-1)/2)*28), line, font=normal, fill=theme.CYAN, anchor='mm')
         x = 220
         for column,width in zip(columns,widths):
             y = (height-sum(t.height for t in column))//2
             for part in column:
                 tile.paste(part,(x,y));y+=part.height
             if not column:
-                draw.text((x+width/2,height/2),'/',font=normal,fill='#bdb1d4',anchor='mm')
+                draw.text((x+width/2,height/2),'/',font=normal,fill=theme.DIM,anchor='mm')
             x += width
         for top in range(0,height,7000):
             tiles.append(tile.crop((0,top,1600,min(height,top+7000))))
     for index,row in enumerate(rows):
-        bg = '#302b46' if index%2==0 else '#252137'
+        bg = action_background(row['group'],theme.CARD if index%2==0 else theme.SURFACE)
         if (row['group'] or {}).get('kind') == 'instant':
             add_row(row['values'][0], [row['events']], bg, True)
         else:
@@ -137,11 +139,11 @@ def save_portrait_png(data, rows, path):
     pages.append(page)
     outputs = []
     for number,page in enumerate(pages,1):
-        image = Image.new('RGB',(1600,132+sum(t.height for t in page)),'#201d32')
+        image = Image.new('RGB',(1600,132+sum(t.height for t in page)),theme.BG)
         draw = ImageDraw.Draw(image)
-        draw.text((24,16),f'HBR Live · 行动轴  {data.get("run_id") or ""}  ({number}/{len(pages)})',font=normal,fill='#f5aacb')
+        draw.text((24,16),f'HBR Live · 行动轴  {data.get("run_id") or ""}  ({number}/{len(pages)})',font=normal,fill=theme.PINK)
         for x,title in zip((110,450,910,1370),('回合','左','中','右')):
-            draw.text((x,78),title,font=bold,fill='#83e5ed',anchor='mm')
+            draw.text((x,78),title,font=bold,fill=theme.CYAN,anchor='mm')
         y=112
         for tile in page:
             image.paste(tile,(0,y));y+=tile.height

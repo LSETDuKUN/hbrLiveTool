@@ -6,6 +6,86 @@ from hbr_live_app.app import App
 
 
 class DashboardTests(unittest.TestCase):
+    def test_export_explicit_mode_after_user_stops_ignores_display_mode(self):
+        self.app.connected=False
+        self.app.model.actions['a']=dict(event_id='a',value=1)
+        self.app.model.planned_actions['p']=dict(event_id='p',value=0)
+        self.app.history_mode.set('actual')
+        with patch('hbr_live_app.app.filedialog.asksaveasfilename',return_value='test.png'),patch('hbr_live_app.axis_export.save_axis',return_value=['test.png']) as save:
+            self.app.export_axis(mode='planned')
+            self.assertEqual(save.call_args.args[0]['actions'][0]['event_id'],'p')
+            self.assertEqual(save.call_args.args[0]['history_mode'],'planned')
+            self.app.history_mode.set('planned');self.app.export_axis(mode='actual')
+            self.assertEqual(save.call_args.args[0]['actions'][0]['event_id'],'a')
+            self.assertEqual(save.call_args.args[0]['history_mode'],'actual')
+    def test_real_execution_expires_pending_fragile_but_role_switch_does_not(self):
+        from test_damage_autofill import setup,status
+        from hbr_live_app.damage_window import DamageWindow
+        from hbr_live_app.damage_autofill import autofill
+        p,e,lookup=setup();e['hp']=100000
+        snapshot=dict(connected=False,run_id='preview-expiry',execution_revision=0,
+            turn_context=dict(selecting=True),players=[p],enemies=[e])
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)):
+            w=DamageWindow(self.root,lambda:snapshot)
+            try:
+                snapshot['connected']=True;w.fill()
+                item=dict(title='永久脆弱',caster=1,source='fragile',part=dict(label='fragile',
+                    skill_type='Fragile',target_type='Single',effect=dict(exitCond='Eternal')))
+                w.update_pending('add',(item,33));w.fill()
+                self.assertEqual(float(w.values['fragile'].get()),33)
+                self.assertEqual(len(w.pending_effects),1)
+                e['statuses']=[status('Fragile',33)]
+                snapshot['execution_revision']=1
+                w.observe_live()
+                self.assertFalse(w.pending_effects)
+                self.assertEqual(float(w.values['fragile'].get()),33)
+                w.update_pending('add',(item,33))
+                self.assertEqual(float(w.values['fragile'].get()),66)
+                w.sequence_action('clear')
+                self.assertFalse(w.pending_effects)
+                self.assertEqual(float(w.values['fragile'].get()),33)
+            finally:w.destroy()
+    def test_sequence_fill_carries_result_to_next_actor_and_clear_restores_live(self):
+        from copy import deepcopy
+        from test_damage_autofill import setup
+        from hbr_live_app.damage_window import DamageWindow
+        from hbr_live_app.damage_autofill import autofill
+        p,e,lookup=setup();p.update(actor='A',actor_position=0)
+        q=deepcopy(p);q.update(actor_id=3,actor='B',actor_position=1)
+        e.update(dp=50,hp=10000.123456789);e['enemy_progress']['damage_rate']=100
+        snapshot=dict(connected=False,run_id='sequence-test',players=[p,q],enemies=[e])
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)):
+            w=DamageWindow(self.root,lambda:snapshot)
+            try:
+                snapshot['connected']=True;w.fill()
+                w.use_skill.set(False);w.flags['critical'].set(False)
+                from hbr_live_app.damage_math import DamageInputs
+                defaults=DamageInputs(base=100,critical=False)
+                for key in w.values:w.values[key].set(str(getattr(defaults,key)))
+                w.values['base'].set('100');w.values['destruction'].set('100');w.values['od'].set('1');w.values['health_factor'].set('1')
+                w.pool.set('auto');w.use_destruction.set(True);w.hit_weights.set('1')
+                for k,v in dict(main_hits=1,skill_dr=5.123456789,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=50,enemy_hp=e['hp']).items():w.params[k].set(str(v))
+                w.sequence_action('add')
+                self.assertEqual(len(w.sequence.steps),1,w.sequence_panel.message.cget('text'))
+                w.player_box.current(1);w.fill()
+                self.assertEqual(float(w.params['enemy_dp'].get()),0)
+                self.assertEqual(float(w.values['destruction'].get()),120.493827156)
+                self.assertEqual(float(w.params['enemy_hp'].get()),e['hp'])
+                # Changes to this actor's Buff / Debuff inputs are legal;
+                # resource carry-over must not be rounded by the UI.
+                w.values['attack'].set('150');w.values['defense_down'].set('40')
+                w.use_skill.set(False);w.values['base'].set('100');w.use_destruction.set(True);w.hit_weights.set('1')
+                for k,v in dict(main_hits=1,skill_dr=5,enemy_dr=4,destruction_bonus=0,max_dr=300).items():w.params[k].set(str(v))
+                w.sequence_action('add')
+                self.assertEqual(len(w.sequence.steps),2,w.sequence_panel.message.cget('text'))
+                self.assertEqual(w.sequence.steps[1]['config']['inputs'].attack,150)
+                self.assertEqual(w.sequence.steps[1]['config']['inputs'].defense_down,40)
+                self.assertEqual(e['dp'],50)
+                w.sequence_action('clear')
+                self.assertEqual(float(w.params['enemy_dp'].get()),50)
+                self.assertFalse(w.sequence.steps)
+            finally:w.destroy()
+
     def test_targeted_funnel_survives_role_switch_and_updates_hit_weights(self):
         from copy import deepcopy
         from test_damage_autofill import setup
@@ -45,6 +125,7 @@ class DashboardTests(unittest.TestCase):
         self.app.model.update(dict(enemies=[],planned_events=[event]))
         self.app.history_mode.set('planned');self.app.refresh_history()
         self.assertIn('铁锤',str(self.app.tree.rows))
+        self.assertIn('铁锤',str(self.app.plan_summary.previous))
         self.assertIn('不代表实际发动',self.app.event_detail_text(event))
         self.app.history_mode.set('actual');self.app.refresh_history()
         self.assertFalse(self.app.tree.rows)
@@ -466,11 +547,11 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(len(self.app.tree.get_children()), 1)
         iid = self.app.tree.get_children()[0]
         values = self.app.tree.item(iid, 'values')
-        self.assertEqual(values, ('Turn 1 / Bonus 1 / Extra', '角色\n技能', '/', '/'))
+        self.assertEqual(values, ('Turn 1 / OD 1 / Bonus 1 / Extra', '角色\n技能', '/', '/'))
         self.assertFalse(self.app.details_open)
         canvas = self.app.tree.canvas
         labels = canvas.find_withtag('context')
-        self.assertEqual(''.join(canvas.itemcget(i, 'text') for i in labels), 'Turn 1 / Bonus 1 / Extra')
+        self.assertEqual(''.join(canvas.itemcget(i, 'text') for i in labels), 'Turn 1 / OD 1 / Bonus 1 / Extra')
         self.assertEqual(len({canvas.coords(i)[1] for i in labels}), 1)
 
     def test_long_style_truncated_only_in_table(self):

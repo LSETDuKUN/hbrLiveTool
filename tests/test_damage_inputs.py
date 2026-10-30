@@ -8,6 +8,25 @@ from hbr_live_app.damage_inputs import read_inputs
 
 
 class DamageInputTests(unittest.TestCase):
+    def test_overwrite_keeps_effective_identity_but_uses_selected_base_name(self):
+        from unittest.mock import Mock
+        from hbr_live_app.damage_inputs import read_selection
+        r=Mock()
+        props={(1,'frontSkillList'):2,(1,'selectedCommandIndex'):0,
+               (3,'domainSkill'):4,(3,'domainSkillOverwrite'):5,(3,'skillLevel'):10}
+        fields={(4,'master'):6,(5,'master'):7,(6,'Label'):'AccessorySkillHealSp01',
+                (6,'Name'):'点数援助',(7,'Label'):'SkillOverwrite.Karerin.HealCommon01'}
+        r.prop.side_effect=lambda a,n:props.get((a,n))
+        r.get.side_effect=lambda a,n:fields.get((a,n))
+        r.r.cls.side_effect=lambda a:{2:'List`1',3:'BattleSkill'}.get(a)
+        with patch('hbr_live_app.source.members',return_value=[3]):
+            selected=read_selection(r,1)['selected_skill']
+        self.assertEqual(selected['name'],'点数援助')
+        self.assertEqual(selected['label'],'SkillOverwrite.Karerin.HealCommon01')
+        self.assertEqual(selected['base_label'],'AccessorySkillHealSp01')
+        fields[(7,'Name')]='真正的新技能名'
+        with patch('hbr_live_app.source.members',return_value=[3]):
+            self.assertEqual(read_selection(r,1)['selected_skill']['name'],'真正的新技能名')
     def test_recorded_player_enemy_and_selected_skill(self):
         data=json.loads((Path(__file__).parent/'fixtures/damage_inputs.json').read_text(encoding='utf8'))
         reader=StatusReader(RecordedMemory(data))

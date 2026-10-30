@@ -71,6 +71,9 @@ class DamageWindow(tk.Toplevel):
         self.loaded_snapshot = {}
         self.pending_effects=[]
         self.pending_delta={}
+        from .damage_sequence import DamageSequence
+        self.sequence=DamageSequence()
+        self.sequence_candidate=None
         self.fill_notes = '尚未自动填充'
         self.build_header()
         self.build_selector()
@@ -183,6 +186,10 @@ class DamageWindow(tk.Toplevel):
         self.damage_metric=tk.StringVar(self,value='raw')
         Segment(self.result_area,[('raw','打出伤害（含溢出）'),('applied','实际扣除 DP＋HP')],
                 self.damage_metric,command=self.compute,accent=theme.CYAN).pack(anchor='w')
+        from .sequence_panel import SequencePanel
+        self.sequence_panel=SequencePanel(self.result_area,self.sequence_action)
+        self.sequence_panel.pack(fill='x',pady=8)
+        self.sequence_panel.update_sequence(self.sequence)
         self.summary.bind('<Configure>',lambda e:self.summary.configure(wraplength=max(300,e.width-12)))
         self.result_details=self.fold(form,'计算明细与备注')
         self.note(self.result_details, '自动填充当前状态与已确认的攻击前效果；填充后可修改，实时采样不会覆盖你的修改。\n'
@@ -477,6 +484,26 @@ class DamageWindow(tk.Toplevel):
             else:box.set('')
         self.loaded_snapshot=data
 
+    def sync_preview_epoch(self,data):
+        epoch=(data.get('run_id'),data.get('execution_revision'))
+        old=getattr(self,'preview_epoch',epoch)
+        self.preview_epoch=epoch
+        if old==epoch:return False
+        self.sequence.clear();self.pending_effects=[];self.pending_delta={}
+        self.sequence_candidate=None;self.preview_needs_fill=True
+        if hasattr(self,'pending_context'):del self.pending_context
+        self.sequence_panel.update_sequence(self.sequence);self.render_pending()
+        self.sequence_panel.message.configure(text='实战行动已推进，旧伤害预演和预添加效果已清空；以新快照重新填充。')
+        self.plot_data=None;self.draw_plot()
+        self.summary.configure(text='等待新一轮指令选择后重新填充')
+        return True
+
+    def observe_live(self):
+        data=self.snapshot()
+        self.sync_preview_epoch(data)
+        if getattr(self,'preview_needs_fill',False) and (data.get('turn_context') or {}).get('selecting'):
+            self.fill()
+
     def fill(self):
         # Preserve selected identities even if list ordering changes in a new snapshot.
         old=self.loaded_snapshot
@@ -486,10 +513,18 @@ class DamageWindow(tk.Toplevel):
         data=self.snapshot()
         if not data.get('connected'):
             self.fill_notes='未连接战斗，未覆盖表单';self.refresh();return
+        self.sync_preview_epoch(data)
         player=next((p for p in data.get('players',[]) if p.get('actor_id')==player.get('actor_id')),None)
         enemy=next((e for e in data.get('enemies',[]) if e.get('address')==enemy.get('address')),None)
         if player is None or enemy is None:
             self.fill_notes='所选角色/敌人已变化，请刷新列表';self.refresh();return
+        identity=data.get('run_id') or tuple(p.get('actor_id') for p in data.get('players',[]))
+        if getattr(self,'sequence_battle',identity)!=identity:
+            self.sequence.clear();self.sequence_panel.update_sequence(self.sequence)
+        self.sequence_battle=identity
+        try:enemy=self.sequence.overlay(enemy)
+        except ValueError as exc:
+            self.sequence_panel.message.configure(text=str(exc));return
         inputs=player.get('combat_inputs',player.get('inputs',{}))
         gauge=data.get('element_gauge') or {}
         turn=inputs.get('reinforced_mode_turn')
@@ -528,7 +563,7 @@ class DamageWindow(tk.Toplevel):
         filled['notes'].append('模式判断：'+str({k:v for k,v in modes.items() if k!='enemies'})+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
-            v=filled['values'][k];var.set('' if v is None else f'{v:g}')
+            v=filled['values'][k];var.set('' if v is None else str(v) if k=='destruction' else f'{v:g}')
         for k,var in self.flags.items():var.set(filled['values'][k])
         self.pool.set('auto')
         self.shield_state=enemy.get('enemy_progress',{}).get('shield')
@@ -537,7 +572,7 @@ class DamageWindow(tk.Toplevel):
         from .shield_layers import shield_text
         if self.shield_state:filled['notes'].append(shield_text(self.shield_state)+'；下一层 DP 容量来自本地资料')
         for k,var in self.params.items():
-            v=filled['params'].get(k);var.set('' if v is None else f'{v:g}')
+            v=filled['params'].get(k);var.set('' if v is None else str(v) if k in ('enemy_dp','enemy_hp') else f'{v:g}')
         self.hit_weights.set(', '.join(f'{w:.8g}' for w in filled.get('hit_weights',[])))
         self.hit_source.configure(text=filled.get('hit_note','权重未确认'))
         self.use_destruction.set(filled.get('destruction_ready',False))
@@ -558,10 +593,12 @@ class DamageWindow(tk.Toplevel):
         self.show_chain(filled)
         self.use_skill.set(True);self.skill_title.configure(text=filled['skill'])
         self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
+        self.preview_needs_fill=False
         self.refresh();self.compute()
 
     def update_pending(self,action,payload):
         from .effect_pending import targeted_row,with_pending,PREVIEW_KEYS
+        self.sync_preview_epoch(self.snapshot())
         if not hasattr(self,'pending_context'):raise ValueError('请先自动填充伤害角色和敌人')
         player,enemy,fields,modes,party=self.pending_context
         rows=list(self.pending_effects)
@@ -609,6 +646,32 @@ class DamageWindow(tk.Toplevel):
             if row['state']['label']=='SpecialStatus.Funnel':amount=f'{row["state"]["values"]["numValue"]} 颗 × '+amount
             self.effect_editor.pending_list.insert('end','、'.join(row.get('target_names',[]))+' ← '+row['item']['title']+' '+amount)
 
+    def sequence_action(self,action):
+        try:
+            self.sync_preview_epoch(self.snapshot())
+            if action=='add':
+                if not hasattr(self,'pending_context'):raise ValueError('请先自动填充角色与敌人，并使用自动跨 DP/HP')
+                player,enemy,*_=self.pending_context
+                for box,key,identity in [(self.player_box,'players',player.get('actor_id')),(self.enemy_box,'enemies',enemy.get('address'))]:
+                    selected=self.loaded_snapshot.get(key,[])
+                    index=box.current()
+                    field='actor_id' if key=='players' else 'address'
+                    if index<0 or index>=len(selected) or selected[index].get(field)!=identity:raise ValueError('切换角色或敌人后请先自动填充')
+                self.compute()
+                if self.sequence_candidate is None:raise ValueError('需成功完成自动跨 DP/HP 逐段试算，才可预添加结果')
+                self.sequence.append(player.get('actor_id'),player.get('actor') or player.get('name') or '角色',
+                    self.skill_title.cget('text'),enemy.get('address'),self.sequence_candidate)
+                message='本步已冻结。选择下一位角色并自动填充，将继承上述终值；概率图只表示当前技能，不代表整轮联合分布。'
+            else:
+                if action=='undo':self.sequence.undo()
+                else:
+                    self.sequence.clear();self.pending_effects=[];self.pending_delta={}
+                self.fill()
+                message='已撤销并重新填充当前角色。' if action=='undo' else '已清空伤害步骤及预添加效果，恢复当前实战快照。'
+            self.sequence_panel.update_sequence(self.sequence)
+            self.sequence_panel.message.configure(text=message)
+        except (ValueError,TypeError,OverflowError) as exc:self.sequence_panel.message.configure(text=str(exc))
+
     def show_chain(self,filled):
         from .funnels import describe
         count=filled.get('params',{}).get('main_hits') or 0
@@ -616,6 +679,9 @@ class DamageWindow(tk.Toplevel):
         self.chain_dirty=False
 
     def compute(self):
+        self.sequence_candidate=None
+        if getattr(self,'preview_needs_fill',False):return
+        candidate=None
         try:
             if self.chain_dirty:
                 from .funnels import parse
@@ -664,8 +730,10 @@ class DamageWindow(tk.Toplevel):
                     args[0]*=sp_factor(self.params['sp_consumed'].get(),self.params['sp_cap'].get())
                 if cross:
                     hp=self.params['enemy_hp'].get().strip()
-                    detail=simulate_pools(inputs,weights,int(count),*args,float(self.params['enemy_dp'].get()),float(hp) if hp else None,
-                                          hp_adjustments=getattr(self,'hp_adjustments',{}),shield=getattr(self,'shield_state',None))
+                    candidate=dict(inputs=inputs,weights=weights,main_hits=int(count),skill_dr=args[0],enemy_coefficient=args[1],
+                        bonus=args[2],maximum=args[3],enemy_dp=float(self.params['enemy_dp'].get()),enemy_hp=float(hp) if hp else None,
+                        hp_adjustments=getattr(self,'hp_adjustments',{}),shield=getattr(self,'shield_state',None))
+                    detail=simulate_pools(**candidate)
                     result.update(damage=detail['damage'],minimum=None,maximum=None,multiplier=None,
                                   note='逐段跨池基准情景；破盾溢出丢弃，不计入 HP。支持已确认的阿蒙锁盾；其他多层盾、动态增减益及伤害衰减未模拟。')
                 else:
@@ -694,7 +762,8 @@ class DamageWindow(tk.Toplevel):
                 self.plot_data=data;self.plot_damage=1
                 branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in applied_data['branches'])
                 if data.get('raw'):
-                    summary=f"打出伤害：{data['samples']:,} 次固定种子抽样，含破盾及锁盾溢出；击杀后停止后续段。\n平均值抽样标准误约 {data['mean_error']:,.2f}；极小尾部概率不能视为精确值。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
+                    method='固定逐段系数卷积（与单池模型一致）' if data['method']=='convolution' else '破盾 / 击杀分支条件卷积（数值网格近似）'
+                    summary=f"打出伤害：{method}，含破盾及锁盾溢出；击杀后停止后续段。\n真实分支可能产生折点或多峰；极小尾部概率仍受网格精度限制。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
                 else:
                     summary=f"破盾分支数值卷积 · 实际扣除均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
                 if applied_data['kill_probability'] is not None:
@@ -727,13 +796,14 @@ class DamageWindow(tk.Toplevel):
             if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见专页）\n"
             else:text+='逐段递推未启用：沿用固定破坏率，请核对逐段破坏率页的缺失参数。\n'
             text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
+            self.sequence_candidate=candidate
         except (ValueError, OverflowError) as exc:
             text='无法计算：'+str(exc)
             self.plot_data=None;self.draw_plot();self.prob_summary.configure(text=text)
         if self.plot_data:
             data=self.plot_data;scale=self.plot_damage if self.plot_damage is not None else 1
             mean=data['mean'] if data.get('absolute') else self.plot_damage
-            title='平均打出伤害（抽样估计）' if data.get('raw') else '平均实际扣除' if data.get('absolute') else '平均打出伤害'
+            title='平均打出伤害' if data.get('raw') else '平均实际扣除' if data.get('absolute') else '平均打出伤害'
             self.summary.configure(text=(f'{title}  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
                 f"\n伤害浮动区间（中央 90%）  {data['low']*scale:,.2f} – {data['high']*scale:,.2f}")
         else:self.summary.configure(text='暂无法生成完整结果：'+self.prob_summary.cget('text'))

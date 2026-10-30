@@ -1,5 +1,6 @@
 """Freeze command intent independently of observed hits and damage."""
 import copy
+import time
 from .turns import CommandLedger
 
 
@@ -7,16 +8,23 @@ class PlannedActions:
     def __init__(self):
         self.pending=None
         self.seen=set()
+        self.pending_time=None
 
-    def update(self, context, players):
-        if not context:
+    def update(self, context, players, now=None):
+        now=time.monotonic() if now is None else now
+        # A transition-in-flight sample has no context. Retain intent only
+        # across a short gap bracketed by the exact same command identity.
+        if self.pending_time is not None and now-self.pending_time>.6:
             self.pending=None
+        if not context:
             return []
         identity=CommandLedger.identity(context)
         if context.get('selecting'):
             self.pending=(identity,copy.deepcopy(context),copy.deepcopy(players))
+            self.pending_time=now
             return []
         if not self.pending or self.pending[0]!=identity or identity in self.seen:
+            self.pending=None
             return []
         _,group,saved=self.pending
         self.pending=None
