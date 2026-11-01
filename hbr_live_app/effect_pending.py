@@ -76,3 +76,32 @@ def targeted_row(item,amount,party,enemies,selected_player,selected_enemy):
     return dict(item=deepcopy(item),enemy=side,state=state,amount=amount,
                 target_ids=[p.get('address') if enemy else p.get('actor_id') for p in targets],
                 target_names=[str(p.get('actor') or p.get('name') or p.get('actor_id') or p.get('address')) for p in targets])
+
+
+def skill_rows(player,enemy,party,enemies,modes,existing,lookup=None):
+    """Resolve a skill's supported effects once per caster/part in this preview."""
+    from .effect_preview import proposals
+    from .effect_math import EffectInputs,calculate_effect
+    from .damage_autofill import catalog_skill
+    from hbr_data.skill_tree import effects
+    from hbr_data.battle_conditions import context_for,evaluate
+    selected=player.get('combat_inputs',player.get('inputs',{})).get('selected_skill',{})
+    source=(lookup or catalog_skill)(selected.get('label')) if selected.get('label') else {}
+    context=context_for(player,enemy,modes)
+    confirmed={p.get('label') for p in effects(source,context,include_unknown=False)}
+    rows=[];skipped=[]
+    for item in proposals(player,enemy,modes,lookup=lookup):
+        part=item['part']
+        if item.get('passive') or part.get('skill_type') not in SUPPORTED:continue
+        if any(h.get('type')=='After' for h in part.get('hits',[])):
+            skipped.append(item['title']+'：伤害后效果，不提前施加');continue
+        if any(r['item'].get('caster')==item['caster'] and r['item']['part'].get('label')==part.get('label') for r in existing+rows):continue
+        if part.get('label') not in confirmed or any(evaluate(c,context) is not True for c in (source.get('condition'),source.get('cond'),part.get('cond'),part.get('hit_condition')) if c):
+            skipped.append(item['title']+'：条件未确认');continue
+        if part.get('target_type')=='AllySingle':
+            skipped.append(item['title']+'：请手选单体受益者');continue
+        try:
+            amount=calculate_effect(EffectInputs(**item['values']))['final']
+            rows.append(targeted_row(item,amount,party,enemies,player,enemy))
+        except (ValueError,TypeError,OverflowError) as exc:skipped.append(item['title']+'：'+str(exc))
+    return rows,skipped

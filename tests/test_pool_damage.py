@@ -53,10 +53,11 @@ class PoolDamageTests(unittest.TestCase):
         thunder=per_hit([.5,.5],2,10,4,0,350,600)
         self.assertEqual(thunder['final'],390)
 
-    def test_hp_exhaustion_stops_following_hits(self):
+    def test_hp_exhaustion_keeps_growth_and_following_hits(self):
         d=simulate_pools(DamageInputs(base=100,critical=False),[.5,.5],2,4,4,0,300,0,10)
         self.assertEqual(d['hp_damage'],10)
-        self.assertEqual(d['rows'][1]['raw_damage'],0)
+        self.assertEqual(d['rows'][1]['raw_damage'],54)
+        self.assertEqual(d['rows'][1]['applied_damage'],0)
 
     def test_autofill_skill_specific_dp_and_element_cap(self):
         p,e,lookup=setup();db=lookup('test')

@@ -6,6 +6,9 @@ class ShieldLayers:
     def __init__(self):
         self.states={}
 
+    def invalidate(self):
+        self.states.clear()
+
     def update(self,address,label,live,bars,context,now=None):
         layers=[b.get('v') for b in (bars or {}).get('main',[]) if b.get('kind')=='dp']
         if len(layers)<2:return None
@@ -19,10 +22,10 @@ class ShieldLayers:
         if old and old['turn']==turn and turn is not None and broken>=old['broken']:
             delta=broken-old['broken']
             count=old['count']+delta if old['count'] is not None else (delta if delta else None)
-        elif old and turn is not None and old['turn'] is not None and turn>old['turn'] and now-old['time']<=.6 and broken==old['broken']:
+        elif old and turn is not None and old['turn'] is not None and turn>old['turn'] and broken==old['broken']:
             count=0
         # A long sampling gap can span unseen turns or a new encounter.
-        if old and now-old['time']>.6 and broken>0:count=None
+        # Slow status sampling alone does not invalidate a known Turn.
         locked=None if count is None else count>0
         known_rule=label.startswith('BigotryGateAmon')
         result=dict(total=len(layers),index=index,broken=broken,remaining=max(0,len(layers)-broken),
@@ -31,7 +34,8 @@ class ShieldLayers:
                     next_dp=layers[index+1] if index+1<len(layers) else None,
                     source='runtime_index_and_observation',capacity_source='catalog',
                     complete=count is not None)
-        self.states[address]=dict(turn=turn,broken=broken,count=count,time=now)
+        if turn is not None:
+            self.states[address]=dict(turn=turn,broken=broken,count=count,time=now)
         return result
 
 

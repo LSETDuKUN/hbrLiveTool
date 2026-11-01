@@ -26,8 +26,8 @@ class ShieldTests(unittest.TestCase):
         self.assertIsNone(sample(1,1,2,0)['locked'])
         self.assertFalse(sample(2,0,2,.1)['locked'])
         self.assertFalse(sample(1,1,3,.1)['locked'])
-        self.assertIsNone(sample(1,1,3,2)['locked'])
-        self.assertIsNone(sample(1,1,3,2.1)['locked'])
+        self.assertFalse(sample(1,1,3,2)['locked'])
+        self.assertFalse(sample(1,1,3,2.1)['locked'])
         self.assertFalse(sample(1,1,4,2.2)['locked'])
 
     def run_damage(self,dp,locked=False,remaining=3,next_dp=100):

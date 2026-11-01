@@ -289,6 +289,10 @@ class DetailCards(tk.Frame):
                     self.row(frame,label,number((data.get("base_param") or {}).get(key)))
             if not record["skills"] and data.get("desc"):
                 self.label(frame,data["desc"])
+        if record['dataset']=='styles':
+            orb=data.get('growth_abi') or {}
+            self.row(frame,'宝珠强化',orb.get('n') or '无公开宝珠类型')
+            if orb.get('l'):self.row(frame,'宝珠类型',orb['l'])
         talents=record.get('talents',[])
         if talents:
             frame=self.card('风格天赋 · 按解锁阶段')

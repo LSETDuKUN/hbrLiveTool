@@ -1,12 +1,12 @@
 """Raw damage via conditional first-break prefixes and independent HP suffixes.
 
 Each branch retains the actual random breaking prefix, including overflow.
-HP suffix laws stop at the first lethal hit, also retaining raw overkill.
+HP suffix laws retain every hit and its destruction growth after lethal damage.
 All branches use deterministic numerical convolution, never histogram sampling.
 """
 import math
 from .damage_probability import distribution
-from .probability_grid import advance, split, add, stopped, convolve
+from .probability_grid import advance, split, add, convolve
 
 
 def fixed(amounts):
@@ -23,10 +23,9 @@ def fixed(amounts):
 def raw_distribution(detail,bins=4096):
     if not isinstance(bins,int) or not 256<=bins<=16384:raise ValueError('跨池概率网格须为 256–16384')
     weights=[r['weight'] for r in detail['rows']];inc=detail['potential_increments']
-    dp,hp=detail['initial_dp'],detail['initial_hp'];bases=detail['bases']
+    dp=detail['initial_dp'];bases=detail['bases']
     initial,maximum=detail['initial'],detail['maximum']
     dp_amounts=[bases['dp']*w for w in weights]
-    if hp==0:return fixed([])
     # A final-hit break changes no raw hit coefficient. Locked shields likewise
     # keep all attacks in DP, regardless of the actual loss cap.
     if dp>0 and (detail.get('shield_locked') or detail.get('next_shield_dp') is not None or
@@ -40,23 +39,25 @@ def raw_distribution(detail,bins=4096):
             result.append(bases['hp']*weights[j]*rate/100)
             rate+=min(inc[j],max(0,maximum-rate))
         return result
+    def suffix_law(k,step):
+        mass=[1.]
+        for amount in suffix(k):mass=advance(mass,amount,step)
+        return mass
     if dp<=0:
         amounts=suffix(0)
-        if hp is None or 1.1*sum(amounts[:-1])<=hp:return fixed(amounts)
+        return fixed(amounts)
     upper=1.1*sum(weights)*max(bases['dp'],bases['hp']*max(initial,maximum)/100)
     if upper==0:return fixed([])
     step=upper/bins
-    if dp<=0:mass=stopped(suffix(0),hp,step)
-    else:
-        alive=[1.];mass=[]
-        for k,amount in enumerate(dp_amounts,1):
-            alive=advance(alive,amount,step)
-            alive,crossed=split(alive,dp,step)
-            if sum(crossed)>1e-14:
-                tail=stopped(suffix(k),hp,step)
-                add(mass,convolve(crossed,tail) if len(tail)>1 else [p*tail[0] for p in crossed])
-            if sum(alive)<1e-14:break
-        add(mass,alive)
+    alive=[1.];mass=[]
+    for k,amount in enumerate(dp_amounts,1):
+        alive=advance(alive,amount,step)
+        alive,crossed=split(alive,dp,step)
+        if sum(crossed)>1e-14:
+            tail=suffix_law(k,step)
+            add(mass,convolve(crossed,tail) if len(tail)>1 else [p*tail[0] for p in crossed])
+        if sum(alive)<1e-14:break
+    add(mass,alive)
     area=sum(mass)
     if not math.isclose(area,1,abs_tol=1e-6):raise ValueError('打出伤害概率质量校验失败')
     mass=[p/area for p in mass]

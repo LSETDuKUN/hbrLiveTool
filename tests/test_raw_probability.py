@@ -28,13 +28,13 @@ class RawProbabilityTests(unittest.TestCase):
         variance=sum((x-r['mean'])**2*p*r['step'] for x,p in zip(r['x'],r['density']))
         self.assertAlmostEqual(variance,68.5,delta=.1)
 
-    def test_random_early_kill_keeps_lethal_overflow_and_stops_later_hit(self):
-        # Half stop at U(50,55), half produce U(45,50)+U(45,55).
+    def test_random_early_kill_keeps_all_hits(self):
+        # Both hits still contribute after a lethal first hit.
         d=simulate_pools(DamageInputs(base=100,critical=False),[.5,.5],2,0,4,0,100,0,50)
         r=raw_distribution(d)
-        self.assertAlmostEqual(r['mean'],75,delta=.02)
+        self.assertAlmostEqual(r['mean'],100,delta=.02)
         variance=sum((x-r['mean'])**2*p*r['step'] for x,p in zip(r['x'],r['density']))
-        self.assertAlmostEqual(variance,512.5,delta=.15)
+        self.assertAlmostEqual(variance,100/6,delta=.15)
         self.assertGreater(r['high'],90)
 
     def test_complex_branch_grid_converges(self):
@@ -72,8 +72,15 @@ class RawProbabilityTests(unittest.TestCase):
         self.assertAlmostEqual(raw_distribution(d)['mean'],105,delta=.15)
         self.assertAlmostEqual(pool_distribution(d)['mean'],80,delta=.01)
 
-    def test_overkill_counted_but_dead_target_stops_further_hits(self):
+    def test_overkill_keeps_further_hits(self):
         d=simulate_pools(DamageInputs(base=1000,critical=False),[.5,.5],2,0,4,0,300,0,10)
         self.assertEqual(d['damage'],10)
-        self.assertEqual(d['raw_damage'],500)
-        self.assertAlmostEqual(raw_distribution(d)['mean'],500,delta=1)
+        self.assertEqual(d['raw_damage'],1000)
+        self.assertAlmostEqual(raw_distribution(d)['mean'],1000,delta=1)
+
+    def test_death_keeps_chain_damage_and_rate_growth(self):
+        d=simulate_pools(DamageInputs(base=1000,critical=False,chain=75),[1,.25,.25,.25],1,10,4,0,300,50,10)
+        self.assertEqual([r['raw_damage'] for r in d['rows']],[1000,350,375,400])
+        self.assertEqual([r['after'] for r in d['rows']],[140,150,160,170])
+        self.assertEqual(d['hp_damage'],10)
+        self.assertAlmostEqual(raw_distribution(d)['mean'],2125,delta=1)

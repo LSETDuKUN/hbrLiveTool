@@ -49,6 +49,8 @@ class PlayerPanel(tk.Frame):
         self.pools.pack(side='left')
         RoundedButton(head, '完整详情', self.details, theme.CARD_HI, theme.DIM, theme.ui(11),
                       height=28).pack(side='right')
+        self.mode_note=tk.Label(body,bg=theme.CARD,fg=theme.GOLD,anchor='w',justify='left',font=theme.ui(10),wraplength=320)
+        self.mode_note.pack(fill='x',pady=4)
         self.groups = StatusGroups(body, self.status_details)
         self.groups.pack(fill='x', pady=(4, 0))
         self.detail.bind('<Configure>', lambda e: self.caption.configure(wraplength=max(120, e.width - 24)))
@@ -152,6 +154,18 @@ class PlayerPanel(tk.Frame):
             pools.append(f'{pool.upper()} {value:,}'+(f' / {maximum:,}' if maximum else '') if value is not None else pool.upper()+' —')
         self.caption.configure(text=p['actor']+' / '+p.get('style_name',''))
         self.pools.configure(text='   '.join(pools))
+        inputs=p.get('combat_inputs',p.get('inputs',{}))
+        turns=inputs.get('reinforced_mode_turn')
+        ghost=p.get('style_label')=='STezuka03' and isinstance(turns,int) and turns>0
+        text=''
+        if ghost:
+            text=f'鬼神状态 · 剩余 {turns} 回合（内存）\n规则说明：技能连击 3×25%、弱点心眼 120%【单独发动】；覆盖后取实际生效值。'
+            if 'Passive.Condition_AttackUp11' in inputs.get('passive_labels',[]):
+                from .status_rules import active
+                observed=any(s.get('source')=='Passive.Condition_AttackUp11' and active(s) for s in p.get('statuses',[]))
+                text+='\n鬼道技能加攻 +300%：'+('已读到生效状态，见下方加攻区。' if observed else '攻击时生效；当前未读到生效 Buff。')
+            text+='\n以上规则说明不作为额外 Buff 重复计入。'
+        self.mode_note.configure(text=text)
         self.groups.update_state(p)
 
     def tick_effects(self):

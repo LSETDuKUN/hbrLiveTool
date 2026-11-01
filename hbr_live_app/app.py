@@ -501,6 +501,10 @@ class App:
             self.stop_event.set()
             self.set_status('正在停止并保存记录…')
             return
+        # Previous worker has exited; discard its queued snapshots before reconnecting.
+        while True:
+            try:self.queue.get_nowait()
+            except queue.Empty:break
         self.stop_event.clear()
         self.paused.clear()
         self.connected = False

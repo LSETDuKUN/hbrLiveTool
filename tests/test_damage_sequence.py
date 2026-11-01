@@ -61,3 +61,19 @@ class SequenceTests(unittest.TestCase):
         self.assertEqual(step['config']['inputs'].base,100)
         self.assertEqual(step['config']['weights'],[1])
         with self.assertRaises(ValueError):seq.append(2,'B','鞭尸',9,config(dp=0,hp=0,rate=120))
+
+    def test_three_skills_keep_rate_above_their_own_cap_and_resume_growth(self):
+        seq=DamageSequence()
+        first=config(dp=0,rate=295);first.update(maximum=600,bonus=20)
+        a=seq.append(1,'A','超破坏',9,first)
+        self.assertEqual(a['after']['rate'],319)
+        state=seq.current
+        second=config(0,state['hp'],state['rate']);second.update(maximum=300)
+        b=seq.append(2,'B','无属性',9,second)
+        self.assertEqual(b['after']['rate'],319)
+        self.assertAlmostEqual(b['raw_damage'],100*3.19*1.15)
+        state=seq.current
+        third=config(0,state['hp'],state['rate']);third.update(maximum=330,skill_dr=10,bonus=50,weights=[.5,.5],main_hits=2)
+        c=seq.append(3,'C','元素攻击',9,third)
+        self.assertEqual(c['after']['rate'],330)
+        self.assertAlmostEqual(c['raw_damage'],50*(3.19+3.30)*1.15)

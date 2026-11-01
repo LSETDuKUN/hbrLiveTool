@@ -14,14 +14,20 @@ class MBI(c.Structure):
  _fields_=[('BaseAddress',c.c_void_p),('AllocationBase',c.c_void_p),('AllocationProtect',w.DWORD),('PartitionId',w.WORD),('RegionSize',c.c_size_t),('State',w.DWORD),('Protect',w.DWORD),('Type',w.DWORD)]
 vq=bind('VirtualQueryEx',[w.HANDLE,c.c_void_p,c.POINTER(MBI),c.c_size_t],c.c_size_t)
 h=None
+process_identity=None
 
 def open_process(pid):
- global h
+ global h,process_identity
+ process_identity=None
  h=op(0x410,False,pid)
  if not h:raise PermissionError('无法只读访问游戏，请关闭挂件并使用“启动HBR Live.bat”以管理员运行')
  b=c.create_unicode_buffer(32768);n=w.DWORD(len(b))
  if not qp(h,0,b,c.byref(n)) or b.value.lower().rsplit(chr(92), 1)[-1] != 'heavenburnsred.exe':
   close(h);h=None;raise RuntimeError('目标不是 HeavenBurnsRed.exe')
+ times=[w.FILETIME() for _ in range(4)]
+ get_times=bind('GetProcessTimes',[w.HANDLE]+[c.POINTER(w.FILETIME)]*4,w.BOOL)
+ if get_times(h,*(c.byref(t) for t in times)):
+  process_identity=(pid,times[0].dwHighDateTime,times[0].dwLowDateTime)
 
 def read(addr,n):
  if not 65536<addr<0x7fffffffffff:return b''

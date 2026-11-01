@@ -383,6 +383,6 @@ class StatusReader:
             if not isinstance(value,int) or not isinstance(maximum,int) or maximum <= 0:
                 return None
             return dict(value=value, maximum=maximum, element=element,
-                        name='雷' if element == 3 else '元素', full=value >= maximum)
+                        name={1:'火',2:'冰',3:'雷',4:'光',5:'暗'}.get(element,'元素'), full=value >= maximum)
         except (ValueError, RuntimeError, TypeError):
             return None

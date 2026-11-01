@@ -68,7 +68,7 @@ class EffectEditor(tk.Frame):
         self.result=tk.Label(self,text='选择效果，或手动输入参数。',bg=theme.BG,fg=theme.CYAN,
                              font=theme.ui(12,'bold'),anchor='w',justify='left')
         self.result.pack(fill='x',pady=12)
-        actions=tk.Frame(self,bg=theme.BG);actions.pack(fill='x')
+        actions=tk.Frame(self,bg=theme.BG);actions.pack(fill='x');self.actions=actions
         RoundedButton(actions,'预添加当前效果',self.add_pending,theme.PINK_FILL,theme.on_fill,height=32).pack(side='left')
         RoundedButton(actions,'删除所选预添加',self.remove_pending,theme.CARD,theme.FG,height=32).pack(side='left',padx=8)
         self.pending_list=tk.Listbox(self,height=4,bg=theme.CARD,fg=theme.FG,exportselection=False,
@@ -120,6 +120,8 @@ class EffectEditor(tk.Frame):
 
     def load(self,player,enemy,modes):
         self.orb_enabled.set(False);self.orb_level.set('5')
+        from .damage_autofill import style_elements
+        modes=dict(modes,lightning_style='Thunder' in style_elements(player.get('style_label','')))
         self.items=proposals(player,enemy,modes)
         self.selector.configure(values=[item['title'] for item in self.items])
         summaries=[]
@@ -154,7 +156,7 @@ class EffectEditor(tk.Frame):
             count=item.get('funnel_count');self.funnel_count.set('' if count is None else f'{count:g}')
             self.funnel_row.pack(fill='x',before=self.result)
         else:self.funnel_row.pack_forget()
-        self.orb_enabled.set(False);self.orb_level.set('5')
+        self.orb_enabled.set(item['values'].get('orb',0)>0);self.orb_level.set('5')
         for key,var in self.values.items():
             value=item['values'][key];var.set('' if value is None else f'{value:g}')
         self.set_notes(item['notes']);self.compute()

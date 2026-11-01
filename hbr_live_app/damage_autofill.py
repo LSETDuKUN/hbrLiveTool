@@ -211,6 +211,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
         if key=='od_gain_bonus':params[key]+=value
         else:values[key]+=value
     notes.extend(equipment_notes)
+    if any(key in ('hp_bonus','dp_bonus') for key,value in equipment):
+        notes.append('待核对：当前将 HP/DP 饰品加成并入对应池特攻；参考网站并入装备加攻，但跨池适用时点未确认，保留手动调整。')
     for state,enemy_side in [(player,False),(enemy,True)]:
         if not state.get('statuses_available',False):skipped.append(('敌方' if enemy_side else '角色')+'状态未完整读取')
         for s in state.get('statuses',[]):
@@ -341,6 +343,8 @@ def autofill(player, enemy, fields=None, lookup=catalog_skill, modes=None, party
     params['enemy_dr']=progress.get('destruction_coefficient')
     params['max_dr']=progress.get('destruction_max')
     super_element=modes.get('super_break_element') or ('Thunder' if modes.get('transcend') else None)
+    if super_element and super_element!='Thunder':
+        notes.append('当前元素超越已匹配超破坏上限；该属性的额外攻击／暴击等效果尚待核实，请在乘区中核对补充，不套用雷属性数值。')
     if element and element==super_element and isinstance(params['max_dr'],(int,float)):
         params['max_dr']+=300
         notes.append('爆发情景：破坏率上限预加 300 个百分点；其他上限效果请核对')

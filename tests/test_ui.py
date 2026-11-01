@@ -57,7 +57,7 @@ class DashboardTests(unittest.TestCase):
         with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)):
             w=DamageWindow(self.root,lambda:snapshot)
             try:
-                snapshot['connected']=True;w.fill()
+                snapshot['connected']=True;w.player_box.current(0);w.fill()
                 w.use_skill.set(False);w.flags['critical'].set(False)
                 from hbr_live_app.damage_math import DamageInputs
                 defaults=DamageInputs(base=100,critical=False)
@@ -118,6 +118,55 @@ class DashboardTests(unittest.TestCase):
                 self.assertEqual([float(v) for v in w.hit_weights.get().split(',')],[1,.25,.25,.25])
             finally:w.destroy()
 
+    def test_element_gauge_selection_does_not_apply_thunder_bonuses_to_other_elements(self):
+        from test_damage_autofill import setup
+        from hbr_live_app.damage_window import DamageWindow
+        from hbr_live_app.damage_autofill import autofill
+        p,e,lookup=setup()
+        snapshot=dict(connected=False,players=[p],enemies=[e],element_gauge=dict(full=True,element=1))
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)) as fill:
+            w=DamageWindow(self.root,lambda:snapshot)
+            try:
+                snapshot['connected']=True
+                for value,key in [(1,'Fire'),(2,'Ice'),(3,'Thunder'),(4,'Light'),(5,'Dark')]:
+                    snapshot['element_gauge']['element']=value;w.fill()
+                    modes=fill.call_args.kwargs['modes']
+                    self.assertEqual(modes['super_break_element'],key)
+                    self.assertEqual(modes['transcend'],value==3)
+                w.mode_choices['transcend'].set('禁用');w.fill()
+                self.assertNotIn('super_break_element',fill.call_args.kwargs['modes'])
+                w.mode_choices['transcend'].set('启用');w.transcend_element.set('冰');w.fill()
+                self.assertEqual(fill.call_args.kwargs['modes']['super_break_element'],'Ice')
+            finally:w.destroy()
+
+    def test_executing_skill_does_not_auto_precast_its_effect_again(self):
+        from test_damage_autofill import setup
+        from hbr_live_app.damage_window import DamageWindow
+        from hbr_live_app.damage_autofill import autofill
+        p,e,lookup=setup();p['actor_position']=0
+        snapshot=dict(connected=True,players=[p],enemies=[e],turn_context=dict(selecting=False))
+        with patch('hbr_live_app.damage_window.autofill',side_effect=lambda p,e,f=None,**kw:autofill(p,e,f,lookup=lookup,**kw)),patch('hbr_live_app.damage_autofill.catalog_skill',side_effect=lookup),patch('hbr_live_app.effect_pending.skill_rows',return_value=([],[])) as precast:
+            w=DamageWindow(self.root,lambda:snapshot)
+            try:
+                w.fill();precast.assert_not_called()
+                snapshot['turn_context']['selecting']=True;w.fill()
+                self.assertTrue(precast.called)
+            finally:w.destroy()
+
+    def test_open_player_status_refreshes_when_gidou_appears(self):
+        from hbr_live_app.status_groups import group_statuses
+        p=dict(actor_id=99,actor='咲',style_label='STezuka03',actor_position=0,statuses_available=True,statuses=[],combat_inputs=dict(reinforced_mode_turn=3,passive_labels=['Passive.Condition_AttackUp11']))
+        panel=self.app.player_panel;panel.update_state([p],None);panel.select(99)
+        self.assertIn('3×25%',panel.mode_note.cget('text'))
+        self.assertIn('未读到',panel.mode_note.cget('text'))
+        p['statuses'].append(dict(label='SpecialStatus.AttackUp',name='攻击提升',value='300%',source='Passive.Condition_AttackUp11',remaining=1,duration_kind='turn',values=dict(amountOnDpDamageInt=30000,amountOnHpDamageInt=30000)))
+        panel.update_state([p],None)
+        self.assertIn('已读到生效',panel.mode_note.cget('text'))
+        self.assertEqual(len(group_statuses(panel.groups.state)[0]['boost']),1)
+        self.assertEqual(len(panel.groups.previous[1]),1)
+        p['statuses'].clear();panel.update_state([p],None)
+        self.assertEqual(panel.groups.previous[1],[])
+
     def test_history_can_switch_intent_and_observed_actions(self):
         event=dict(event_id='intent:1',actor_id=1,actor='咲',actor_position=0,
                    skill='铁锤',planned=True,value=0,hits=[],targets=[],settled=True,
@@ -134,7 +183,7 @@ class DashboardTests(unittest.TestCase):
     def test_auto_pool_and_main_page_probability_with_collapsed_notes(self):
         self.app.open_damage_calculator();w=self.app.damage_window
         w.values['base'].set('100');w.values['hp_bonus'].set('65')
-        w.flags['critical'].set(False);w.pool.set('auto');w.damage_metric.set('applied');w.use_destruction.set(True)
+        w.flags['critical'].set(False);w.pool.set('auto');w.damage_metric.set('applied');w.use_destruction.set(False)
         w.hit_weights.set('.5,.5')
         for k,v in dict(main_hits=2,skill_dr=0,enemy_dr=4,destruction_bonus=0,max_dr=300,enemy_dp=40,enemy_hp=1000).items():w.params[k].set(str(v))
         w.compute();self.root.update_idletasks()
@@ -142,6 +191,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('平均实际扣除',w.summary.cget('text'))
         self.assertIn('中央 90%',w.summary.cget('text'))
         self.assertNotIn('浮动概率曲线',w.tab_names)
+        self.assertNotIn('逐段破坏率',w.tab_names)
+        self.assertFalse(w.battle_parameters.winfo_ismapped())
+        w.use_destruction.set(True)
         self.assertTrue(str(w.plot).startswith(str(w.page_widgets['乘区试算'][1])))
         self.assertFalse(w.result_details.winfo_ismapped())
         # Explicit manual mode does not silently retain a separate cross-pool toggle.
@@ -229,7 +281,7 @@ class DashboardTests(unittest.TestCase):
     def test_damage_autofill_uses_current_snapshot_without_overwriting_edits(self):
         from unittest.mock import patch
         from test_damage_autofill import setup
-        p,e,lookup=setup();p.update(actor='测试角色');e.update(hp=100,active=True,name='测试敌人')
+        p,e,lookup=setup();p.update(actor='测试角色',actor_position=1);e.update(hp=100,active=True,name='测试敌人')
         p['combat_inputs']['selected_skill']['parts']=[dict(Label='test',skill_type_raw=10)]
         self.app.model.players=[dict(actor_id=3,actor='辅助',actor_position=0),p]
         self.app.model.update(dict(enemies=[e],events=[]));self.app.connected=True

@@ -1,5 +1,6 @@
 """Presentation groups only: never add incompatible effect values together."""
 import tkinter as tk
+from copy import deepcopy
 
 from . import theme
 from .statuses import status_line
@@ -94,7 +95,7 @@ class StatusGroups(tk.Frame):
         self.state = state
         if self.previous == value:
             return
-        self.previous = value
+        self.previous = deepcopy(value)
         self.draw()
 
     def draw(self):

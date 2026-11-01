@@ -16,6 +16,7 @@ CREATE TABLE records(record_key TEXT PRIMARY KEY, source_url TEXT REFERENCES sou
 CREATE TABLE translations(language TEXT, category TEXT, field TEXT, label TEXT, text TEXT,
  PRIMARY KEY(language,category,field,label));
 CREATE INDEX records_lookup ON records(region,dataset,name);
+CREATE INDEX records_label ON records(label,region,dataset,id);
 CREATE TABLE style_talents(record_key TEXT REFERENCES records(record_key), region TEXT, style_label TEXT,
  talent_group TEXT, unlock_tier INTEGER, json_pointer TEXT, label TEXT, raw_json TEXT NOT NULL,
  PRIMARY KEY(record_key,json_pointer));
@@ -25,6 +26,7 @@ CREATE TABLE skills(skill_key TEXT PRIMARY KEY, source_url TEXT REFERENCES sourc
  raw_json TEXT NOT NULL CHECK(json_valid(raw_json)));
 CREATE INDEX skills_lookup ON skills(region,dataset,name);
 CREATE INDEX skills_identity ON skills(region,id);
+CREATE INDEX skills_label ON skills(label,region,dataset);
 CREATE TABLE skill_parts(skill_key TEXT REFERENCES skills(skill_key), part_index INTEGER,
  skill_type TEXT, target TEXT, physical_type TEXT, power_min REAL, power_max REAL,
  diff_for_max REAL, dp_multiplier REAL, hp_multiplier REAL, destruction_multiplier REAL,
@@ -38,6 +40,7 @@ CREATE TABLE skill_elements(skill_key TEXT, part_index INTEGER, element_index IN
  PRIMARY KEY(skill_key,part_index,element_index),
  FOREIGN KEY(skill_key,part_index) REFERENCES skill_parts(skill_key,part_index));
 CREATE VIEW characters AS SELECT * FROM records WHERE dataset='characters';
+CREATE VIEW style_orbs AS SELECT region,label AS style_label, json_extract(raw_json,'$.growth_abi.l') AS orb_type, json_extract(raw_json,'$.growth_abi.n') AS orb_name FROM records WHERE dataset='styles';
 CREATE VIEW styles AS SELECT * FROM records WHERE dataset='styles';
 CREATE VIEW enemies AS SELECT * FROM records WHERE dataset='enemies';
 CREATE VIEW skill_catalog AS SELECT * FROM skills WHERE dataset='skills';

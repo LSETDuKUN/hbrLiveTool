@@ -48,6 +48,10 @@ def proposals(player, enemy, modes=None, lookup=None):
             growth=part.get('growth')
             if not growth or len(growth)!=2:
                 growth=[0,0];notes.append('成长缺失：暂填 0，请核对')
+            command_buff=typ=='AttackUpIncludeNormal' and str(part.get('label','')).endswith('CommandBuff')
+            if command_buff:
+                low=high=.15;threshold=0;fixed=True;weights={k:0 for k in WEIGHTS};growth=[0,0]
+                notes.append('指挥行动：固定 15% 加攻，适用加攻效果量提升；不随技能等级或宝珠增长。')
             stats=inp.get('stats',{})
             required=[k for k,w in weights.items() if w]
             attribute=None
@@ -64,13 +68,15 @@ def proposals(player, enemy, modes=None, lookup=None):
             kind='fixed' if fixed else 'debuff' if typ in ('DefenseDown','Fragile') else 'buff'
             enemy_value=enemy.get('combat_inputs',enemy.get('inputs',{})).get('_defenseRefParam') if kind=='debuff' else 0
             values=asdict(EffectInputs(kind=kind,minimum=None if low is None else low*100,
-                maximum=0 if fixed else None if high is None else high*100,threshold=threshold,
-                attribute=attribute,enemy=enemy_value,level=1 if passive else live_skill.get('level'),
+                maximum=15 if command_buff else 0 if fixed else None if high is None else high*100,threshold=threshold,
+                attribute=attribute,enemy=enemy_value,level=1 if passive or command_buff else live_skill.get('level'),
                 growth_min=growth[0],growth_max=growth[1],reduction=reduction if kind=='debuff' else 0,
                 over_rate=.001 if kind=='debuff' else .0002))
+            from .orb_defaults import enabled
+            values['orb']=5 if not passive and kind!='fixed' and enabled(player,kind,typ) else 0
             for key,value in values.items():
                 if value is None:missing.append(key)
-            notes.append('宝珠默认 0：仅在确认该效果可强化后调整至 5。数据：内存同标签优先，其余来自本地资料库。')
+            notes.append('宝珠按风格 growth_abi 匹配效果类型，匹配时默认 5；固定效果及未知宝珠类型默认关闭，可手动核对修改。数据：内存同标签优先，其余来自本地资料库。')
             if kind!='fixed':
                 notes.append('试算模型：按资料库上下限线性插值，超过阈值继续小斜率增长；尚未用实战验证低属性区间与宝珠增量。')
             conditions=part.get('_branch_path',[])+[source.get('condition') or source.get('cond'),part.get('cond'),part.get('target_condition'),part.get('hit_condition')]

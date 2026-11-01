@@ -69,7 +69,7 @@ class DamageWindow(tk.Toplevel):
         self.plot_damage = None
         self.snapshot = snapshot
         self.loaded_snapshot = {}
-        self.pending_effects=[]
+        self.pending_effects=[];self.dismissed_effects=set()
         self.pending_delta={}
         from .damage_sequence import DamageSequence
         self.sequence=DamageSequence()
@@ -112,21 +112,25 @@ class DamageWindow(tk.Toplevel):
                       theme.ui(11), height=30).pack(side='left')
         RoundedButton(row, '自动填充', self.fill, theme.mix(theme.CARD_HI, theme.CYAN, .26), theme.FG,
                       theme.ui(11), height=30).pack(side='left', padx=8)
+        RoundedButton(row,'下一位',self.next_actor,theme.CARD_HI,theme.FG,height=30).pack(side='left',padx=6)
         modes = tk.Frame(bar, bg=theme.SURFACE)
         modes.pack(fill='x', pady=(10, 0))
         self.mode_choices = {}
         tk.Label(modes, text='模式', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
-        for key, label in [('transcend', '雷超越'), ('high_boost', '高阶增幅')]:
+        for key, label in [('transcend', '元素超越'), ('high_boost', '高阶增幅')]:
             tk.Label(modes, text=label, bg=theme.SURFACE, fg=theme.MUTED,
                      font=theme.ui(11)).pack(side='left', padx=(12, 4))
             var = tk.StringVar(self, value='自动'); self.mode_choices[key] = var
             RoundedSelect(modes, textvariable=var, values=['自动', '启用', '禁用'],
                           width=theme.px(96), height=theme.px(30)).pack(side='left')
+        self.transcend_element=tk.StringVar(self,value='自动属性')
+        RoundedSelect(modes,textvariable=self.transcend_element,values=['自动属性','火','冰','雷','光','暗'],
+                      width=theme.px(100),height=theme.px(30)).pack(side='left',padx=6)
         tk.Label(modes, text='修改后点击自动填充；仅影响试算', bg=theme.SURFACE, fg=theme.MUTED,
                  font=theme.ui(10)).pack(side='left', padx=12)
 
     def build_pages(self):
-        self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '逐段破坏率', '饰品效果', '当前内存参数', '天赋与被动审查']
+        self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '饰品效果', '当前内存参数', '天赋与被动审查']
         self.tabs = TabBar(self, self.tab_names, self.show_page, bg=theme.BG)
         self.tabs.pack(fill='x', padx=14, pady=(0, 6))
         self.pages = tk.Frame(self, bg=theme.BG)
@@ -137,13 +141,16 @@ class DamageWindow(tk.Toplevel):
             self.page_widgets[name] = (frame, body)
         self.build_form_page(*self.page_widgets['乘区试算'])
         self.build_skill_page(*self.page_widgets['技能与属性'])
-        self.build_destruction_page(*self.page_widgets['逐段破坏率'])
+        self.build_destruction_page(self.page_widgets['乘区试算'][0], self.battle_parameters)
         self.build_equipment_page(*self.page_widgets['饰品效果'])
         self.build_probability_page(self.page_widgets['乘区试算'][0],self.result_area)
+        self.sequence_panel.pack_forget()
+        self.sequence_panel.pack(fill='x',pady=8)
         self.build_raw_page(*self.page_widgets['当前内存参数'])
         self.build_audit_page(*self.page_widgets['天赋与被动审查'])
         self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1],self.update_pending)
         self.effect_editor.pack(fill='both', expand=True)
+        RoundedButton(self.effect_editor.actions,'预发动所选技能效果',self.pre_cast_support,theme.CARD_HI,theme.FG,height=32).pack(side='left',padx=8)
         self.show_page(self.tab_names[0])
 
     def show_page(self, name):
@@ -178,6 +185,7 @@ class DamageWindow(tk.Toplevel):
 
     # ---- pages -------------------------------------------------------------
     def build_form_page(self, frame, form):
+        self.battle_parameters=self.fold(form,'逐段破坏率与敌人资源参数')
         self.result_area=tk.Frame(form,bg=theme.BG)
         self.result_area.pack(fill='x',pady=6)
         self.summary=tk.Label(self.result_area,text='尚无计算结果',bg=theme.BG,fg=theme.FG,
@@ -337,20 +345,32 @@ class DamageWindow(tk.Toplevel):
         self.note(form, '权重为 0 的属性不参与计算。特殊技能条件、偏向和其他独立修正仍需核对。')
 
     def build_destruction_page(self, frame, form):
+        # Automatic DP/HP mode always uses per-hit destruction; the optional toggle
+        # is only for comparing fixed-pool results against constant destruction.
         self.use_destruction = tk.BooleanVar(self, value=False)
-        ToggleChip(form, '启用逐段破坏率递推（参数完整时自动启用）', self.use_destruction,
+        self.note(form, '逐段试算 · 自动判断 DP / HP，结算伤害后增加破坏率', 12, theme.CYAN)
+        fields=[('enemy_dp','剩余 DP'),('enemy_hp','剩余 HP（可空）'),
+                ('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),
+                ('enemy_dr','敌人有效破坏系数'),('max_dr','本技能破坏率上限 %'),
+                ('destruction_bonus','破坏率获取提升 %')]
+        current=tk.Frame(form,bg=theme.BG);current.pack(fill='x',pady=4)
+        tk.Label(current,text='当前破坏率 %',bg=theme.BG,fg=theme.DIM,font=theme.ui(11)).pack(side='left',padx=6)
+        RoundedEntry(current,textvariable=self.values['destruction'],width=theme.px(160)).pack(side='left')
+        grid=tk.Frame(form,bg=theme.BG);grid.pack(fill='x')
+        for column in range(2):grid.columnconfigure(column,weight=1)
+        for index,(key,label) in enumerate(fields):
+            cell=tk.Frame(grid,bg=theme.BG)
+            cell.grid(row=index//2,column=index%2,sticky='ew',padx=6)
+            self.params[key]=self.field_row(cell,label,16)
+        self.calculation_status=self.note(form,'自动填充后直接计算；连续预演沿用上一人的破坏率和剩余 DP / HP。')
+        RoundedButton(form,'重新计算',self.compute,theme.mix(theme.CARD_HI,theme.CYAN,.28),
+                      theme.FG,theme.ui(11),height=32).pack(anchor='w',pady=4)
+        details=self.fold(self.result_area,'逐段伤害与破坏率明细（展开核对）')
+        ToggleChip(details,'单池比较时也计算逐段破坏率',self.use_destruction,
                    accent=theme.PINK).pack(anchor='w')
-        self.note(form, '各段先结算伤害，再增加破坏率。破盾当段即增加破坏率；该段溢出伤害不转入 HP，后续段使用新破坏率。\n'
-                        '敌人系数沿用 DamageRateValue（例如 4），不是属性抗性百分比；有破坏抗性状态时需核对最终有效系数。')
-        for key, label in [('skill_dr','技能破坏倍率'),('main_hits','本体 Hit 数'),('enemy_dr','敌人有效破坏系数'),
-                           ('max_dr','本技能有效破坏率上限 %'),('destruction_bonus','破坏率获取提升合计 %')]:
-            self.params[key] = self.field_row(form, label, 20)
-        self.note(form,'主界面选择自动跨 DP/HP 时，按敌人剩余 DP 逐段判断承伤池；破盾段溢出仍丢弃。')
-        for key, label in [('enemy_dp','敌人剩余 DP'),('enemy_hp','敌人剩余 HP（可空）')]:
-            self.params[key] = self.field_row(form, label, 28)
-        RoundedButton(form, '计算逐段伤害', self.compute, theme.mix(theme.CARD_HI, theme.PINK, .3),
-                      theme.FG, theme.ui(11), height=32).pack(anchor='w', pady=8)
-        self.destruction_report = self.text_panel(form, height=16)
+        self.note(details,'自动跨 DP/HP 始终按逐段计算。破盾当段增加破坏率，但溢出伤害不转入 HP。'
+                          '达到本技能上限后停止增长；已有破坏率不会因换用其他属性技能而降低。')
+        self.destruction_report=self.text_panel(details,height=16)
 
     def build_equipment_page(self, frame, form):
         self.equipment_editor = EquipmentEditor(form)
@@ -469,6 +489,18 @@ class DamageWindow(tk.Toplevel):
         scale=self.plot_damage if self.plot_damage is not None else 1
         self.plot_hint.configure(text=f'{"伤害" if d.get("absolute") else "伤害倍率"} {factor:.4f} · 对应伤害 {factor*scale:,.4g} · 密度 {d["density"][idx]:.3f}（密度不是单点概率）')
 
+    def next_actor(self):
+        from .preview_order import ordered_frontline
+        data=self.snapshot();players=data.get('players',[])
+        order=ordered_frontline(players)
+        current=self.player_box.current()
+        if not order:return
+        if current in order and order.index(current)==len(order)-1:
+            self.sequence_panel.message.configure(text='本轮已核查到最后一位；未自动预添加或重复发动技能。')
+            return
+        index=order[order.index(current)+1] if current in order else order[0]
+        self.player_box.current(index);self.fill()
+
     def reload_choices(self):
         data=self.snapshot()
         for box,key in [(self.player_box,'players'),(self.enemy_box,'enemies')]:
@@ -476,10 +508,9 @@ class DamageWindow(tk.Toplevel):
             box.configure(values=labels)
             default=0
             if key=='players' and old not in labels:
-                default=next((i for i,p in enumerate(data.get(key,[]))
-                              if p.get('actor_position',0) in (0,1,2) and any(
-                                  part.get('skill_type_raw')==10 for part in
-                                  p.get('combat_inputs',p.get('inputs',{})).get('selected_skill',{}).get('parts',[]))),0)
+                from .preview_order import ordered_frontline
+                ordered=ordered_frontline(data.get(key,[]))
+                default=ordered[0] if ordered else 0
             if labels:box.current(labels.index(old) if old in labels else default)
             else:box.set('')
         self.loaded_snapshot=data
@@ -489,7 +520,7 @@ class DamageWindow(tk.Toplevel):
         old=getattr(self,'preview_epoch',epoch)
         self.preview_epoch=epoch
         if old==epoch:return False
-        self.sequence.clear();self.pending_effects=[];self.pending_delta={}
+        self.sequence.clear();self.pending_effects=[];self.dismissed_effects=set();self.pending_delta={}
         self.sequence_candidate=None;self.preview_needs_fill=True
         if hasattr(self,'pending_context'):del self.pending_context
         self.sequence_panel.update_sequence(self.sequence);self.render_pending()
@@ -528,7 +559,7 @@ class DamageWindow(tk.Toplevel):
         inputs=player.get('combat_inputs',player.get('inputs',{}))
         gauge=data.get('element_gauge') or {}
         turn=inputs.get('reinforced_mode_turn')
-        automatic=dict(transcend=gauge.get('full') is True and gauge.get('element')==3,
+        automatic=dict(transcend=gauge.get('full') is True,
                        high_boost=any(s.get('label')=='SpecialStatus.HighBoost' and s.get('effective') is not False
                                       and not s.get('pending_add') and not s.get('pending_remove')
                                       for s in player.get('statuses',[])),
@@ -542,17 +573,33 @@ class DamageWindow(tk.Toplevel):
         od=data.get('od_state') or {}
         modes.update(od_active=od.get('active') if od.get('available') else None,od_level=od.get('level'))
         modes['lightning_style']='Thunder' in style_elements(player.get('style_label',''))
-        if gauge.get('full') and (gauge.get('element')!=3 or modes.get('transcend')):
-            modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(gauge.get('element'))
+        selected_element={'火':1,'冰':2,'雷':3,'光':4,'暗':5}.get(self.transcend_element.get(),gauge.get('element'))
+        if modes.get('transcend'):
+            modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(selected_element)
+        # Thunder's stat bonuses are verified separately. Do not apply them to
+        # another element merely because its gauge is full.
+        modes['transcend']=bool(modes.get('transcend') and selected_element==3)
         filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
         from .effect_pending import with_pending,PREVIEW_KEYS
         identity=data.get('run_id') or tuple(p.get('actor_id') for p in data.get('players',[]))
-        if getattr(self,'pending_battle',identity)!=identity:self.pending_effects=[]
+        if getattr(self,'pending_battle',identity)!=identity:self.pending_effects=[];self.dismissed_effects=set()
         self.pending_battle=identity
         self.pending_delta={}
-        self.damage_orb_enabled.set(False)
+        from .orb_defaults import enabled
+        self.damage_orb_enabled.set(enabled(player,'damage'))
         self.pending_context=(player,enemy,data.get('field_state'),modes,data.get('players',[]))
         self.pending_base=filled
+        from .effect_pending import skill_rows
+        from .damage_autofill import catalog_skill
+        from hbr_data.skill_tree import effects
+        from hbr_data.battle_conditions import context_for
+        selected=player.get('combat_inputs',player.get('inputs',{})).get('selected_skill',{})
+        skill=catalog_skill(selected.get('label')) if selected.get('label') else {}
+        if (data.get('turn_context') or {}).get('selecting') is not False and any(str(p.get('skill_type','')).startswith('Attack') and p.get('skill_type') not in ('AttackUp','AttackUpIncludeNormal') for p in effects(skill,context_for(player,enemy,modes),include_unknown=False)):
+            rows,skipped=skill_rows(player,enemy,data.get('players',[]),data.get('enemies',[]),modes,self.pending_effects)
+            rows=[r for r in rows if (r['item'].get('caster'),r['item']['part'].get('label')) not in self.dismissed_effects]
+            self.pending_effects.extend(rows)
+            filled['skipped'].extend(skipped)
         if self.pending_effects:
             p,e=with_pending(player,enemy,self.pending_effects)
             filled=autofill(p,e,data.get('field_state'),modes=modes,party=data.get('players',[]))
@@ -596,6 +643,19 @@ class DamageWindow(tk.Toplevel):
         self.preview_needs_fill=False
         self.refresh();self.compute()
 
+    def pre_cast_support(self):
+        if not hasattr(self,'pending_context'):return
+        from .effect_pending import skill_rows
+        player,enemy,fields,modes,party=self.pending_context
+        index=self.effect_editor.caster_box.current()
+        if 0<=index<len(party):player=party[index]
+        from .damage_autofill import style_elements
+        modes=dict(modes,lightning_style='Thunder' in style_elements(player.get('style_label','')))
+        rows,skipped=skill_rows(player,enemy,party,modes.get('enemies') or [enemy],modes,self.pending_effects)
+        self.pending_effects.extend(rows)
+        self.fill()
+        self.effect_editor.result.configure(text=f'已预发动 {len(rows)} 项效果；按对象保存。'+ '\n'.join(skipped))
+
     def update_pending(self,action,payload):
         from .effect_pending import targeted_row,with_pending,PREVIEW_KEYS
         self.sync_preview_epoch(self.snapshot())
@@ -612,7 +672,9 @@ class DamageWindow(tk.Toplevel):
                     r['item']['part'].get('_branch_path')!=item['part']['_branch_path'] for r in rows):
                 raise ValueError('同一技能已有另一个条件分支，请先删除再切换场景')
             rows.append(row)
-        else:rows.pop(payload)
+        else:
+            removed=rows.pop(payload)
+            self.dismissed_effects.add((removed['item'].get('caster'),removed['item']['part'].get('label')))
         p,e=with_pending(player,enemy,rows)
         computed=autofill(p,e,fields,modes=modes,party=party)
         keys=PREVIEW_KEYS
@@ -665,7 +727,7 @@ class DamageWindow(tk.Toplevel):
             else:
                 if action=='undo':self.sequence.undo()
                 else:
-                    self.sequence.clear();self.pending_effects=[];self.pending_delta={}
+                    self.sequence.clear();self.pending_effects=[];self.dismissed_effects=set();self.pending_delta={}
                 self.fill()
                 message='已撤销并重新填充当前角色。' if action=='undo' else '已清空伤害步骤及预添加效果，恢复当前实战快照。'
             self.sequence_panel.update_sequence(self.sequence)
@@ -698,8 +760,15 @@ class DamageWindow(tk.Toplevel):
             auto=self.pool.get()=='auto'
             cross=auto
             if auto and getattr(self,'auto_pool_blocked',False):raise ValueError('当前为多层盾，自动跨池尚未支持；可选择单池核对')
-            if cross and not self.use_destruction.get():
-                raise ValueError('跨 DP/HP 计算需要先启用逐段递推并补齐参数')
+            if cross or self.use_destruction.get():
+                labels={'enemy_dp':'剩余 DP','skill_dr':'技能破坏倍率','main_hits':'本体 Hit 数',
+                        'enemy_dr':'敌人有效破坏系数','max_dr':'本技能破坏率上限',
+                        'destruction_bonus':'破坏率获取提升'}
+                if not cross:labels.pop('enemy_dp')
+                missing=[label for key,label in labels.items() if not self.params[key].get().strip()]
+                if not self.hit_weights.get().strip():missing.append('各 Hit 伤害权重（计算明细内）')
+                self.calculation_status.configure(text='待补齐：'+'、'.join(missing) if missing else '逐段参数已齐全；连续预演继承上一人的终值。')
+                if missing:raise ValueError('请自动填充或补齐：'+'、'.join(missing))
             self.equipment_editor.apply({**self.values,**self.params})
             if self.use_dp_scaling.get():
                 factor=dp_factor(*(float(self.params[k].get()) for k in ('own_dp','own_dp_max','dp_zero_factor','dp_full_factor')))
@@ -719,7 +788,7 @@ class DamageWindow(tk.Toplevel):
                 from dataclasses import replace
                 inputs=replace(inputs,**{k:getattr(inputs,k)+v for k,v in self.hp_adjustments.items()})
             result=calculate(inputs);detail=None
-            if self.use_destruction.get():
+            if cross or self.use_destruction.get():
                 raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
                 weights=[float(w) for w in raw.split(',') if w.strip()]
                 count=float(self.params['main_hits'].get())
@@ -763,7 +832,7 @@ class DamageWindow(tk.Toplevel):
                 branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in applied_data['branches'])
                 if data.get('raw'):
                     method='固定逐段系数卷积（与单池模型一致）' if data['method']=='convolution' else '破盾 / 击杀分支条件卷积（数值网格近似）'
-                    summary=f"打出伤害：{method}，含破盾及锁盾溢出；击杀后停止后续段。\n真实分支可能产生折点或多峰；极小尾部概率仍受网格精度限制。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
+                    summary=f"打出伤害：{method}，含破盾及锁盾溢出；击杀后仍计算后续段与破坏率增长。\n真实分支可能产生折点或多峰；极小尾部概率仍受网格精度限制。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
                 else:
                     summary=f"破盾分支数值卷积 · 实际扣除均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
                 if applied_data['kill_probability'] is not None:
@@ -793,8 +862,8 @@ class DamageWindow(tk.Toplevel):
                     text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
                     text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
                 else:text+='此处为无浮动基准；随机伤害均值、区间和各破盾段概率见浮动概率曲线。\n'
-            if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见专页）\n"
-            else:text+='逐段递推未启用：沿用固定破坏率，请核对逐段破坏率页的缺失参数。\n'
+            if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见下方折叠区）\n"
+            else:text+='逐段递推未启用：沿用固定破坏率，可启用主页面明细中的单池逐段比较。\n'
             text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
             self.sequence_candidate=candidate
         except (ValueError, OverflowError) as exc:
@@ -806,6 +875,11 @@ class DamageWindow(tk.Toplevel):
             title='平均打出伤害' if data.get('raw') else '平均实际扣除' if data.get('absolute') else '平均打出伤害'
             self.summary.configure(text=(f'{title}  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
                 f"\n伤害浮动区间（中央 90%）  {data['low']*scale:,.2f} – {data['high']*scale:,.2f}")
+            if detail:
+                extra=f"\n破坏率（无浮动基准）：{inputs.destruction:g}% → {detail['final']:g}% · 已逐段计算"
+                if detail.get('segmented') and detail.get('remaining_hp')==0:
+                    extra+='；预测击杀后仍计后续伤害与破坏率增长'
+                self.summary.configure(text=self.summary.cget('text')+extra)
         else:self.summary.configure(text='暂无法生成完整结果：'+self.prob_summary.cget('text'))
         self.result.configure(state='normal');self.result.delete('1.0','end')
         self.result.insert('end',text)

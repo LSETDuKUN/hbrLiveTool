@@ -88,10 +88,9 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
     initial_locked=locked;initial_next=next_dp
     dp=enemy_dp;hp=enemy_hp;rate=inputs.destruction;rows=[];theoretical=0;total_dp=total_hp=overflow=0
     for item in template['rows']:
-        alive=hp is None or hp>0
         pool='dp' if dp>0 else 'hp'
         before=rate
-        raw=bases[pool]*item['weight']*(rate/100 if pool=='hp' else 1) if alive else 0
+        raw=bases[pool]*item['weight']*(rate/100 if pool=='hp' else 1)
         if not math.isfinite(raw):raise ValueError('逐段伤害溢出')
         if pool=='dp':
             applied=min(max(0,dp-(1 if locked else 0)),raw);dp-=applied;total_dp+=applied;lost=raw-applied;overflow+=lost
@@ -101,7 +100,7 @@ def simulate_pools(inputs, weights, main_hits, skill_dr, enemy_coefficient, bonu
             applied=raw if hp is None else min(hp,raw)
             if hp is not None:hp-=applied
             total_hp+=applied;lost=0
-        increment=item['theoretical_increment'] if dp<=0 and alive else 0
+        increment=item['theoretical_increment'] if dp<=0 else 0
         rate+=min(increment,max(0,maximum-rate));theoretical+=increment
         rows.append(dict(item,pool=pool,before=before,after=rate,increment=rate-before,
                          theoretical_increment=increment,clipped=increment-(rate-before),

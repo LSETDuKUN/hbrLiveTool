@@ -10,6 +10,25 @@ from .formation import FormationReader
 from .enemy_reader import EnemyReader
 from .overdrive import read_overdrive
 
+_class_cache=None
+
+
+def battle_classes(r):
+    global _class_cache
+    identity=getattr(r,'process_identity',None)
+    def valid(k):
+        return r.name(r.q(k+16))=='BattleModule' and bool(r.name(r.q(r.q(k+88)+16)))
+    if identity is not None and _class_cache and _class_cache[0]==identity:
+        classes=_class_cache[1]
+        if classes and all(valid(k) for k in classes):return classes
+    names,_=r.scan(b'BattleModule\0')
+    if not names:raise RuntimeError('未找到战斗运行时，请进入战斗后重试')
+    refs,_=r.scan(tuple(struct.pack('<Q',n) for n in names),seconds=60)
+    classes={ref-16 for ref in refs if valid(ref-16)}
+    if not classes:raise RuntimeError('未找到 BattleModule 类，游戏版本可能不兼容')
+    _class_cache=(identity,classes) if identity is not None else None
+    return classes
+
 
 def members(r, address):
     size = r.i(address + 24)
@@ -21,14 +40,7 @@ def members(r, address):
 
 def locate(r):
     """Find class metadata then instances; reject ambiguous retained battles."""
-    names, _ = r.scan(b'BattleModule\0')
-    if not names:
-        raise RuntimeError('未找到战斗运行时，请进入战斗后重试')
-    refs, _ = r.scan(tuple(struct.pack('<Q', n) for n in names), seconds=60)
-    classes = {ref - 16 for ref in refs if r.name(r.q(ref)) == 'BattleModule'
-               and r.name(r.q(r.q(ref - 16 + 88) + 16))}
-    if not classes:
-        raise RuntimeError('未找到 BattleModule 类，游戏版本可能不兼容')
+    classes=battle_classes(r)
     refs, _ = r.scan(tuple(struct.pack('<Q', k) for k in classes), seconds=60)
     candidates = []
     for obj in refs:
@@ -156,6 +168,8 @@ def run(stop, paused, emit, outdir):
             log.write(json.dumps({'schema': 2, 'run_id': run_id, 'kind': 'start', 'time': time.time()})+'\n')
             log.flush()
             emit(('connected', {'run_id': run_id, 'path': str(path)}))
+            first=dict(time=time.time(),enemies=states,events=[],loading_details=True)
+            emit(('snapshot',first));log.write(json.dumps(first,ensure_ascii=False)+'\n');log.flush()
             if turn_warning:
                 emit(('status', turn_warning))
             previous_context = None
@@ -164,16 +178,23 @@ def run(stop, paused, emit, outdir):
                 if paused.is_set():
                     planned.pending=None
                     enemy_reader.observations.invalidate()
+                    enemy_reader.shields.invalidate()
                     player_transitions.invalidate()
                     stop.wait(0.1)
                     continue
                 context = None
-                if turn_reader:
-                    try:
-                        context = turn_reader.sample()
-                    except (RuntimeError, ValueError) as exc:
-                        turn_reader = None
-                        emit(('status', f'回合分组已停止，继续记录角色行动：{exc}'))
+                try:
+                    if turn_reader is None:
+                        turn_reader = TurnReader(r, module)
+                    context = turn_reader.sample()
+                except (RuntimeError, ValueError) as exc:
+                    # Retry transitions can temporarily have no current FSM state.
+                    # Keep a resolved reader so command visit IDs do not restart.
+                    if not turn_warning:
+                        emit(('status', f'回合状态暂不可读，将自动重试：{exc}'))
+                    turn_warning=str(exc)
+                else:
+                    turn_warning=None
                 states, actions = snapshot(r, module)
                 if context:
                     visit = context.get('command_visit')
@@ -195,6 +216,12 @@ def run(stop, paused, emit, outdir):
                     except (RuntimeError, ValueError, TypeError, KeyError):
                         state['forecast'] = dict(text='敌方行动信息暂不可读', blink=False)
                 known_enemies.update(s['address'] for s in states)
+                if previous is None:
+                    first=dict(time=time.time(),enemies=states,events=[],turn_context=context,loading_details=True)
+                    # Snapshot dictionaries are enriched below; publish a stable copy.
+                    import copy
+                    emit(('snapshot',copy.deepcopy(first)))
+                    log.write(json.dumps(first,ensure_ascii=False)+'\n');log.flush()
                 for action in actions:
                     action['style_name'] = names.style(action['style_label']) if action.get('style_label') else ''
                     action['actor_name'] = names.actor(action['actor_name'])
