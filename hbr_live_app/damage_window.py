@@ -169,28 +169,33 @@ class DamageWindow(tk.Toplevel):
         label.bind('<Configure>', lambda e: label.configure(wraplength=max(240, e.width - 8)))
         return label
 
-    def fold(self,parent,title):
+    def fold(self,parent,title, prominent=False):
         shell=tk.Frame(parent,bg=theme.BG);shell.pack(fill='x',pady=5)
         body=tk.Frame(shell,bg=theme.BG)
         opened=tk.BooleanVar(self,value=False)
         def toggle():
             opened.set(not opened.get())
-            button.configure(text=('▾ ' if opened.get() else '▸ ')+title)
+            button.configure(text=caption(opened.get()))
             if opened.get():body.pack(fill='x')
             else:body.pack_forget()
-        button=tk.Button(shell,text='▸ '+title,command=toggle,bg=theme.SURFACE,fg=theme.DIM,
-                         relief='flat',anchor='w',font=theme.ui(11))
+        def caption(expanded):
+            if prominent:return ('收起' if expanded else '展开')+'　'+title
+            return ('▾ ' if expanded else '▸ ')+title
+        button=tk.Button(shell,text=caption(False),command=toggle,bg=theme.CARD_HI if prominent else theme.SURFACE,
+                         fg=theme.CYAN if prominent else theme.DIM,cursor='hand2',pady=5 if prominent else 1,
+                         relief='flat',anchor='w',font=theme.ui(11,'bold' if prominent else 'normal'))
         button.pack(fill='x')
         return body
 
     # ---- pages -------------------------------------------------------------
     def build_form_page(self, frame, form):
-        self.battle_parameters=self.fold(form,'逐段破坏率与敌人资源参数')
+        self.battle_parameters=self.fold(form,'敌人 DP / HP 与破坏率参数',prominent=True)
         self.result_area=tk.Frame(form,bg=theme.BG)
         self.result_area.pack(fill='x',pady=6)
         self.summary=tk.Label(self.result_area,text='尚无计算结果',bg=theme.BG,fg=theme.FG,
                               font=theme.ui(13,'bold'),justify='left',anchor='w')
         self.summary.pack(fill='x',pady=6)
+        self.hit_details=self.fold(self.result_area,'逐 Hit 明细 · 每段伤害与破坏率',prominent=True)
         self.damage_metric=tk.StringVar(self,value='raw')
         Segment(self.result_area,[('raw','打出伤害（含溢出）'),('applied','实际扣除 DP＋HP')],
                 self.damage_metric,command=self.compute,accent=theme.CYAN).pack(anchor='w')
@@ -365,7 +370,7 @@ class DamageWindow(tk.Toplevel):
         self.calculation_status=self.note(form,'自动填充后直接计算；连续预演沿用上一人的破坏率和剩余 DP / HP。')
         RoundedButton(form,'重新计算',self.compute,theme.mix(theme.CARD_HI,theme.CYAN,.28),
                       theme.FG,theme.ui(11),height=32).pack(anchor='w',pady=4)
-        details=self.fold(self.result_area,'逐段伤害与破坏率明细（展开核对）')
+        details=self.hit_details
         ToggleChip(details,'单池比较时也计算逐段破坏率',self.use_destruction,
                    accent=theme.PINK).pack(anchor='w')
         self.note(details,'自动跨 DP/HP 始终按逐段计算。破盾当段增加破坏率，但溢出伤害不转入 HP。'

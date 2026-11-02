@@ -133,19 +133,37 @@ class StatusGroups(tk.Frame):
                     self.status_row(status, self, muted=True)
 
     def status_row(self, status, parent, muted=False):
-        line=tk.Frame(parent,bg=parent.cget('bg'))
-        line.pack(fill='x',pady=1)
+        # One effect per tile. Keep the same reading order for players and bosses.
+        tile=tk.Frame(parent,bg=theme.CARD,padx=7,pady=4,cursor='hand2')
+        tile.pack(fill='x',pady=2)
+        tile.columnconfigure(0,weight=1,uniform='effect')
+        tile.columnconfigure(1,weight=1,uniform='effect')
         badge=element_badge(status)
-        if badge:
-            name,fg,bg=badge
-            tag=tk.Label(line,text=name,bg=bg,fg=fg,font=theme.ui(10,'bold'),
-                         padx=5,pady=1,highlightthickness=1,highlightbackground=fg,cursor='hand2')
-            tag.pack(side='left',anchor='n',padx=(0,5),pady=2)
-            tag.bind('<Button-1>',lambda e:self.details(status))
-        body=tk.Frame(line,bg=line.cget('bg'))
-        body.pack(side='left',fill='x',expand=True)
-        self.row(effect_line(status),theme.MUTED if muted else theme.FG,
-                 callback=lambda:self.details(status),parent=body)
+        name=status.get('name') or '未知状态'
+        if status.get('label')=='SpecialStatus.ResistDown' and status.get('values',{}).get('rateValueInt',0)<0:
+            name='弱点加深 / '+name
+        if badge:name=badge[0]+' · '+name
+        name_fg=theme.MUTED if muted else badge[1] if badge else theme.FG
+        name_bg=badge[2] if badge and not muted else theme.CARD
+        duration=(status.get('duration') or '').replace('（消耗规则待核实）','')
+        tags=[duration]
+        if status.get('buff_limit_type')==4 or status.get('source_effect',{}).get('effect',{}).get('limitType')=='Only':tags.append('单独发动')
+        if status.get('pending_add'):tags.append('预添加')
+        if status.get('pending_remove'):tags.append('预移除')
+        if status.get('effective') is False:tags.append('暂未计入')
+        def cell(text,row,column,color,background,bold=False,span=1):
+            label=tk.Label(tile,text=text,fg=color,bg=background,anchor='w',justify='left',
+                           wraplength=100,font=theme.ui(11 if bold else 10,'bold' if bold else 'normal'),cursor='hand2')
+            label.grid(row=row,column=column,columnspan=span,sticky='ew',padx=2)
+            label.bind('<Configure>',lambda e:label.configure(wraplength=max(40,e.width-4)))
+            label.bind('<Button-1>',lambda e:self.details(status))
+        cell(name,0,0,name_fg,name_bg,True)
+        cell(status.get('value') or '数值未确认',0,1,theme.MUTED if muted else theme.CYAN,theme.CARD,True)
+        source=status.get('source_name') or status.get('source') or '未确认'
+        tags.append(f'来源：{source}')
+        meta=' · '.join(filter(None,tags))
+        if meta:cell(meta,1,0,theme.DIM,theme.CARD,span=2)
+        tile.bind('<Button-1>',lambda e:self.details(status))
 
     def toggle(self):
         self.expanded = not self.expanded
