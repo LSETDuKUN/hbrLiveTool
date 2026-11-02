@@ -13,6 +13,8 @@ class BattleModel:
         self.element_gauge = None
         self.field_state = None
         self.od_state = None
+        self.od_markers=[]
+        self.od_active=False
         self.execution_revision=0
         self.executions=set()
 
@@ -27,6 +29,23 @@ class BattleModel:
                 keys.add((group.get('turn'),group['id']))
         fresh=keys-self.executions
         if fresh:self.execution_revision+=1;self.executions.update(fresh)
+        od=packet.get('od_state') or {}
+        active=od.get('active') if od.get('available') else context.get('od')
+        if active and not self.od_active:
+            def anchor(events, incoming):
+                new={e['event_id'] for e in incoming if e['event_id'] not in events and e.get('command') and not e['command'].get('od')}
+                return len(events)+len(new)
+            actual=list(packet.get('events',[]))
+            planned=[e for e in actual if e.get('instant')]+list(packet.get('planned_events',[]))
+            turn=context.get('turn')
+            prior=any(g.get('turn')==turn and not g.get('od') and g.get('kind')!='instant'
+                      for e in [*self.actions.values(),*actual,*self.planned_actions.values(),*planned] if (g:=e.get('command')))
+            self.od_markers.append(dict(turn=turn,level=od.get('level') or context.get('od_level') or context.get('bonus_max'),
+                timing='后置' if prior or context.get('od_before_enemy') else '前置' if context.get('od_before_enemy') is not None else '时点未知',
+                actual=anchor(self.actions,actual),planned=anchor(self.planned_actions,planned)))
+        if active is not None:self.od_active=active
+        if active and self.od_markers and not self.od_markers[-1]['level']:
+            self.od_markers[-1]['level']=od.get('level') or context.get('bonus_max')
         if 'od_state' in packet:self.od_state=packet['od_state']
         if 'field_state' in packet:
             self.field_state = packet['field_state']
@@ -79,6 +98,6 @@ class BattleModel:
                 'player_states': self.players,
                 'element_gauge': self.element_gauge,
                 'field_state': self.field_state,
-                'od_state': self.od_state,
+                'od_state': self.od_state, 'od_markers':list(self.od_markers),
                 'planned_actions': list(self.planned_actions.values()),
                 'enemies': list(self.enemies.values()), 'actions': list(self.actions.values())}

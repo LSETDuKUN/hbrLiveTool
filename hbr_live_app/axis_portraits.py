@@ -125,7 +125,9 @@ def save_portrait_png(data, rows, path):
             tiles.append(tile.crop((0,top,1600,min(height,top+7000))))
     for index,row in enumerate(rows):
         bg = action_background(row['group'],theme.CARD if index%2==0 else theme.SURFACE)
-        if (row['group'] or {}).get('kind') == 'instant':
+        if (row['group'] or {}).get('kind')=='od_marker':
+            tile=Image.new('RGB',(1600,52),bg);ImageDraw.Draw(tile).text((800,26),row['values'][0],font=normal,fill=theme.FG,anchor='mm');tiles.append(tile)
+        elif (row['group'] or {}).get('kind') == 'instant':
             add_row(row['values'][0], [row['events']], bg, True)
         else:
             add_row(row['values'][0], row['slots'], bg)

@@ -55,14 +55,42 @@ def beneficiary_title(event):
     return actor_title(dict(target, actor=target.get('name') or '友方目标')) if target else ''
 
 
-def table_rows(events):
+def table_rows(events, markers=(), mode="actual"):
     rows = OrderedDict()
-    for event in events:
+    events=list(events)
+    if not markers:
+        # Older exports only have the OD context attached to command rows.
+        from .overdrive import action_od_level
+        markers=[];previous=None;acted=set()
+        for index,event in enumerate(events):
+            group=event.get('command') or {}
+            if not group:continue
+            turn=group.get('turn')
+            if group.get('od'):
+                activation=(turn,group.get('od_activation'))
+                if activation!=previous:
+                    timing='后置' if turn in acted or group.get('od_before_enemy') else '前置' if group.get('od_before_enemy') is not None else '时点未知'
+                    markers.append({mode:index,'level':action_od_level(group),'timing':timing})
+                previous=activation
+            else:
+                previous=None
+                if group.get('kind')!='instant':acted.add(turn)
+    offsets={}
+    for number,marker in enumerate(markers):
+        offsets.setdefault(marker[mode],[]).append((number,marker))
+    for index in range(len(events)+1):
+        for number,marker in offsets.get(index,[]):
+            level=marker.get('level') or '?'
+            label=f"OD{level} · {marker['timing']}"
+            rows[f'od:{number}']=dict(group=dict(kind='od_marker',od=True,od_level=level),values=(label,'','',''),events=[],slots=[[],[],[]],unplaced=[],pursuits=[],position_unknown=False)
+        if index==len(events):break
+        event=events[index]
         group = event.get('command')
         key = f'command:{group["id"]}' if group else f'unknown:{event["event_id"]}'
         row = rows.setdefault(key, dict(group=group, events=[]))
         row['events'].append(event)
     for row_key, row in list(rows.items()):
+        if (row['group'] or {}).get('kind')=='od_marker':continue
         slots = [[], [], []]
         unknown = []
         visible = []

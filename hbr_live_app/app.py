@@ -602,7 +602,7 @@ class App:
             self.plan_summary.pack(fill='x',before=self.tree.master,pady=5)
             self.plan_summary.update_events(self.model.planned_actions.values())
         else:self.plan_summary.pack_forget()
-        self.history_rows=table_rows(self.history_events())
+        self.history_rows=table_rows(self.history_events(),self.model.od_markers,self.history_mode.get())
         self.tree.set_rows(self.history_rows)
         self.detail_caption.configure(text=('预选行动：开始前最后一次采样，不代表实际发动；旧记录未采集预选时此处为空。'
             if self.history_mode.get()=='planned' else '实际行动：一行一次行动 · / 表示未观测到行动 · 双击查看详情。'))
@@ -624,7 +624,11 @@ class App:
         from .statuses import status_line
         self.field_label.configure(text='场地 · '+('  /  '.join(status_line(s)+' · '+s.get('duration','持续待确认') for s in active)
             if active else '未观测到场地' if field.get('available') else '暂不可读'))
-        if events or self.history_mode.get()=='planned':
+        markers=self.model.od_markers
+        marker_revision=(self.model.run_id,len(markers),markers[-1]['level'] if markers else None)
+        marker_changed=marker_revision!=getattr(self,'_history_marker_revision',None)
+        self._history_marker_revision=marker_revision
+        if events or marker_changed or self.history_mode.get()=='planned':
             self.refresh_history()
         self.render_details()
 
@@ -700,6 +704,7 @@ class App:
         if not selected or selected[0] not in self.history_rows:
             return '选择一行，展开查看所有角色的伤害、作用目标和逐 Hit 明细。'
         row = self.history_rows[selected[0]]
+        if (row['group'] or {}).get('kind')=='od_marker':return row['values'][0]
         events = row['events']
         text = context_label(row['group']) + f' · 合计 {sum(e["value"] for e in events):,}\n'
         if row['position_unknown']:
@@ -804,7 +809,7 @@ class App:
         self.style()
         self.build()
         self.layout()
-        self.history_rows = table_rows(self.history_events())
+        self.history_rows = table_rows(self.history_events(),self.model.od_markers,self.history_mode.get())
         self.tree.set_rows(self.history_rows)
         self.render(getattr(self, 'last_events', []))
         if self.history_visible.get():

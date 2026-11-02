@@ -173,9 +173,6 @@ def context_label(group):
     if group.get('observed_before_connection'):return '接入前 · 小按钮（时点未知）'
     parts = [f'Turn {group["turn"]}'] if group.get('turn') else ['回合未识别']
     if group.get('od'):
-        from .overdrive import action_od_level
-        level=action_od_level(group)
-        if level:parts.append(f'OD {level}')
         parts.append(f'Bonus {group["bonus"]}')
     if group.get('additional') or group.get('extra'):
         parts.append('Extra')

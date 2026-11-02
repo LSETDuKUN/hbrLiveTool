@@ -4,7 +4,7 @@ from tkinter import font as tkfont
 from . import theme
 from .history import actor_title, skill_title, beneficiary, beneficiary_title
 from .turns import context_label
-from .overdrive import action_background,action_od_level
+from .overdrive import action_background
 
 
 class BattleTable(tk.Frame):
@@ -164,6 +164,11 @@ class BattleTable(tk.Frame):
                                     text=title, fill=theme.FG, font=self.skill_font)
         y = 0
         for number, (key, row) in enumerate(self.rows.items()):
+            if (row['group'] or {}).get('kind')=='od_marker':
+                self.canvas.create_rectangle(0,y,available,y+36,fill=action_background(row['group'],theme.CARD),outline=theme.LINE)
+                self.canvas.create_text(available/2,y+18,text=row['values'][0],font=self.badge_font,fill=theme.FG)
+                self.bounds[key]=(y,y+36);y+=36
+                continue
             if (row['group'] or {}).get('kind') == 'instant':
                 items, content_height = self.draw_event((edges[1]+available)/2, y+10,
                     available-edges[1], row['events'][0])
@@ -193,8 +198,6 @@ class BattleTable(tk.Frame):
             group = row['group'] or {}
             badges = [(f'Turn {group["turn"]}', theme.CYAN, theme.CYAN_DEEP)] if group.get('turn') else [('回合待确认', theme.LAVENDER, theme.LAVENDER_DEEP)]
             if group.get('od'):
-                level=action_od_level(group)
-                if level:badges.append((f'OD {level}',theme.GOLD,theme.GOLD_DEEP))
                 badges.append((f'Bonus {group["bonus"]}', theme.GOLD, theme.GOLD_DEEP))
             if group.get('additional') or group.get('extra'):
                 badges.append(('Extra', theme.PINK, theme.PINK_DEEP))

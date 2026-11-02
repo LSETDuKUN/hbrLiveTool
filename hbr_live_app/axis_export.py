@@ -21,13 +21,15 @@ def cells(row):
 
 def save_axis(data, path, portraits=False):
     path = Path(path)
-    rows = list(table_rows(data['actions']).values())
+    rows = list(table_rows(data['actions'],data.get('od_markers',()),data.get('history_mode','actual')).values())
     if path.suffix.lower() == '.html':
         body = []
         from .axis_portraits import Images, event_html
         images = Images()
         for row in rows:
             row_open='<tr style="background:'+action_background(row['group'],theme.CARD)+'">'
+            if (row['group'] or {}).get('kind')=='od_marker':
+                body.append(row_open+'<td colspan="4">'+html.escape(row['values'][0])+'</td></tr>');continue
             if portraits:
                 label = '<td>'+html.escape(row['values'][0])+'</td>'
                 if (row['group'] or {}).get('kind') == 'instant':
@@ -144,6 +146,8 @@ def save_png(data, rows, path):
     block_groups = []
     for row in rows:
         previous_blocks=len(blocks)
+        if (row['group'] or {}).get('kind')=='od_marker':
+            blocks.append([wrap(row['values'][0],True,widths[0]),[],[],[]]);block_groups.append(row['group']);continue
         if (row['group'] or {}).get('kind') == 'instant':
             for event in row['events']:
                 blocks.append([wrap(row['values'][0], False, widths[0]),

@@ -596,14 +596,15 @@ class DashboardTests(unittest.TestCase):
         events = ledger.update([dict(event(1), actor_position=1)], context(5, additional=True, od=True))
         self.app.model.update(dict(enemies=[], events=events))
         self.app.render(events)
-        self.assertEqual(len(self.app.tree.get_children()), 1)
-        iid = self.app.tree.get_children()[0]
+        self.assertEqual(len(self.app.tree.get_children()), 2)
+        marker,iid = self.app.tree.get_children()
+        self.assertTrue(self.app.tree.item(marker,'values')[0].startswith('OD1'))
         values = self.app.tree.item(iid, 'values')
-        self.assertEqual(values, ('Turn 1 / OD 1 / Bonus 1 / Extra', '角色\n技能', '/', '/'))
+        self.assertEqual(values, ('Turn 1 / Bonus 1 / Extra', '角色\n技能', '/', '/'))
         self.assertFalse(self.app.details_open)
         canvas = self.app.tree.canvas
         labels = canvas.find_withtag('context')
-        self.assertEqual(''.join(canvas.itemcget(i, 'text') for i in labels), 'Turn 1 / OD 1 / Bonus 1 / Extra')
+        self.assertEqual(''.join(canvas.itemcget(i, 'text') for i in labels), 'Turn 1 / Bonus 1 / Extra')
         self.assertEqual(len({canvas.coords(i)[1] for i in labels}), 1)
 
     def test_long_style_truncated_only_in_table(self):
