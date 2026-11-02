@@ -3,6 +3,7 @@ import tkinter as tk
 from copy import deepcopy
 
 from . import theme
+from .components import RoundedCard
 from .statuses import status_line
 from .status_rules import active
 
@@ -99,71 +100,121 @@ class StatusGroups(tk.Frame):
         self.draw()
 
     def draw(self):
-        for child in self.winfo_children():child.destroy()
+        for child in self.winfo_children():
+            child.destroy()
         groups, other = group_statuses(self.state)
         if not self.state.get('statuses_available'):
             self.row('状态暂不可读', theme.MUTED)
-            if self.enemy:self.base_resistances()
+            if self.enemy:
+                self.base_resistances()
             return
         shown = False
-        for key,title,color in group_list():
+        for key, title, color in group_list():
             items = groups[key]
-            if not items:continue
+            if not items:
+                continue
             shown = True
-            block = tk.Frame(self,bg=group_backgrounds()[key])
-            block.pack(fill='x',pady=3)
-            accent = tk.Frame(block,bg=color,width=3)
-            accent.pack(side='left',fill='y')
-            body = tk.Frame(block,bg=group_backgrounds()[key])
-            body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
-            self.row(title, color, bold=True, parent=body)
-            # Each applied effect remains separate, including different durations.
-            for status in items:
-                self.status_row(status, body)
+            self.group_block(title, color, items)
         if not shown:
             self.row('主要乘区暂无已确认状态', theme.MUTED)
         if self.enemy:
             self.base_resistances()
         if other:
-            tk.Button(self,text=('▾' if self.expanded else '▸')+f' 暂被覆盖 / 其他效果 · {len(other)} 项',
-                command=self.toggle,bg=self.cget('bg'),fg=theme.DIM,relief='flat',anchor='w',
-                activebackground=self.cget('bg'),activeforeground=theme.FG,font=theme.ui(11)).pack(fill='x',pady=3)
+            arrow = '▾' if self.expanded else '▸'
+            toggle = tk.Label(self, text=f'{arrow}  暂被覆盖 / 其他效果 · {len(other)} 项',
+                              bg=theme.mix(theme.SURFACE, theme.LINE, .45), fg=theme.DIM,
+                              font=theme.ui(11, 'bold'), anchor='w', padx=10, pady=6,
+                              cursor='hand2')
+            toggle.pack(fill='x', pady=(6, 3))
+            toggle.bind('<Button-1>', lambda e: self.toggle())
             if self.expanded:
                 for status in other:
-                    self.status_row(status, self, muted=True)
+                    self.status_row(status, self, muted=True, background=self.cget('bg'))
 
-    def status_row(self, status, parent, muted=False):
-        # One effect per tile. Keep the same reading order for players and bosses.
-        tile=tk.Frame(parent,bg=theme.CARD,padx=7,pady=4,cursor='hand2')
-        tile.pack(fill='x',pady=2)
-        tile.columnconfigure(0,weight=1,uniform='effect')
-        tile.columnconfigure(1,weight=1,uniform='effect')
-        badge=element_badge(status)
-        name=status.get('name') or '未知状态'
-        if status.get('label')=='SpecialStatus.ResistDown' and status.get('values',{}).get('rateValueInt',0)<0:
-            name='弱点加深 / '+name
-        if badge:name=badge[0]+' · '+name
-        name_fg=theme.MUTED if muted else badge[1] if badge else theme.FG
-        name_bg=badge[2] if badge and not muted else theme.CARD
-        duration=(status.get('duration') or '').replace('（消耗规则待核实）','')
-        tags=[duration]
-        if status.get('buff_limit_type')==4 or status.get('source_effect',{}).get('effect',{}).get('limitType')=='Only':tags.append('单独发动')
-        if status.get('pending_add'):tags.append('预添加')
-        if status.get('pending_remove'):tags.append('预移除')
-        if status.get('effective') is False:tags.append('暂未计入')
-        def cell(text,row,column,color,background,bold=False,span=1):
-            label=tk.Label(tile,text=text,fg=color,bg=background,anchor='w',justify='left',
-                           wraplength=100,font=theme.ui(11 if bold else 10,'bold' if bold else 'normal'),cursor='hand2')
-            label.grid(row=row,column=column,columnspan=span,sticky='ew',padx=2)
-            label.bind('<Configure>',lambda e:label.configure(wraplength=max(40,e.width-4)))
-            label.bind('<Button-1>',lambda e:self.details(status))
-        cell(name,0,0,name_fg,name_bg,True)
-        cell(status.get('value') or '数值未确认',0,1,theme.MUTED if muted else theme.CYAN,theme.CARD,True)
-        source=status.get('source_name') or status.get('source') or '未确认'
-        tags.append(f'来源：{source}')
-        meta=' · '.join(filter(None,tags))
-        if meta:cell(meta,1,0,theme.DIM,theme.CARD,span=2)
-        tile.bind('<Button-1>',lambda e:self.details(status))
+    def group_block(self, title, color, items, note=None):
+        tint = theme.mix(theme.CARD, color, .11)
+        card = RoundedCard(self, background=tint, outline='', radius=14,
+                           pad=(12, 9), shadow=False)
+        card.pack(fill='x', pady=(0, 6))
+        block = card.content
+        head = tk.Frame(block, bg=tint)
+        head.pack(fill='x', pady=(0, 6))
+        dot = tk.Canvas(head, width=9, height=9, bg=tint, highlightthickness=0, bd=0)
+        dot.pack(side='left', padx=(0, 7))
+        dot.create_oval(1, 1, 8, 8, fill=color, outline='')
+        tk.Label(head, text=title, bg=tint, fg=color,
+                 font=theme.ui(11, 'bold')).pack(side='left')
+        tk.Label(head, text=str(len(items)), bg=tint,
+                 fg=theme.mix(color, theme.CARD, .45),
+                 font=theme.ui(10)).pack(side='left', padx=(6, 0))
+        sources = [item.get('source_name') or item.get('source') or '未确认' for item in items]
+        shared = sources[0] if sources and len(set(sources)) == 1 else None
+        if shared:
+            tk.Label(head, text='来源：' + shared, bg=tint, fg=theme.MUTED,
+                     font=theme.ui(9)).pack(side='right', padx=(0, 10))
+        for index, status in enumerate(items):
+            if index:
+                tk.Frame(block, bg=theme.mix(tint, theme.LINE, .45),
+                         height=1).pack(fill='x', pady=5)
+            self.status_row(status, block, background=tint, color=color,
+                            show_source=shared is None)
+
+    def status_row(self, status, parent, muted=False, background=None, color=None,
+                   show_source=True):
+        bg = background or parent.cget('bg')
+        accent = color or theme.LAVENDER
+        tile = tk.Frame(parent, bg=bg, cursor='hand2')
+        tile.pack(fill='x')
+        tile.columnconfigure(1, weight=1)
+        tile.columnconfigure(3, minsize=theme.px(52))
+        badge = element_badge(status)
+        name = status.get('name') or '未知状态'
+        if status.get('label') == 'SpecialStatus.ResistDown' and status.get('values', {}).get('rateValueInt', 0) < 0:
+            name = '弱点加深 / ' + name
+        if badge:
+            marker = tk.Label(tile, text=badge[0], bg=badge[2], fg=badge[1],
+                              font=theme.ui(9, 'bold'), padx=3, pady=0, cursor='hand2')
+            marker.grid(row=0, column=0, sticky='w', padx=(0, 8))
+        else:
+            marker = tk.Canvas(tile, width=7, height=14, bg=bg, highlightthickness=0,
+                               bd=0, cursor='hand2')
+            marker.grid(row=0, column=0, sticky='w', padx=(0, 8))
+            marker.create_oval(1, 4, 7, 10, fill=accent, outline='')
+        name_fg = theme.MUTED if muted else theme.FG
+        label = tk.Label(tile, text=name, fg=name_fg, bg=bg, anchor='w', justify='left',
+                         wraplength=180, font=theme.ui(11, 'bold'), cursor='hand2')
+        label.grid(row=0, column=1, sticky='ew')
+        label.bind('<Configure>', lambda e: label.configure(wraplength=max(60, e.width - 4)))
+        value = tk.Label(tile, text=status.get('value') or '数值未确认', bg=bg,
+                         fg=theme.MUTED if muted else theme.mix(color or theme.CYAN, theme.FG, .15),
+                         font=theme.ui(11, 'bold'), anchor='e', cursor='hand2')
+        value.grid(row=0, column=2, sticky='e', padx=(10, 8))
+        duration = (status.get('duration') or '').replace('（消耗规则待核实）', '')
+        if duration:
+            chip = tk.Label(tile, text=duration.replace('回合', ' 回合'), bg=theme.mix(theme.CARD, accent, .18),
+                            fg=theme.mix(accent, theme.FG, .45), font=theme.ui(9),
+                            padx=6, pady=1, cursor='hand2')
+            chip.grid(row=0, column=3, sticky='e')
+        tags = []
+        if status.get('buff_limit_type') == 4 or status.get('source_effect', {}).get('effect', {}).get('limitType') == 'Only':
+            tags.append('单独发动')
+        if status.get('pending_add'):
+            tags.append('预添加')
+        if status.get('pending_remove'):
+            tags.append('预移除')
+        if status.get('effective') is False:
+            tags.append('暂未计入')
+        meta = list(tags)
+        if show_source and not muted:
+            meta.append('来源：' + (status.get('source_name') or status.get('source') or '未确认'))
+        if meta:
+            foot = tk.Label(tile, text=' · '.join(meta), bg=bg,
+                            fg=theme.mix(theme.MUTED, accent, .35), anchor='w',
+                            justify='left', font=theme.ui(9), cursor='hand2')
+            foot.grid(row=1, column=1, columnspan=3, sticky='ew', pady=(2, 0))
+        for widget in (tile, marker, label, value, foot if meta else None):
+            if widget is not None:
+                widget.bind('<Button-1>', lambda e, s=status: self.details(s))
 
     def toggle(self):
         self.expanded = not self.expanded
@@ -171,14 +222,21 @@ class StatusGroups(tk.Frame):
 
     def base_resistances(self):
         from .resistances import resistance_lines
-        block=tk.Frame(self,bg=group_backgrounds()['resist'])
-        block.pack(fill='x',pady=3)
-        accent=tk.Frame(block,bg=theme.LAVENDER,width=3)
-        accent.pack(side='left',fill='y')
-        body=tk.Frame(block,bg=group_backgrounds()['resist'])
-        body.pack(side='left',fill='x',expand=True,padx=(10,8),pady=7)
-        self.row('抗性 · 弱点参考', theme.LAVENDER, bold=True, parent=body)
-        for text in resistance_lines(self.state):self.row(text, theme.FG, parent=body)
+        color = theme.LAVENDER
+        tint = theme.mix(theme.CARD, color, .11)
+        card = RoundedCard(self, background=tint, outline='', radius=14,
+                           pad=(12, 9), shadow=False)
+        card.pack(fill='x', pady=(0, 6))
+        body = card.content
+        head = tk.Frame(body, bg=tint)
+        head.pack(fill='x', pady=(0, 6))
+        dot = tk.Canvas(head, width=9, height=9, bg=tint, highlightthickness=0, bd=0)
+        dot.pack(side='left', padx=(0, 7))
+        dot.create_oval(1, 1, 8, 8, fill=color, outline='')
+        tk.Label(head, text='抗性 · 弱点参考', bg=tint, fg=color,
+                 font=theme.ui(11, 'bold')).pack(side='left')
+        for text in resistance_lines(self.state):
+            self.row(text, theme.FG, parent=body)
 
     def row(self,text,color,bold=False,callback=None,parent=None):
         parent = self if parent is None else parent
