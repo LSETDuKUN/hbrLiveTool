@@ -97,7 +97,6 @@ class RoundedButton(tk.Canvas):
         super().__init__(master, height=height, bg=master.cget('bg'), highlightthickness=0,
                          takefocus=True, cursor='hand2', bd=0, **kwargs)
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
         self.bind('<Button-1>', self._invoke)
         self.bind('<Return>', self._invoke)
         self.bind('<space>', self._invoke)
@@ -130,6 +129,7 @@ class RoundedButton(tk.Canvas):
             self._command()
 
     def _invoke(self, event=None):
+        self.focus_set()
         if self._state == 'disabled':
             return
         self.invoke()
@@ -174,7 +174,6 @@ class Pill(tk.Canvas):
         super().__init__(master, height=height, bg=master.cget('bg'),
                          highlightthickness=0, bd=0, **kwargs)
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def configure(self, cnf=None, **kwargs):
         for option, attr in (('text', '_text'), ('fg', '_fg'), ('bg', '_bg')):
@@ -213,13 +212,13 @@ class ToggleChip(tk.Canvas):
         self.bind('<Enter>', lambda e: self._hovered(True))
         self.bind('<Leave>', lambda e: self._hovered(False))
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _hovered(self, value):
         self._hover = value
         self.draw()
 
     def _toggle(self, event=None):
+        self.focus_set()
         self._var.set(not self._var.get())
         if self._command:
             self._command()
@@ -359,7 +358,6 @@ class RoundedSelect(tk.Canvas):
         self.bind('<Enter>', lambda e: self._set_hover(True))
         self.bind('<Leave>', lambda e: self._set_hover(False))
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
         self._var.trace_add('write', lambda *_: self.draw())
         self.draw()
 
@@ -391,6 +389,7 @@ class RoundedSelect(tk.Canvas):
                          font=self._font, fill=theme.MUTED)
 
     def popup(self, event=None):
+        self.focus_set()
         if self._state == 'disabled' or not self._values:
             return
         self._open = True
@@ -468,7 +467,6 @@ class Segment(tk.Canvas):
         self.bind('<Motion>', self._motion)
         self.bind('<Leave>', lambda e: self._set_hover(None))
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _segments(self):
         font = tkfont.Font(font=theme.ui(11))
@@ -531,7 +529,6 @@ class TabBar(tk.Canvas):
         self.bind('<Motion>', self._motion)
         self.bind('<Leave>', lambda e: self._set_hover(None))
         self.bind('<Configure>', lambda e: self.draw())
-        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _segments(self):
         font = tkfont.Font(font=self.font)
@@ -559,6 +556,7 @@ class TabBar(tk.Canvas):
         return None
 
     def _click(self, event):
+        self.focus_set()
         name = self._hit(event.x,event.y)
         if name and name != self.current:
             self.select(name)
