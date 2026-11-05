@@ -49,6 +49,18 @@ def read_inputs(reader, actor):
                     audit.append(audit_entry(label,runtime))
         result['passive_labels']=labels
         result['passive_audit']=audit
+    # Read equipped command skills once with the cached character inputs.
+    pointer = reader.prop(actor, 'frontSkillList')
+    if pointer and reader.r.cls(pointer) == 'List`1':
+        roster = []
+        for skill in members(reader.r, pointer):
+            if reader.r.cls(skill) != 'BattleSkill': continue
+            domain = reader.prop(skill, 'domainSkill')
+            master = reader.get(domain, 'master') if domain else None
+            if master:
+                roster.append(dict(label=reader.get(master, 'Label'), name=reader.get(master, 'Name'),
+                                   level=reader.prop(skill, 'skillLevel')))
+        result['equipped_skills'] = roster
     result.update(read_selection(reader,actor))
     return result
 

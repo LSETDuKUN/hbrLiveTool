@@ -2,6 +2,7 @@
 import json
 import os
 import queue
+import sqlite3
 import threading
 import time
 import tkinter as tk
@@ -45,6 +46,8 @@ class App:
         self.session_path = None
         self._player_need = -1
         self._enemy_need = -1
+        from .team_store import TeamStore
+        self.team_store = TeamStore(ROOT / 'data' / 'team_builds.sqlite3')
         self.settings = self._load_settings()
         theme.use(self.settings.get('theme', theme.NAME))
         self.compact = tk.BooleanVar(value=bool(self.settings.get('compact', False)))
@@ -70,6 +73,13 @@ class App:
             return data if isinstance(data, dict) else {}
         except (OSError, ValueError):
             return {}
+
+    def open_teams(self):
+        from .team_window import TeamWindow
+        window = getattr(self, 'team_window', None)
+        if window is not None and window.winfo_exists():
+            window.refresh();window.deiconify();window.lift();return
+        self.team_window = TeamWindow(self.root, self.team_store)
 
     def open_damage_calculator(self):
         from .damage_window import DamageWindow
@@ -146,6 +156,7 @@ class App:
         self.menu.add_separator()
         self.menu.add_command(label='导出本场摘要…', command=self.export)
         self.menu.add_command(label='保存行动轴…', command=self.export_axis)
+        self.menu.add_command(label='配队档案…', command=self.open_teams)
         self.menu.add_command(label='打开记录文件夹', command=self.open_sessions)
         self.menu.add_command(label='诊断日志', command=self.show_logs)
         self.settings_button = RoundedButton(head, '设置 ⋯', self.drop_menu, theme.CARD_HI, theme.FG,
@@ -560,6 +571,14 @@ class App:
                     self.set_status('内存已连接 · 可以行动', theme.CYAN)
                 elif kind == 'snapshot':
                     self.model.update(data)
+                    try:
+                        captured = self.team_store.observe(self.model.run_id, self.model.players, self.model.turn_context)
+                        if captured:
+                            self.set_status('已采集配队 · 设置 → 配队档案，可保存或丢弃', theme.CYAN)
+                            archive = getattr(self, 'team_window', None)
+                            if archive is not None and archive.winfo_exists(): archive.refresh()
+                    except (OSError, sqlite3.Error) as exc:
+                        self.set_status(f'配队采集失败：{exc}', theme.ROSE)
                     window=getattr(self,'damage_window',None)
                     if window is not None and window.winfo_exists():window.observe_live()
                     self.last_packet = data
