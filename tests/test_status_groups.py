@@ -34,3 +34,23 @@ class StatusGroupTests(unittest.TestCase):
         groups,other=group_statuses(dict(statuses=states))
         self.assertFalse(any(groups.values()))
         self.assertEqual(other,states)
+
+class StatusCardInteractionTests(unittest.TestCase):
+    def test_duration_click_and_collapsed_source(self):
+        import tkinter as tk
+        from hbr_live_app.status_groups import StatusGroups
+        root=tk.Tk();root.withdraw()
+        clicked=[]
+        try:
+            panel=StatusGroups(root,clicked.append)
+            effect=status('AttackUp',duration='剩余1回合',source_name='来源技能')
+            panel.status_row(effect,panel,muted=True)
+            def widgets(parent):
+                for child in parent.winfo_children():
+                    yield child
+                    yield from widgets(child)
+            labels=[w for w in widgets(panel) if isinstance(w,tk.Label)]
+            chip=next(w for w in labels if '回合' in w.cget('text'))
+            self.assertTrue(chip.bind('<Button-1>'))
+            self.assertTrue(any('来源技能' in w.cget('text') for w in labels))
+        finally:root.destroy()

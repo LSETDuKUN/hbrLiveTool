@@ -150,8 +150,10 @@ class StatusGroups(tk.Frame):
         sources = [item.get('source_name') or item.get('source') or '未确认' for item in items]
         shared = sources[0] if sources and len(set(sources)) == 1 else None
         if shared:
-            tk.Label(head, text='来源：' + shared, bg=tint, fg=theme.MUTED,
-                     font=theme.ui(9)).pack(side='right', padx=(0, 10))
+            source = tk.Label(block, text='来源：' + shared, bg=tint, fg=theme.MUTED,
+                              font=theme.ui(9), anchor='w', justify='left', wraplength=200)
+            source.pack(fill='x', pady=(0, 6))
+            source.bind('<Configure>', lambda e: source.configure(wraplength=max(60, e.width-4)))
         for index, status in enumerate(items):
             if index:
                 tk.Frame(block, bg=theme.mix(tint, theme.LINE, .45),
@@ -190,6 +192,7 @@ class StatusGroups(tk.Frame):
                          font=theme.ui(11, 'bold'), anchor='e', cursor='hand2')
         value.grid(row=0, column=2, sticky='e', padx=(10, 8))
         duration = (status.get('duration') or '').replace('（消耗规则待核实）', '')
+        chip = None
         if duration:
             chip = tk.Label(tile, text=duration.replace('回合', ' 回合'), bg=theme.mix(theme.CARD, accent, .18),
                             fg=theme.mix(accent, theme.FG, .45), font=theme.ui(9),
@@ -205,14 +208,15 @@ class StatusGroups(tk.Frame):
         if status.get('effective') is False:
             tags.append('暂未计入')
         meta = list(tags)
-        if show_source and not muted:
+        if show_source:
             meta.append('来源：' + (status.get('source_name') or status.get('source') or '未确认'))
         if meta:
             foot = tk.Label(tile, text=' · '.join(meta), bg=bg,
                             fg=theme.mix(theme.MUTED, accent, .35), anchor='w',
                             justify='left', font=theme.ui(9), cursor='hand2')
             foot.grid(row=1, column=1, columnspan=3, sticky='ew', pady=(2, 0))
-        for widget in (tile, marker, label, value, foot if meta else None):
+            foot.bind('<Configure>', lambda e: foot.configure(wraplength=max(60, e.width-4)))
+        for widget in (tile, marker, label, value, chip, foot if meta else None):
             if widget is not None:
                 widget.bind('<Button-1>', lambda e, s=status: self.details(s))
 
