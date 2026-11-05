@@ -50,9 +50,8 @@ class PlayerPanel(tk.Frame):
         RoundedButton(head, '完整详情', self.details, theme.CARD_HI, theme.DIM, theme.ui(11),
                       height=28).pack(side='right')
         self.mode_note=tk.Label(body,bg=theme.CARD,fg=theme.GOLD,anchor='w',justify='left',font=theme.ui(10),wraplength=320)
-        self.mode_note.pack(fill='x',pady=4)
         self.groups = StatusGroups(body, self.status_details)
-        self.groups.pack(fill='x', pady=(4, 0))
+        self.groups.pack(fill='x', pady=(6, 0))
         self.detail.bind('<Configure>', lambda e: self.caption.configure(wraplength=max(120, e.width - 24)))
 
     def reset(self):
@@ -166,6 +165,11 @@ class PlayerPanel(tk.Frame):
                 text+='\n鬼道技能加攻 +300%：'+('已读到生效状态，见下方加攻区。' if observed else '攻击时生效；当前未读到生效 Buff。')
             text+='\n以上规则说明不作为额外 Buff 重复计入。'
         self.mode_note.configure(text=text)
+        if text.strip():
+            if not self.mode_note.winfo_ismapped():
+                self.mode_note.pack(fill='x', pady=(2, 4), before=self.groups)
+        elif self.mode_note.winfo_ismapped():
+            self.mode_note.pack_forget()
         self.groups.update_state(p)
 
     def tick_effects(self):
