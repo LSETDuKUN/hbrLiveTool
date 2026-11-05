@@ -97,6 +97,7 @@ class RoundedButton(tk.Canvas):
         super().__init__(master, height=height, bg=master.cget('bg'), highlightthickness=0,
                          takefocus=True, cursor='hand2', bd=0, **kwargs)
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
         self.bind('<Button-1>', self._invoke)
         self.bind('<Return>', self._invoke)
         self.bind('<space>', self._invoke)
@@ -173,6 +174,7 @@ class Pill(tk.Canvas):
         super().__init__(master, height=height, bg=master.cget('bg'),
                          highlightthickness=0, bd=0, **kwargs)
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def configure(self, cnf=None, **kwargs):
         for option, attr in (('text', '_text'), ('fg', '_fg'), ('bg', '_bg')):
@@ -211,6 +213,7 @@ class ToggleChip(tk.Canvas):
         self.bind('<Enter>', lambda e: self._hovered(True))
         self.bind('<Leave>', lambda e: self._hovered(False))
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _hovered(self, value):
         self._hover = value
@@ -245,8 +248,9 @@ class RoundedEntry(tk.Canvas):
     """Rounded field wrapping a borderless entry, so inputs match the cards."""
 
     def __init__(self, master, textvariable=None, width=130, height=None, justify='right',
-                 font=None, radius=None, **kwargs):
+                 font=None, radius=None, placeholder='', **kwargs):
         self._var = textvariable if textvariable is not None else tk.StringVar()
+        self._placeholder = placeholder
         self._justify = justify
         self._font = font or theme.ui(12)
         self._height = height or theme.px(34)
@@ -262,7 +266,9 @@ class RoundedEntry(tk.Canvas):
         self.entry.bind('<FocusIn>', self._focus_in)
         self.entry.bind('<FocusOut>', self._focus_out)
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
         self.entry.bind('<Configure>', lambda e: None)
+        self._var.trace_add('write', lambda *_: self.draw())
         self.draw()
 
     def _focus_in(self, event=None):
@@ -277,6 +283,9 @@ class RoundedEntry(tk.Canvas):
         self.entry.focus_set()
 
     def configure(self, cnf=None, **kwargs):
+        if isinstance(cnf, dict):
+            kwargs = {**cnf, **kwargs}
+            cnf = None
         if 'textvariable' in kwargs:
             self._var = kwargs.pop('textvariable')
             self.entry.configure(textvariable=self._var)
@@ -297,16 +306,29 @@ class RoundedEntry(tk.Canvas):
     def set(self, value):
         self._var.set(value)
 
+    def delete(self, first, last=None):
+        return self.entry.delete(first, last)
+
+    def insert(self, index, text):
+        return self.entry.insert(index, text)
+
     def draw(self):
         # Keep the embedded entry alive across focus/resize repaints.
         for item in self.find_all():
             if item != self._slot:
-                self.delete(item)
+                tk.Canvas.delete(self, item)
         width = max(40, self.winfo_width())
         height = self._height
         radius = self._radius if self._radius is not None else min(height / 2, theme.RADIUS_SM)
         outline = theme.PINK if self._focused else theme.LINE
         rounded(self, 1, 1, width - 1, height - 1, radius, fill=theme.field(), outline=outline)
+        showing = bool(self._placeholder) and not self._var.get() and not self._focused
+        if showing:
+            self.itemconfigure(self._slot, state='hidden')
+            self.create_text(14, height / 2, text=self._placeholder, anchor='w',
+                             font=self._font, fill=theme.MUTED)
+        else:
+            self.itemconfigure(self._slot, state='normal')
         if self._focused:
             rounded(self, 3, 3, width - 3, height - 3, max(3, radius - 2), fill='',
                     outline=theme.mix(theme.field(), theme.PINK, .45))
@@ -337,6 +359,7 @@ class RoundedSelect(tk.Canvas):
         self.bind('<Enter>', lambda e: self._set_hover(True))
         self.bind('<Leave>', lambda e: self._set_hover(False))
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
         self._var.trace_add('write', lambda *_: self.draw())
         self.draw()
 
@@ -345,7 +368,7 @@ class RoundedSelect(tk.Canvas):
         self.draw()
 
     def draw(self):
-        self.delete('all')
+        tk.Canvas.delete(self, 'all')
         width = max(40, self.winfo_width())
         height = self._height
         radius = min(height / 2, theme.RADIUS_SM)
@@ -414,6 +437,9 @@ class RoundedSelect(tk.Canvas):
         return index
 
     def configure(self, cnf=None, **kwargs):
+        if isinstance(cnf, dict):
+            kwargs = {**cnf, **kwargs}
+            cnf = None
         if 'values' in kwargs:
             self._values = list(kwargs.pop('values'))
         if 'state' in kwargs:
@@ -442,6 +468,7 @@ class Segment(tk.Canvas):
         self.bind('<Motion>', self._motion)
         self.bind('<Leave>', lambda e: self._set_hover(None))
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _segments(self):
         font = tkfont.Font(font=theme.ui(11))
@@ -504,6 +531,7 @@ class TabBar(tk.Canvas):
         self.bind('<Motion>', self._motion)
         self.bind('<Leave>', lambda e: self._set_hover(None))
         self.bind('<Configure>', lambda e: self.draw())
+        self.bind('<Button-1>', lambda e: self.focus_set())
 
     def _segments(self):
         font = tkfont.Font(font=self.font)

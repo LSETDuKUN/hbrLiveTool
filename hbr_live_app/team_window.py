@@ -3,12 +3,15 @@ import sqlite3
 import tkinter as tk
 from tkinter import ttk, messagebox
 from . import theme
-from .components import RoundedButton
+from .components import (RoundedButton, RoundedCard, RoundedEntry,
+                         RoundedSelect, TabBar)
 from .portraits import Portraits
 from .damage_inputs import STATS
 
 
 class TeamWindow(tk.Toplevel):
+    PAGES = ('六维与 DP / HP', '技能', '饰品效果', '天赋与其他被动', '共鸣被动')
+
     def __init__(self, parent, store):
         super().__init__(parent)
         self.store = store
@@ -16,61 +19,132 @@ class TeamWindow(tk.Toplevel):
         self.geometry('1180x760')
         self.minsize(1040, 620)
         self.configure(bg=theme.BG)
+        theme.install(self)
         self.portraits = Portraits(self, size=52)
-        tk.Label(self, text='每场首次完整采样 → 待确认 → 另存配队或覆盖已有配队', bg=theme.BG,
-                 fg=theme.FG, font=theme.ui(13)).pack(anchor='w', padx=18, pady=(14, 4))
-        tk.Label(self, text='记录采样时的实测数值，可能含战斗修正；饰品暂保留可读取的效果，不代表完整装备清单。',
-                 bg=theme.BG, fg=theme.DIM, font=theme.ui(10)).pack(anchor='w', padx=18)
-        body = tk.PanedWindow(self, orient='horizontal', bg=theme.BG, sashwidth=8)
-        body.pack(fill='both', expand=True, padx=18, pady=12)
+        self.pages = {}
+        self.page_frames = {}
+        self.build_head()
+        body = tk.PanedWindow(self, orient='horizontal', bg=theme.BG, sashwidth=10,
+                              sashrelief='flat', borderwidth=0, showhandle=False)
+        body.pack(fill='both', expand=True, padx=18, pady=(0, 10))
         left = tk.Frame(body, bg=theme.CARD)
-        right = tk.Frame(body, bg=theme.CARD)
-        body.add(left, minsize=280, width=310); body.add(right, minsize=690)
-        self.tree = ttk.Treeview(left, show='tree', selectmode='browse')
-        self.tree.pack(fill='both', expand=True)
-        self.tree.bind('<<TreeviewSelect>>', self.show)
-        self.search = tk.StringVar()
-        self.scope = ttk.Combobox(left, state='readonly', values=['全部', '配队名', '角色 / 风格'], width=18)
+        right = tk.Frame(body, bg=theme.BG)
+        body.add(left, minsize=300, width=350)
+        body.add(right, minsize=640)
+        self.build_list(left)
+        self.build_detail(right)
+        self.build_footer()
+        self.refresh()
+
+    # ---- chrome -----------------------------------------------------------
+    def build_head(self):
+        head = tk.Frame(self, bg=theme.BG)
+        head.pack(fill='x', padx=18, pady=(16, 2))
+        tk.Label(head, text='✦', bg=theme.BG, fg=theme.PINK,
+                 font=theme.ui(18)).pack(side='left')
+        tk.Label(head, text='配队档案', bg=theme.BG, fg=theme.FG,
+                 font=theme.ui(18, 'bold')).pack(side='left', padx=(8, 0))
+        tk.Label(head, text='养成与配装', bg=theme.BG, fg=theme.MUTED,
+                 font=theme.ui(11)).pack(side='left', padx=(10, 0), pady=(4, 0))
+        lines = tk.Frame(self, bg=theme.BG)
+        lines.pack(fill='x', padx=18, pady=(0, 10))
+        tk.Label(lines, text='每场首次完整采样 → 待确认 → 另存配队或覆盖已有配队',
+                 bg=theme.BG, fg=theme.FG, font=theme.ui(11)).pack(anchor='w')
+        tk.Label(lines, text='记录采样时的实测数值，可能含战斗修正；饰品暂保留可读取的效果，不代表完整装备清单。',
+                 bg=theme.BG, fg=theme.DIM, font=theme.ui(10), justify='left').pack(anchor='w', pady=(2, 0))
+
+    def build_list(self, left):
+        style = ttk.Style(self)
+        style.configure('Quest.Team.Treeview', background=theme.CARD, fieldbackground=theme.CARD,
+                        foreground=theme.FG, rowheight=theme.px(30), borderwidth=0,
+                        font=theme.ui(12))
+        style.map('Quest.Team.Treeview',
+                  background=[('selected', theme.mix(theme.CARD, theme.PINK, .22))],
+                  foreground=[('selected', theme.FG)])
+        bar = tk.Frame(left, bg=theme.CARD)
+        bar.pack(fill='x', padx=10, pady=(10, 6))
+        self.scope = RoundedSelect(bar, values=['全部', '配队名', '角色 / 风格'],
+                                   width=theme.px(116), height=theme.px(30))
+        self.scope.pack(side='left')
         self.scope.current(0)
-        self.scope.pack(before=self.tree, fill='x', padx=8, pady=(8, 4))
-        query = ttk.Entry(left, textvariable=self.search)
-        query.pack(before=self.tree, fill='x', padx=8, pady=(0, 8))
+        self.search = tk.StringVar()
+        self.search_entry = RoundedEntry(bar, textvariable=self.search, width=theme.px(150),
+                                         height=theme.px(30), justify='left',
+                                         placeholder='搜索配队 / 角色')
+        self.search_entry.pack(side='left', fill='x', expand=True, padx=(8, 0))
+        self.tree = ttk.Treeview(left, show='tree', selectmode='browse',
+                                 style='Quest.Team.Treeview')
+        self.tree.pack(fill='both', expand=True, padx=6, pady=(0, 8))
+        self.tree.bind('<<TreeviewSelect>>', self.show)
         self.search.trace_add('write', lambda *_: self.refresh())
         self.scope.bind('<<ComboboxSelected>>', lambda e: self.refresh())
-        self.caption = tk.Label(right, bg=theme.CARD, fg=theme.PINK, font=theme.ui(14, 'bold'), anchor='w', justify='left')
-        self.caption.pack(fill='x', padx=14, pady=(12, 6))
-        self.note = tk.Label(right, bg=theme.CARD, fg=theme.DIM, font=theme.ui(10), anchor='w', justify='left')
-        self.note.pack(fill='x', padx=14, pady=(0, 10))
-        self.tabs = ttk.Notebook(right)
-        self.tabs.pack(fill='both', expand=True, padx=8, pady=(0, 8))
-        self.pages = {}
-        for title in ('六维与 DP / HP', '技能', '饰品效果', '天赋与其他被动', '共鸣被动'):
-            outer = tk.Frame(self.tabs, bg=theme.CARD)
-            self.tabs.add(outer, text=title)
-            canvas = tk.Canvas(outer, bg=theme.CARD, highlightthickness=0)
+
+    def build_detail(self, right):
+        head = RoundedCard(right, background=theme.CARD, outline=theme.LINE,
+                           pad=(14, 12), radius=theme.RADIUS_SM)
+        head.pack(fill='x', pady=(0, 8))
+        self.caption = tk.Label(head.content, bg=theme.CARD, fg=theme.PINK,
+                                font=theme.ui(15, 'bold'), anchor='w', justify='left')
+        self.caption.pack(fill='x')
+        self.caption.bind('<Configure>',
+                          lambda e: self.caption.configure(wraplength=max(160, e.width - 8)))
+        self.note = tk.Label(head.content, bg=theme.CARD, fg=theme.DIM,
+                             font=theme.ui(10), anchor='w', justify='left')
+        self.note.pack(fill='x', pady=(5, 0))
+        self.note.bind('<Configure>',
+                       lambda e: self.note.configure(wraplength=max(160, e.width - 8)))
+        self.tab_bar = TabBar(right, self.PAGES, self.show_page, bg=theme.BG)
+        self.tab_bar.pack(fill='x', pady=(0, 8))
+        self.tabs = self.tab_bar
+        holder = tk.Frame(right, bg=theme.BG)
+        holder.pack(fill='both', expand=True)
+        for title in self.PAGES:
+            outer = tk.Frame(holder, bg=theme.CARD)
+            canvas = tk.Canvas(outer, bg=theme.CARD, highlightthickness=0, bd=0)
             scroll = ttk.Scrollbar(outer, command=canvas.yview)
             scroll.pack(side='right', fill='y')
             canvas.configure(yscrollcommand=scroll.set)
             canvas.pack(fill='both', expand=True)
             inner = tk.Frame(canvas, bg=theme.CARD)
             item = canvas.create_window(0, 0, window=inner, anchor='nw')
-            inner.bind('<Configure>', lambda e,c=canvas: c.configure(scrollregion=c.bbox('all')))
-            canvas.bind('<Configure>', lambda e,c=canvas,i=item: c.itemconfigure(i,width=e.width))
-            canvas.bind('<MouseWheel>', lambda e,c=canvas: c.yview_scroll(int(-e.delta/120), 'units'))
+            inner.bind('<Configure>', lambda e, c=canvas: c.configure(scrollregion=c.bbox('all')))
+            canvas.bind('<Configure>', lambda e, c=canvas, i=item: c.itemconfigure(i, width=e.width))
+            canvas.bind('<MouseWheel>', lambda e, c=canvas: c.yview_scroll(int(-e.delta / 120), 'units'))
             self.pages[title] = inner
-        bar = tk.Frame(self, bg=theme.BG)
-        bar.pack(fill='x', padx=18, pady=(0, 14))
-        tk.Label(bar, text='配队名', bg=theme.BG, fg=theme.FG).grid(row=0,column=0,padx=4)
-        self.name = ttk.Entry(bar, width=24)
-        self.name.grid(row=0,column=1,padx=4,sticky='ew')
-        self.target = ttk.Combobox(bar, state='readonly', width=28)
-        self.target.grid(row=0,column=2,padx=4,sticky='ew')
-        self.save_button = RoundedButton(bar, '保存待确认记录', self.save, theme.PINK_FILL, theme.on_fill, theme.ui(11),height=32)
-        self.save_button.grid(row=0,column=3,padx=4)
-        RoundedButton(bar, '删除 / 不保存', self.remove, theme.CARD_HI, theme.FG, theme.ui(11),height=32).grid(row=1,column=3,pady=(8,0))
-        tk.Label(bar,text='覆盖时请在右侧选择原配队；同成员也可另存不同配装。',bg=theme.BG,fg=theme.DIM).grid(row=1,column=0,columnspan=3,sticky='w',pady=(8,0))
-        bar.columnconfigure(1, weight=1);bar.columnconfigure(2, weight=1)
-        self.refresh()
+            self.page_frames[title] = outer
+        self.show_page(self.PAGES[0])
+
+    def build_footer(self):
+        card = RoundedCard(self, background=theme.CARD, outline=theme.LINE,
+                           pad=(14, 10), radius=theme.RADIUS_SM)
+        card.pack(fill='x', padx=18, pady=(0, 14))
+        bar = card.content
+        bar.columnconfigure(1, weight=1)
+        bar.columnconfigure(3, weight=1)
+        tk.Label(bar, text='配队名', bg=theme.CARD, fg=theme.FG,
+                 font=theme.ui(11)).grid(row=0, column=0, padx=(0, 6))
+        self.name = RoundedEntry(bar, width=theme.px(200), height=theme.px(32), justify='left')
+        self.name.grid(row=0, column=1, sticky='ew', padx=(0, 14))
+        tk.Label(bar, text='覆盖目标', bg=theme.CARD, fg=theme.FG,
+                 font=theme.ui(11)).grid(row=0, column=2, padx=(0, 6))
+        self.target = RoundedSelect(bar, values=['另存为新配队'], width=theme.px(210),
+                                    height=theme.px(32))
+        self.target.grid(row=0, column=3, sticky='ew', padx=(0, 14))
+        self.save_button = RoundedButton(bar, '保存待确认记录', self.save, theme.PINK_FILL,
+                                         theme.on_fill, theme.ui(11), height=theme.px(32))
+        self.save_button.grid(row=0, column=4, padx=(0, 8))
+        RoundedButton(bar, '删除 / 不保存', self.remove, theme.CARD_HI, theme.FG,
+                      theme.ui(11), height=theme.px(32)).grid(row=0, column=5)
+        tk.Label(bar, text='覆盖时请在右侧选择原配队；同成员也可另存不同配装。',
+                 bg=theme.CARD, fg=theme.DIM, font=theme.ui(10)).grid(
+                     row=1, column=0, columnspan=6, sticky='w', pady=(8, 0))
+
+    def show_page(self, name):
+        for key, frame in self.page_frames.items():
+            if key == name:
+                frame.pack(fill='both', expand=True)
+            else:
+                frame.pack_forget()
 
     def refresh(self):
         from .team_views import member_matches
@@ -119,7 +193,6 @@ class TeamWindow(tk.Toplevel):
             for widget in page.winfo_children(): widget.destroy()
 
     def card(self, page, title, text, color=None):
-        from .components import RoundedCard
         card = RoundedCard(page, background=theme.mix(theme.CARD, color or theme.CYAN, .06),
                            outline=theme.LINE, pad=(14, 10), radius=theme.RADIUS_SM)
         card.pack(fill='x', padx=8, pady=5)
@@ -154,11 +227,14 @@ class TeamWindow(tk.Toplevel):
         self.card(page,'资源 · 当前 / 上限',f"DP   {p.get('dp','?')} / {p.get('dp_max','?')}         HP   {p.get('hp','?')} / {p.get('hp_max','?')}",theme.MINT)
         grid=tk.Frame(page,bg=theme.CARD);grid.pack(fill='x',padx=8,pady=8)
         for i,(k,title) in enumerate(STATS.items()):
-            tile=tk.Frame(grid,bg=theme.CARD_HI,padx=12,pady=14)
-            tile.grid(row=i//3,column=i%3,sticky='ew',padx=4,pady=4)
+            shell = RoundedCard(grid, background=theme.mix(theme.CARD, theme.CYAN, .07),
+                                outline='', radius=14, pad=(10, 10), shadow=False)
+            shell.grid(row=i//3,column=i%3,sticky='ew',padx=4,pady=4)
             grid.columnconfigure(i%3,weight=1)
-            tk.Label(tile,text=title,bg=theme.CARD_HI,fg=theme.DIM,font=theme.ui(11)).pack()
-            tk.Label(tile,text=str(p.get('stats',{}).get(k,'?')),bg=theme.CARD_HI,fg=theme.FG,font=theme.ui(20,'bold')).pack()
+            tile = shell.content
+            tk.Label(tile,text=title,bg=shell.background,fg=theme.DIM,font=theme.ui(11)).pack()
+            tk.Label(tile,text=str(p.get('stats',{}).get(k,'?')),bg=shell.background,
+                     fg=theme.FG,font=theme.num(19)).pack()
         self.card(page,'数值来源','首次完整战斗采样，可能含战斗修正，并非角色裸面板。',theme.GOLD)
         page=self.pages['技能']
         if not p.get('skills_complete'):self.card(page,'列表不完整','仅展示已读取的技能，不用资料库默认等级补齐。',theme.GOLD)
