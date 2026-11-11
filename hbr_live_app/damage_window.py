@@ -474,9 +474,11 @@ class DamageWindow(tk.Toplevel):
             polygon=c.create_polygon([l,b]+points+[r,b],fill=theme.CYAN_DEEP,outline='')
             c.itemconfigure(polygon,fill=theme.mix(theme.SURFACE,theme.CYAN,.18))
             c.create_line(points,fill=theme.CYAN,width=2,smooth=False)
-        for value in (data['low'],data.get('mean',1),data['high']):
+        # Highlight the mean line itself; comparing the value with 1 only worked
+        # for the old relative plot and never matched absolute damage.
+        for value,is_mean in ((data['low'],False),(data.get('mean',1),True),(data['high'],False)):
             x=l+(value-xmin)/span*(r-l)
-            c.create_line(x,t,x,b,fill=theme.PINK if value==1 else theme.mix(theme.SURFACE,theme.LAVENDER,.7),
+            c.create_line(x,t,x,b,fill=theme.PINK if is_mean else theme.mix(theme.SURFACE,theme.LAVENDER,.7),
                           dash=(3,5))
 
         for value,prob in data.get('atoms',[]):
