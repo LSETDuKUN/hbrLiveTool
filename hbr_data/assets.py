@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from urllib.parse import quote
 from .store import Catalog
-from .sync import ROOT, fetch
+from .sync import ROOT, fetch, write_atomic
 
 
 def asset_urls(region, dataset, filename):
@@ -115,7 +115,7 @@ def _sync_portraits(root, progress, retry_missing):
                     digest = hashlib.sha256(data).hexdigest()
                     path = objects / (digest+".webp")
                     if not path.exists():
-                        path.write_bytes(data)
+                        write_atomic(path, data)
                     result = {"status":"ready", "url":url, "sha256":digest,
                               "path":path.relative_to(root).as_posix()}
                 except Exception as exc:

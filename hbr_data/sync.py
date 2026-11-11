@@ -19,6 +19,18 @@ REGIONS = {"jp": "", "cn": "cn/", "en": "en/"}
 _connections = threading.local()
 
 
+def write_atomic(path, data):
+    """Content-addressed blobs are trusted by existence, so never expose a partial file."""
+    path = Path(path)
+    temporary = path.with_name(f"{path.name}.{threading.get_ident()}.part")
+    try:
+        temporary.write_bytes(data)
+        temporary.replace(path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
 def fetch(url):
     parsed = urlsplit(url)
     if parsed.scheme != "https" or parsed.hostname not in {"hbr.quest", "master.hbr.quest", "cdn.hbr.quest", "assets.hbr.quest"}:
@@ -107,7 +119,7 @@ def sync(root=ROOT, progress=print, resume=False):
             digest = hashlib.sha256(data).hexdigest()
             path = objects / (digest + suffix)
             if not path.exists():
-                path.write_bytes(data)
+                write_atomic(path, data)
             return str(path.relative_to(root)).replace("\\", "/")
 
         for path, text in scripts.items():

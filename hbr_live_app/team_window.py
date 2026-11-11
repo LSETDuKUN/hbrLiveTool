@@ -23,6 +23,7 @@ class TeamWindow(tk.Toplevel):
         self.portraits = Portraits(self, size=52)
         self.pages = {}
         self.page_frames = {}
+        self.canvases = {}
         self.build_head()
         body = tk.PanedWindow(self, orient='horizontal', bg=theme.BG, sashwidth=10,
                               sashrelief='flat', borderwidth=0, showhandle=False)
@@ -109,10 +110,26 @@ class TeamWindow(tk.Toplevel):
             item = canvas.create_window(0, 0, window=inner, anchor='nw')
             inner.bind('<Configure>', lambda e, c=canvas: c.configure(scrollregion=c.bbox('all')))
             canvas.bind('<Configure>', lambda e, c=canvas, i=item: c.itemconfigure(i, width=e.width))
-            canvas.bind('<MouseWheel>', lambda e, c=canvas: c.yview_scroll(int(-e.delta / 120), 'units'))
+            self.canvases[title] = canvas
             self.pages[title] = inner
             self.page_frames[title] = outer
         self.show_page(self.PAGES[0])
+        # Every widget's bindtags end with this toplevel, so the wheel scrolls
+        # the page whether the pointer is over a card, a label or the canvas.
+        self.bind('<MouseWheel>', self._wheel)
+
+    def _wheel(self, event):
+        widget = event.widget
+        for title, frame in self.page_frames.items():
+            if not frame.winfo_ismapped():
+                continue
+            node = widget
+            while node is not None and node is not frame:
+                node = getattr(node, 'master', None)
+            if node is frame:
+                steps = int(-event.delta / 120) or (-1 if event.delta > 0 else 1)
+                self.canvases[title].yview_scroll(steps, 'units')
+            return
 
     def build_footer(self):
         card = RoundedCard(self, background=theme.CARD, outline=theme.LINE,
@@ -178,6 +195,7 @@ class TeamWindow(tk.Toplevel):
             self.tree.selection_set(selected);self.show()
         else:
             self.clear_pages()
+            self.save_button.configure(state='disabled')
             self.caption.configure(text='没有匹配的档案', image='')
             self.note.configure(text='可修改搜索条件，或连接战斗生成待确认记录。')
 
@@ -191,6 +209,9 @@ class TeamWindow(tk.Toplevel):
     def clear_pages(self):
         for page in self.pages.values():
             for widget in page.winfo_children(): widget.destroy()
+        # A new record starts at the top instead of the previous scroll offset.
+        for canvas in self.canvases.values():
+            canvas.yview_moveto(0)
 
     def card(self, page, title, text, color=None):
         card = RoundedCard(page, background=theme.mix(theme.CARD, color or theme.CYAN, .06),
@@ -210,8 +231,11 @@ class TeamWindow(tk.Toplevel):
         from .team_views import effect_group, equipment_slot
         row = self.selected()
         if not row:
+            self.save_button.configure(state='disabled')
             self.clear_pages();self.caption.configure(text='请选择配队或角色',image='');self.note.configure(text='');return
         draft, key, name, payload = row
+        # Only drafts can be saved; make that visible instead of erroring on click.
+        self.save_button.configure(state='normal' if draft else 'disabled')
         self.name.delete(0,'end')
         self.name.insert(0, ' / '.join(p.get('actor') or p['style_label'] for p in payload['members'][:3]) if draft else name)
         iid = self.tree.selection()[0]

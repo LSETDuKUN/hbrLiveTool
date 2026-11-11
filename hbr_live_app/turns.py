@@ -94,6 +94,11 @@ class TurnReader:
                     phase_count=phase_count, state_address=hex(current), fsm_address=hex(fsm))
 
 
+def _visit(context):
+    visit = context.get('command_visit')
+    return context.get('command_count', 0) if visit is None else visit
+
+
 class CommandLedger:
     def __init__(self):
         self.groups = {}
@@ -108,7 +113,7 @@ class CommandLedger:
     def identity(context):
         if not context:
             return None
-        return (context.get('command_visit', context['command_count']),
+        return (_visit(context),
                 context.get('fsm_address'), context['turn'])
 
     def update(self, events, context):
@@ -136,10 +141,10 @@ class CommandLedger:
                     if event.get('observed_before_connection'):group['observed_before_connection']=True
                     bucket = next(iter(self.pending_instants.values()))['damage_group_id'] if self.pending_instants else f'pending:{key}'
                     self.damage_groups[key] = bucket
-                elif context and context.get('command_visit', context['command_count']) > 0:
-                    count = context.get('command_visit', context['command_count'])
+                elif context and _visit(context) > 0:
+                    count = _visit(context)
                     if count not in self.groups:
-                        source = self.pending if self.pending and self.pending.get('command_visit', self.pending['command_count']) == count else context
+                        source = self.pending if self.pending and _visit(self.pending) == count else context
                         group = copy.deepcopy({k: v for k, v in source.items() if k != 'selecting'})
                         if 'frontline' in context:
                             group['frontline'] = copy.deepcopy(context['frontline'])

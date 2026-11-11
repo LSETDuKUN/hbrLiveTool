@@ -146,9 +146,11 @@ class RoundedButton(tk.Canvas):
         self.delete('all')
         width = max(2, self.winfo_width())
         height = self._height
-        color = theme.lift(self._color, .10) if self._hover else self._color
+        disabled = self._state == 'disabled'
+        color = theme.lift(self._color, .10) if self._hover and not disabled else self._color
         label = self._fg
-        if self._state == 'disabled':
+        super().configure(cursor='arrow' if disabled else 'hand2')
+        if disabled:
             color = theme.mix(self._color, theme.BG, .55)
             label = theme.mix(self._fg, theme.BG, .45)
         radius = self._radius if self._radius is not None else height / 2
@@ -189,10 +191,12 @@ class Pill(tk.Canvas):
         self.delete('all')
         font = tkfont.Font(font=self._font)
         width = font.measure(self._text) + 2 * self._padx
-        self.configure(width=width)
+        if int(self.cget('width') or 0) != width:
+            # Bypass our configure(), which would redraw and recurse forever.
+            tk.Canvas.configure(self, width=width)
         height = self._height
         rounded(self, 1, 1, width - 1, height - 1, height / 2, fill=self._bg, outline='')
-        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=label)
+        self.create_text(width / 2, height / 2, text=self._text, font=self._font, fill=self._fg)
 
 
 class ToggleChip(tk.Canvas):
@@ -627,16 +631,22 @@ class ResourceMeter(tk.Canvas):
                          fill=self.colors[1], font=self.title_font)
         self.create_text(right, 16, text=f'{fraction:.0%}', anchor='e',
                          fill=theme.MUTED, font=self.caption_font)
-        self.create_text(pad, 44, text=f"{'−' if self.loss >= 0 else '+'}{abs(self.loss):,}",
+        sign = '−' if self.loss > 0 else ('+' if self.loss < 0 else '')
+        self.create_text(pad, 44, text=f'{sign}{abs(self.loss):,}',
                          anchor='w', fill=theme.GOLD if self.loss else theme.MUTED,
                          font=self.loss_font)
         self.create_text(right, 44, text=f'{self.current:,}', anchor='e',
                          fill=theme.FG, font=self.number_font)
         rounded(self, pad, 62, right, 80, 9, fill=theme.BG, outline=theme.LINE_SOFT)
-        filled = int((right - pad - 2) * fraction)
-        for x in range(filled):
-            self.create_line(pad + 1 + x, 64, pad + 1 + x, 78,
-                             fill=theme.mix(self.colors[0], self.colors[1], x / max(1, right - pad - 2)))
+        span = max(1, right - pad - 2)
+        filled = int(span * fraction)
+        # Paint the gradient in 3px bands: one canvas item per pixel made every
+        # redraw allocate hundreds of items on wide windows.
+        step = 3
+        for x in range(0, filled, step):
+            self.create_rectangle(pad + 1 + x, 64, pad + 1 + min(filled, x + step), 78,
+                                  fill=theme.mix(self.colors[0], self.colors[1], x / span),
+                                  outline='')
         self.create_text(pad, 94, text='最近变化', anchor='w', fill=theme.MUTED, font=self.caption_font)
         self.create_text(right, 94, text=f'参考 {self.maximum:,}', anchor='e',
                          fill=theme.MUTED, font=self.caption_font)
