@@ -12,9 +12,10 @@ from .damage_inputs import STATS
 class TeamWindow(tk.Toplevel):
     PAGES = ('六维与 DP / HP', '技能', '饰品效果', '天赋与其他被动', '共鸣被动')
 
-    def __init__(self, parent, store):
+    def __init__(self, parent, store, on_calculate=None):
         super().__init__(parent)
         self.store = store
+        self.on_calculate = on_calculate
         self.title('配队档案 · 养成与配装')
         self.geometry('1180x760')
         self.minsize(1040, 620)
@@ -152,6 +153,10 @@ class TeamWindow(tk.Toplevel):
         self.save_button.grid(row=0, column=4, padx=(0, 8))
         RoundedButton(bar, '删除 / 不保存', self.remove, theme.CARD_HI, theme.FG,
                       theme.ui(11), height=theme.px(32)).grid(row=0, column=5)
+        if self.on_calculate:
+            RoundedButton(bar, '用此配队试算 ›', self.calculate,
+                          theme.mix(theme.CARD_HI, theme.CYAN, .26), theme.FG,
+                          theme.ui(11), height=theme.px(32)).grid(row=0, column=6, padx=(8, 0))
         tk.Label(bar, text='覆盖时请在右侧选择原配队；同成员也可另存不同配装。',
                  bg=theme.CARD, fg=theme.DIM, font=theme.ui(10)).grid(
                      row=1, column=0, columnspan=6, sticky='w', pady=(8, 0))
@@ -296,6 +301,12 @@ class TeamWindow(tk.Toplevel):
         except (ValueError, sqlite3.Error) as exc:
             messagebox.showerror('保存失败',str(exc),parent=self);return
         self.refresh()
+
+    def calculate(self):
+        row = self.selected()
+        if not row:
+            messagebox.showinfo('配队档案', '请先选择一个配队。', parent=self);return
+        self.on_calculate(row[1], row[0])
 
     def remove(self):
         row = self.selected()

@@ -79,7 +79,14 @@ class App:
         window = getattr(self, 'team_window', None)
         if window is not None and window.winfo_exists():
             window.refresh();window.deiconify();window.lift();return
-        self.team_window = TeamWindow(self.root, self.team_store)
+        self.team_window = TeamWindow(self.root, self.team_store, on_calculate=self.open_offline_calculator)
+
+    def open_offline_calculator(self, team_key=None, draft=False):
+        from .offline_damage_window import OfflineDamageWindow
+        window = getattr(self, 'offline_window', None)
+        if window is not None and window.winfo_exists():
+            window.destroy()
+        self.offline_window = OfflineDamageWindow(self.root, self.team_store, team_key, draft)
 
     def open_damage_calculator(self):
         from .damage_window import DamageWindow
@@ -157,6 +164,7 @@ class App:
         self.menu.add_command(label='导出本场摘要…', command=self.export)
         self.menu.add_command(label='保存行动轴…', command=self.export_axis)
         self.menu.add_command(label='配队档案…', command=self.open_teams)
+        self.menu.add_command(label='离线伤害试算（配队档案）…', command=self.open_offline_calculator)
         self.menu.add_command(label='打开记录文件夹', command=self.open_sessions)
         self.menu.add_command(label='诊断日志', command=self.show_logs)
         self.settings_button = RoundedButton(head, '设置 ⋯', self.drop_menu, theme.CARD_HI, theme.FG,
