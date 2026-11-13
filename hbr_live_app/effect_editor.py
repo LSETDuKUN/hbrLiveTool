@@ -18,6 +18,7 @@ class EffectEditor(tk.Frame):
         super().__init__(parent,bg=theme.BG)
         self.items=[];self.values={};self.kind=tk.StringVar(self,value='buff')
         self.on_pending=on_pending
+        self.shared_enemy=None
         self.orb_enabled=tk.BooleanVar(self,value=False)
         self.orb_level=tk.StringVar(self,value='5')
         tk.Label(self,text='效果试算 · 按技能对象预添加；切换角色保留，删除可撤销（仅试算，不修改实时状态）',bg=theme.BG,fg=theme.DIM,
@@ -145,6 +146,7 @@ class EffectEditor(tk.Frame):
             self.kind.set('buff')
             for k,v in asdict(EffectInputs()).items():
                 if k in self.values:self.values[k].set(str(v))
+            self.apply_shared_enemy()
             self.result.configure(text='没有可自动填充的效果；已清除上一角色参数。')
             self.set_notes('未读到预选辅助效果或支持的持有被动。可手填；不能据此认定该角色没有增益能力。')
 
@@ -159,7 +161,14 @@ class EffectEditor(tk.Frame):
         self.orb_enabled.set(item['values'].get('orb',0)>0);self.orb_level.set('5')
         for key,var in self.values.items():
             value=item['values'][key];var.set('' if value is None else f'{value:g}')
+        self.apply_shared_enemy()
         self.set_notes(item['notes']);self.compute()
+
+    def apply_shared_enemy(self):
+        # The boss stat is window-wide; buff proposals carry 0 because they ignore it,
+        # but a manual switch to debuff must still see the shared value.
+        value=self.shared_enemy() if self.shared_enemy else None
+        if value is not None:self.values['enemy'].set(f'{value:g}')
 
     def compute(self):
         try:

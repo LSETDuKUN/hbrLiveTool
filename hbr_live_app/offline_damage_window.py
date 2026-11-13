@@ -49,8 +49,15 @@ class OfflineDamageWindow(DamageWindow):
                 for index in (range(count) if target == ob.ALL_MEMBERS else [target]):
                     statuses.setdefault(index, []).append(status)
         enemy = dict(self.offline_enemy, statuses=enemy_statuses)
-        return ob.snapshot(('d' if draft else 's') + str(key), payload, enemy, self.skill_choices, statuses,
+        choices = {i: skill for i, (skill, _) in self.skill_choices.items()}
+        data = ob.snapshot(('d' if draft else 's') + str(key), payload, enemy, choices, statuses,
                            self.offline_field, int(self.od_level.get() or 0))
+        from .skill_forms import with_form
+        players = []
+        for index, player in enumerate(data['players']):
+            form = self.skill_choices.get(index, (0, None))[1]
+            players.append(with_form(player, form)[0] if form is not None else player)
+        return dict(data, players=players)
 
     # ---- chrome ------------------------------------------------------------
     def build_header(self):
@@ -122,12 +129,14 @@ class OfflineDamageWindow(DamageWindow):
             name=self.entry(grid, 0, 0, '名称', '自定义敌人', 150, 'left'),
             dp=self.entry(grid, 0, 1, 'DP', '0'),
             hp=self.entry(grid, 0, 2, 'HP', '1000000'),
-            defense=self.entry(grid, 1, 0, '防御参考（属性值）', '', 150),
-            damage_rate=self.entry(grid, 1, 1, '当前破坏率 %', '100'),
-            coefficient=self.entry(grid, 1, 2, '有效破坏系数', ''),
-            maximum=self.entry(grid, 2, 0, '破坏率上限 %', '', 150))
+            damage_rate=self.entry(grid, 1, 0, '当前破坏率 %', '100', 150),
+            coefficient=self.entry(grid, 1, 1, '有效破坏系数', ''),
+            maximum=self.entry(grid, 1, 2, '破坏率上限 %', ''))
         self.enemy_down = tk.BooleanVar(self, value=False)
-        ToggleChip(grid, '倒地中', self.enemy_down, accent=theme.GOLD).grid(row=2, column=2, columnspan=2, sticky='w')
+        ToggleChip(grid, '倒地中', self.enemy_down, accent=theme.GOLD).grid(row=2, column=0, columnspan=2,
+                                                                           sticky='w', pady=(4, 0))
+        tk.Label(enemy, text='敌方属性（防御参考）在窗口顶部统一填写：伤害与减益共用这一个值。',
+                 bg=theme.CARD, fg=theme.GOLD, font=theme.ui(10), anchor='w').pack(fill='x', pady=(8, 0))
         tk.Label(enemy, text='相性：填写游戏中的伤害倍率 %（弱点 150 / 普通 100 / 抗性 50 / 吸收为负）',
                  bg=theme.CARD, fg=theme.MUTED, font=theme.ui(10), anchor='w').pack(fill='x', pady=(10, 4))
         rates = tk.Frame(enemy, bg=theme.CARD)
@@ -247,19 +256,38 @@ class OfflineDamageWindow(DamageWindow):
             title = f"{member.get('actor') or '?'} · {member.get('style_name') or member.get('style_label')}"
             tk.Label(self.members_frame, text=f'{front}  {title}', bg=theme.CARD, fg=theme.FG,
                      font=theme.ui(11), anchor='w').grid(row=row * 2, column=column, sticky='w', pady=(4, 0))
-            skills = [s for s in member.get('skills', []) if s.get('label')]
-            labels = [f"{s.get('name') or s['label']}  Lv.{s.get('level') if s.get('level') is not None else '?'}"
-                      for s in skills]
-            box = RoundedSelect(self.members_frame, values=labels, width=theme.px(300), height=theme.px(30),
+            options = self.skill_options(member)
+            labels = [label for label, _ in options]
+            box = RoundedSelect(self.members_frame, values=labels, width=theme.px(340), height=theme.px(30),
                                 placeholder='无已读取技能')
             box.grid(row=row * 2 + 1, column=column, sticky='w', padx=(0, 18), pady=(2, 4))
             if labels:
-                box.current(self.skill_choices.get(index, 0))
-            box.bind('<<ComboboxSelected>>', lambda e, i=index, b=box: self.choose_skill(i, b.current()))
+                values = [value for _, value in options]
+                choice = self.skill_choices.get(index)
+                box.current(values.index(choice) if choice in values else 0)
+                self.skill_choices[index] = values[box.current()]
+            box.bind('<<ComboboxSelected>>',
+                     lambda e, i=index, b=box, o=options: self.choose_skill(i, o[b.current()][1]))
         self.sync_status_target()
 
+    @staticmethod
+    def skill_options(member):
+        """(label, (skill index, form index)); switch skills list every form."""
+        from .skill_forms import forms
+        options = []
+        skills = [s for s in member.get('skills', []) if s.get('label')]
+        for si, skill in enumerate(skills):
+            level = skill.get('level') if skill.get('level') is not None else '?'
+            name = skill.get('name') or skill['label']
+            variants = forms(skill['label'])
+            if not variants:
+                options.append((f'{name}  Lv.{level}', (si, None)))
+            for fi, (_, form_name, _) in enumerate(variants):
+                options.append((f'{name} ⇄ 形态{fi + 1}「{form_name}」  Lv.{level}', (si, fi)))
+        return options
+
     def choose_skill(self, index, choice):
-        self.skill_choices[index] = max(0, choice)
+        self.skill_choices[index] = choice
         self.apply_setup()
 
     def target_options(self):
@@ -331,7 +359,6 @@ class OfflineDamageWindow(DamageWindow):
             self.offline_enemy = ob.manual_enemy(
                 name=v['name'].get().strip(), dp=self.number(v['dp'], 'DP', integer=True),
                 hp=self.number(v['hp'], 'HP', integer=True),
-                defense=self.number(v['defense'], '防御参考', optional=True),
                 damage_rate=self.number(v['damage_rate'], '当前破坏率'),
                 destruction_coefficient=self.number(v['coefficient'], '破坏系数', optional=True),
                 destruction_max=self.number(v['maximum'], '破坏率上限', optional=True),
@@ -349,8 +376,8 @@ class OfflineDamageWindow(DamageWindow):
         if not self.read_enemy():
             return
         progress = self.offline_enemy.get('enemy_progress', {})
-        if self.offline_enemy.get('combat_inputs', {}).get('_defenseRefParam') is None:
-            message = '未填防御参考：属性差将无法计算，基础伤害需手填。'
+        if self.enemy_stat_override is None:
+            message = '未填顶部的「敌方属性」：属性差无法计算，基础伤害需手填。'
         elif progress.get('destruction_coefficient') is None or progress.get('destruction_max') is None:
             message = '未填有效破坏系数 / 破坏率上限：破坏率递推与跨 DP/HP 结果无法生成（不自动猜测）。'
         else:

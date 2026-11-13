@@ -128,6 +128,103 @@ class DamageWindow(tk.Toplevel):
                       width=theme.px(100),height=theme.px(30)).pack(side='left',padx=6)
         tk.Label(modes, text='修改后点击自动填充；仅影响试算', bg=theme.SURFACE, fg=theme.MUTED,
                  font=theme.ui(10)).pack(side='left', padx=12)
+        shared = tk.Frame(bar, bg=theme.SURFACE)
+        shared.pack(fill='x', pady=(10, 0))
+        tk.Label(shared, text='技能形态', bg=theme.SURFACE, fg=theme.DIM, font=theme.ui(11)).pack(side='left')
+        self.form_choice = tk.StringVar(self, value='无切换形态')
+        self.form_box = RoundedSelect(shared, textvariable=self.form_choice, values=['无切换形态'],
+                                      width=theme.px(220), height=theme.px(30))
+        self.form_box.pack(side='left', padx=(6, 18))
+        self.form_box.bind('<<ComboboxSelected>>', lambda e: self.fill())
+        self.form_key = None
+        # One boss stat for every calculation: damage difference and debuff
+        # difference both read this value, so it lives here instead of per page.
+        self.enemy_stat_title = tk.Label(shared, text='敌方属性 · 读取', bg=theme.SURFACE, fg=theme.DIM,
+                                         font=theme.ui(11))
+        self.enemy_stat_title.pack(side='left')
+        self.enemy_stat = tk.StringVar(self, value='')
+        self.enemy_stat_override = None
+        stat_entry = RoundedEntry(shared, textvariable=self.enemy_stat, width=theme.px(96), height=theme.px(30))
+        stat_entry.pack(side='left', padx=6)
+        stat_entry.entry.bind('<Return>', self.apply_enemy_stat)
+        stat_entry.entry.bind('<FocusOut>', self.apply_enemy_stat, add='+')
+        RoundedButton(shared, '恢复读取值', self.reset_enemy_stat, theme.CARD_HI, theme.DIM,
+                      theme.ui(10), height=28).pack(side='left', padx=4)
+        tk.Label(shared, text='伤害属性差与减益效果量共用此值；回车生效', bg=theme.SURFACE, fg=theme.MUTED,
+                 font=theme.ui(10)).pack(side='left', padx=12)
+
+    # ---- shared boss stat / skill forms -------------------------------------
+    def apply_enemy_stat(self, event=None):
+        text = self.enemy_stat.get().strip().replace(',', '')
+        try:
+            value = float(text) if text else None
+            if value is not None and (value < 0 or value != value):
+                raise ValueError
+        except ValueError:
+            self.enemy_stat_title.configure(text='敌方属性 · 无效', fg=theme.ROSE)
+            return
+        if value == self.enemy_stat_override:
+            return
+        self.enemy_stat_override = value
+        self.push_enemy_stat()
+        if hasattr(self, 'pending_context') and self.loaded_snapshot.get('connected'):
+            self.fill()
+        else:
+            self.compute()
+
+    def reset_enemy_stat(self):
+        self.enemy_stat_override = None
+        self.enemy_stat.set('')
+        self.push_enemy_stat()
+        if self.loaded_snapshot.get('connected'):
+            self.fill()
+
+    def push_enemy_stat(self):
+        manual = self.enemy_stat_override is not None
+        self.enemy_stat_title.configure(text='敌方属性 · ' + ('手动' if manual else '读取'),
+                                        fg=theme.GOLD if manual else theme.DIM)
+        if manual:
+            text = f'{self.enemy_stat_override:g}'
+            if hasattr(self, 'params') and 'enemy' in self.params:
+                self.params['enemy'].set(text)
+            if hasattr(self, 'effect_editor'):
+                self.effect_editor.values['enemy'].set(text)
+
+    def shared_enemy(self, enemy):
+        """Apply the shared boss stat to one enemy snapshot (or mirror the read value)."""
+        inputs = enemy.get('combat_inputs', enemy.get('inputs', {}))
+        if self.enemy_stat_override is None:
+            live = inputs.get('_defenseRefParam')
+            self.enemy_stat.set('' if live is None else f'{live:g}')
+            return enemy
+        inputs = dict(inputs, _defenseRefParam=self.enemy_stat_override)
+        return dict(enemy, combat_inputs=inputs, inputs=inputs)
+
+    def resolve_forms(self, data, actor_id):
+        """Concrete form for switch skills: manual for the selected actor, auto otherwise."""
+        from .skill_forms import forms, with_form
+        players, notes = [], []
+        for player in data.get('players', []):
+            choice = None
+            if player.get('actor_id') == actor_id:
+                selected = player.get('combat_inputs', player.get('inputs', {})).get('selected_skill') or {}
+                options = forms(selected.get('label'))
+                key = (actor_id, selected.get('label'))
+                labels = ['自动判断形态'] + [f'形态 {i + 1} · {name}' for i, (_, name, _) in enumerate(options)]
+                if not options:
+                    labels = ['无切换形态']
+                if key != self.form_key or self.form_choice.get() not in labels:
+                    self.form_choice.set(labels[0])
+                self.form_key = key
+                self.form_box.configure(values=labels)
+                current = labels.index(self.form_choice.get())
+                choice = current - 1 if options and current > 0 else None
+            resolved, note = with_form(player, choice)
+            if note and player.get('actor_id') == actor_id:
+                notes.append(note)
+            players.append(resolved)
+        return dict(data, players=players), notes
+
 
     def build_pages(self):
         self.tab_names = ['乘区试算', '技能与属性', 'Buff／Debuff', '饰品效果', '当前内存参数', '天赋与被动审查']
@@ -150,6 +247,7 @@ class DamageWindow(tk.Toplevel):
         self.build_audit_page(*self.page_widgets['天赋与被动审查'])
         self.effect_editor = EffectEditor(self.page_widgets['Buff／Debuff'][1],self.update_pending)
         self.effect_editor.pack(fill='both', expand=True)
+        self.effect_editor.shared_enemy=lambda:self.enemy_stat_override
         RoundedButton(self.effect_editor.actions,'预发动所选技能效果',self.pre_cast_support,theme.CARD_HI,theme.FG,height=32).pack(side='left',padx=8)
         self.show_page(self.tab_names[0])
 
@@ -552,6 +650,9 @@ class DamageWindow(tk.Toplevel):
         if not data.get('connected'):
             self.fill_notes='未连接战斗，未覆盖表单';self.refresh();return
         self.sync_preview_epoch(data)
+        data,form_notes=self.resolve_forms(data,player.get('actor_id'))
+        if self.enemy_stat_override is not None:
+            data=dict(data,enemies=[self.shared_enemy(e) for e in data.get('enemies',[])])
         player=next((p for p in data.get('players',[]) if p.get('actor_id')==player.get('actor_id')),None)
         enemy=next((e for e in data.get('enemies',[]) if e.get('address')==enemy.get('address')),None)
         if player is None or enemy is None:
@@ -563,6 +664,7 @@ class DamageWindow(tk.Toplevel):
         try:enemy=self.sequence.overlay(enemy)
         except ValueError as exc:
             self.sequence_panel.message.configure(text=str(exc));return
+        enemy=self.shared_enemy(enemy)
         inputs=player.get('combat_inputs',player.get('inputs',{}))
         gauge=data.get('element_gauge') or {}
         turn=inputs.get('reinforced_mode_turn')
@@ -614,6 +716,7 @@ class DamageWindow(tk.Toplevel):
         self.effect_editor.pending_list.delete(0,'end')
         self.effect_editor.load_party(data.get('players',[]),player,enemy,modes)
         self.render_pending()
+        filled['notes'][:0]=form_notes
         filled['notes'].append('模式判断：'+str({k:v for k,v in modes.items() if k!='enemies'})+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
         if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
         for k,var in self.values.items():
