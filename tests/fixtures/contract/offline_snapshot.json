@@ -1,0 +1,742 @@
+{
+ "connected": true,
+ "offline": true,
+ "run_id": "offline:example",
+ "execution_revision": 0,
+ "turn_context": {
+  "selecting": true,
+  "turn": null
+ },
+ "players": [
+  {
+   "actor_id": "offline-0",
+   "actor": "角色1",
+   "name": "角色1",
+   "style_label": "Example0Style",
+   "style_name": "示例风格1",
+   "actor_position": 0,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [
+    {
+     "label": "SpecialStatus.AttackUp",
+     "name": "无属性 攻击力提升",
+     "source": "Manual.3",
+     "source_name": "手动添加：无属性 攻击力提升",
+     "element_key": null,
+     "element_type": 0,
+     "duration_kind": "turn",
+     "remaining": 1,
+     "buff_limit_type": 0,
+     "values": {
+      "amountOnDpDamageInt": 5000,
+      "amountOnHpDamageInt": 5000
+     },
+     "manual": true
+    },
+    {
+     "label": "SpecialStatus.Funnel",
+     "name": "无属性 连击（每颗",
+     "source": "Manual.4",
+     "source_name": "手动添加：无属性 连击（每颗",
+     "element_key": null,
+     "element_type": 0,
+     "duration_kind": "turn",
+     "remaining": 1,
+     "buff_limit_type": 0,
+     "values": {
+      "rateValueInt": 2500,
+      "numValue": 3
+     },
+     "manual": true
+    }
+   ],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example0Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example0Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example0Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example0Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example0Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example0Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  },
+  {
+   "actor_id": "offline-1",
+   "actor": "角色2",
+   "name": "角色2",
+   "style_label": "Example1Style",
+   "style_name": "示例风格2",
+   "actor_position": 1,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example1Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example1Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example1Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example1Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example1Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example1Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  },
+  {
+   "actor_id": "offline-2",
+   "actor": "角色3",
+   "name": "角色3",
+   "style_label": "Example2Style",
+   "style_name": "示例风格3",
+   "actor_position": 2,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example2Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example2Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example2Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example2Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example2Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example2Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  },
+  {
+   "actor_id": "offline-3",
+   "actor": "角色4",
+   "name": "角色4",
+   "style_label": "Example3Style",
+   "style_name": "示例风格4",
+   "actor_position": 3,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example3Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example3Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example3Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example3Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example3Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example3Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  },
+  {
+   "actor_id": "offline-4",
+   "actor": "角色5",
+   "name": "角色5",
+   "style_label": "Example4Style",
+   "style_name": "示例风格5",
+   "actor_position": 4,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example4Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example4Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example4Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example4Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example4Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example4Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  },
+  {
+   "actor_id": "offline-5",
+   "actor": "角色6",
+   "name": "角色6",
+   "style_label": "Example5Style",
+   "style_name": "示例风格6",
+   "actor_position": 5,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "statuses": [],
+   "statuses_available": true,
+   "combat_inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example5Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example5Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example5Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   },
+   "inputs": {
+    "stats": {
+     "power": 500,
+     "dexterity": 480,
+     "toughness": 420,
+     "spirit": 450,
+     "wisdom": 430,
+     "luck": 410
+    },
+    "equipped_skills": [
+     {
+      "label": "Example5Skill01",
+      "name": "示例攻击",
+      "level": 10
+     },
+     {
+      "label": "Example5Skill02",
+      "name": "示例增益",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "Example5Skill01",
+     "name": "示例攻击",
+     "level": 10,
+     "parts": []
+    },
+    "passive_audit": [
+     {
+      "label": "Passive.Start_AttackUp01",
+      "name": "示例被动",
+      "condition": "",
+      "timing": "开始时",
+      "description": "示例：攻击力提升",
+      "parts": [],
+      "catalog_found": true,
+      "classification": "示例",
+      "runtime": {}
+     }
+    ],
+    "passive_labels": [
+     "Passive.Start_AttackUp01"
+    ]
+   }
+  }
+ ],
+ "enemies": [
+  {
+   "address": "offline-enemy",
+   "name": "示例敌人",
+   "active": true,
+   "dp": 50000,
+   "hp": 300000,
+   "dp_max": 50000,
+   "hp_max": 300000,
+   "base_resistances": {
+    "fire": -50.0,
+    "slash": 0.0
+   },
+   "enemy_progress": {
+    "damage_rate": 150,
+    "down": 0,
+    "destruction_coefficient": 3,
+    "destruction_max": 300
+   },
+   "statuses": [
+    {
+     "label": "SpecialStatus.DefenseDown",
+     "name": "无属性 防御力下降",
+     "source": "Manual.1",
+     "source_name": "手动添加：无属性 防御力下降",
+     "element_key": null,
+     "element_type": 0,
+     "duration_kind": "turn",
+     "remaining": 1,
+     "buff_limit_type": 0,
+     "values": {
+      "amountOnDpDamageInt": -3000,
+      "amountOnHpDamageInt": -3000
+     },
+     "manual": true
+    },
+    {
+     "label": "SpecialStatus.ResistDown",
+     "name": "火 属性抗性下降",
+     "source": "Manual.2",
+     "source_name": "手动添加：火 属性抗性下降",
+     "element_key": "Fire",
+     "element_type": 0,
+     "duration_kind": "turn",
+     "remaining": 1,
+     "buff_limit_type": 0,
+     "values": {
+      "rateValueInt": -2500
+     },
+     "manual": true
+    }
+   ],
+   "statuses_available": true,
+   "combat_inputs": {
+    "_defenseRefParam": 420
+   },
+   "inputs": {
+    "_defenseRefParam": 420
+   }
+  }
+ ],
+ "field_state": {
+  "statuses": [
+   {
+    "label": "SpecialStatus.Zone",
+    "name": "火场地",
+    "element_key": "Fire",
+    "element_type": 0,
+    "duration_kind": "turn",
+    "remaining": 1,
+    "values": {
+     "rateValueInt": 13000
+    }
+   }
+  ]
+ },
+ "element_gauge": {
+  "full": false
+ },
+ "od_state": {
+  "available": true,
+  "active": true,
+  "level": 1
+ },
+ "schema_version": 1
+}

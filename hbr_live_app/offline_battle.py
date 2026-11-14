@@ -170,9 +170,10 @@ def zone_state(element, bonus):
 
 def snapshot(team_key, payload, enemy, skill_choices=None, statuses=None, field=None,
              od_level=0, revision=0):
+    from hbr_live_core.snapshot import stamp
     players = team_players(payload, skill_choices, statuses)
-    return dict(connected=True, offline=True, run_id=f'offline:{team_key}', execution_revision=revision,
+    return stamp(dict(connected=True, offline=True, run_id=f'offline:{team_key}', execution_revision=revision,
                 turn_context=dict(selecting=True, turn=None), players=players,
                 enemies=[enemy] if enemy else [], field_state=field or {'statuses': []},
                 element_gauge=dict(full=False), od_state=dict(available=True, active=od_level > 0,
-                                                              level=od_level or None))
+                                                              level=od_level or None)))

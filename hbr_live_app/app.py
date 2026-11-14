@@ -94,12 +94,8 @@ class App:
         if window is not None and window.winfo_exists():
             window.deiconify();window.lift();return
         def snapshot():
-            return dict(connected=self.connected,run_id=self.model.run_id,
-                execution_revision=self.model.execution_revision,turn_context=self.model.turn_context,
-                players=[dict(p,name=p.get('actor'), inputs=p.get('combat_inputs', {})) for p in self.model.players],
-                enemies=[dict(e,inputs=e.get('combat_inputs', {}))
-                         for e in self.model.enemies.values() if e.get('active')],field_state=self.model.field_state,
-                         element_gauge=self.model.element_gauge,od_state=self.model.od_state)
+            from hbr_live_core.snapshot import live_snapshot
+            return live_snapshot(self.model, self.connected)
         self.damage_window = DamageWindow(self.root, snapshot)
 
     def _restore_geometry(self):

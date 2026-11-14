@@ -1,0 +1,273 @@
+{
+ "schema": 1,
+ "captured_at": "2026-11-14T15:00:00",
+ "context": {
+  "turn": 1
+ },
+ "members": [
+  {
+   "style_label": "Example0Style",
+   "actor": "角色1",
+   "style_name": "示例风格1",
+   "position": 0,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example0Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example0Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  },
+  {
+   "style_label": "Example1Style",
+   "actor": "角色2",
+   "style_name": "示例风格2",
+   "position": 1,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example1Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example1Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  },
+  {
+   "style_label": "Example2Style",
+   "actor": "角色3",
+   "style_name": "示例风格3",
+   "position": 2,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example2Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example2Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  },
+  {
+   "style_label": "Example3Style",
+   "actor": "角色4",
+   "style_name": "示例风格4",
+   "position": 3,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example3Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example3Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  },
+  {
+   "style_label": "Example4Style",
+   "actor": "角色5",
+   "style_name": "示例风格5",
+   "position": 4,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example4Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example4Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  },
+  {
+   "style_label": "Example5Style",
+   "actor": "角色6",
+   "style_name": "示例风格6",
+   "position": 5,
+   "dp": 1200,
+   "hp": 3000,
+   "dp_max": 1200,
+   "hp_max": 3000,
+   "stats": {
+    "power": 500,
+    "dexterity": 480,
+    "toughness": 420,
+    "spirit": 450,
+    "wisdom": 430,
+    "luck": 410
+   },
+   "skills": [
+    {
+     "label": "Example5Skill01",
+     "name": "示例攻击",
+     "level": 10
+    },
+    {
+     "label": "Example5Skill02",
+     "name": "示例增益",
+     "level": 5
+    }
+   ],
+   "skills_complete": true,
+   "passives": [
+    {
+     "label": "Passive.Start_AttackUp01",
+     "name": "示例被动",
+     "condition": "",
+     "timing": "开始时",
+     "description": "示例：攻击力提升",
+     "parts": [],
+     "catalog_found": true,
+     "classification": "示例",
+     "runtime": {}
+    }
+   ]
+  }
+ ]
+}

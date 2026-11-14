@@ -1,0 +1,4343 @@
+{
+ "connected": true,
+ "run_id": "20261111-211522-987865",
+ "execution_revision": 0,
+ "turn_context": {
+  "command_count": 1,
+  "command_visit": 1,
+  "turn": 1,
+  "extra_actor_ids": null,
+  "od": false,
+  "bonus": 0,
+  "bonus_max": 0,
+  "od_activation": 0,
+  "od_before_enemy": false,
+  "additional": false,
+  "extra": false,
+  "extra_turn": 0,
+  "selecting": true,
+  "phase": "コマンド選択",
+  "phase_count": 1,
+  "state_address": "0x236f04171c0",
+  "fsm_address": "0x2374ff28500",
+  "frontline": [
+   {
+    "actor_id": 2435187970048,
+    "position": 0,
+    "actor": "逢川 惠"
+   },
+   {
+    "actor_id": 2435122781312,
+    "position": 1,
+    "actor": "茅森 月歌"
+   },
+   {
+    "actor_id": 2435122780512,
+    "position": 2,
+    "actor": "朝仓 可怜"
+   }
+  ]
+ },
+ "players": [
+  {
+   "actor_id": 2435187970048,
+   "actor_position": 0,
+   "style_label": "MAikawa09",
+   "actor": "逢川 惠",
+   "style_name": "特别之夜·少女即兴演奏会",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 560,
+     "dexterity": 564,
+     "toughness": 503,
+     "spirit": 556,
+     "wisdom": 640,
+     "luck": 550
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 7,
+    "expected_sp": 7,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Turn_ExecuteSkill01",
+     "Passive.Turn_HealSp01",
+     "Passive.Start_ThunderEnhanceRing04"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_ExecuteSkill01",
+      "name": "小玉合奏",
+      "condition": "",
+      "timing": "OnBattleStart",
+      "description": "战斗开始时 赋予自身小玉合奏（3次）",
+      "parts": [
+       {
+        "label": "Passive.Turn_ExecuteSkill01",
+        "skill_type": "ExecuteSkillOnPreTurn",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         null,
+         -1
+        ],
+        "cond": "CountBC(IsPlayer()&&DpRate()==0.0)>=1",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Count",
+         "exitVal": [
+          3,
+          0
+         ]
+        },
+        "sv": "MAikawaSkill07"
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "小玉合奏",
+       "condition": "",
+       "description": "战斗开始时 赋予自身小玉合奏（3次）",
+       "master_label": "Passive.Turn_ExecuteSkill01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_HealSp01",
+      "name": "闪光",
+      "condition": "IsFront()",
+      "timing": "未确认",
+      "description": "若回合开始时位于前锋\n则自身的SP+1",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "闪光",
+       "condition": "IsFront()",
+       "description": "若回合开始时位于前锋\n则自身的SP+1",
+       "master_label": "Passive.Turn_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_ThunderEnhanceRing04",
+      "name": "雷属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身雷属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_ThunderEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Thunder"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "雷属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身雷属性技能攻击力+10%",
+       "master_label": "Passive.Start_ThunderEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "MAikawaAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "MAikawaSkill01",
+      "name": "眩晕之刃",
+      "level": 2
+     },
+     {
+      "label": "MAikawaSkill05",
+      "name": "冷却",
+      "level": 4
+     },
+     {
+      "label": "MAikawaSkill03",
+      "name": "赤身抹杀",
+      "level": 6
+     },
+     {
+      "label": "MAikawaSkill06",
+      "name": "黄昏",
+      "level": 10
+     },
+     {
+      "label": "MAikawaSkill56",
+      "name": "最高潮！青春登台",
+      "level": 10
+     },
+     {
+      "label": "MAikawaSkill51Ev1",
+      "name": "极限冲击+",
+      "level": 6
+     }
+    ],
+    "selected_skill": {
+     "label": "MAikawaAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "MAikawaAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 1
+    }
+   },
+   "hp": 1838,
+   "hp_max": 1838,
+   "expected_hp": 1838,
+   "dp": 5097,
+   "dp_max": 5097,
+   "expected_dp": 5097,
+   "statuses": [
+    {
+     "label": "SpecialStatus.ExecuteSkillOnPreTurn",
+     "name": "ExecuteSkillOnPreTurn",
+     "value": "",
+     "values": {},
+     "source": "Passive.Turn_ExecuteSkill01",
+     "source_name": "Passive.Turn_ExecuteSkill01",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 3,
+     "duration": "剩余计数 3（消耗规则待核实）",
+     "duration_kind": "count",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.SkillLimitCountUp",
+     "name": "技能次数增加",
+     "value": "3",
+     "values": {
+      "numValue": 3
+     },
+     "source": "Passive.SupportSkill_31C02",
+     "source_name": "Passive.SupportSkill_31C02",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "逢川 惠",
+   "inputs": {
+    "stats": {
+     "power": 560,
+     "dexterity": 564,
+     "toughness": 503,
+     "spirit": 556,
+     "wisdom": 640,
+     "luck": 550
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 7,
+    "expected_sp": 7,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Turn_ExecuteSkill01",
+     "Passive.Turn_HealSp01",
+     "Passive.Start_ThunderEnhanceRing04"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_ExecuteSkill01",
+      "name": "小玉合奏",
+      "condition": "",
+      "timing": "OnBattleStart",
+      "description": "战斗开始时 赋予自身小玉合奏（3次）",
+      "parts": [
+       {
+        "label": "Passive.Turn_ExecuteSkill01",
+        "skill_type": "ExecuteSkillOnPreTurn",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         null,
+         -1
+        ],
+        "cond": "CountBC(IsPlayer()&&DpRate()==0.0)>=1",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Count",
+         "exitVal": [
+          3,
+          0
+         ]
+        },
+        "sv": "MAikawaSkill07"
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "小玉合奏",
+       "condition": "",
+       "description": "战斗开始时 赋予自身小玉合奏（3次）",
+       "master_label": "Passive.Turn_ExecuteSkill01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_HealSp01",
+      "name": "闪光",
+      "condition": "IsFront()",
+      "timing": "未确认",
+      "description": "若回合开始时位于前锋\n则自身的SP+1",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "闪光",
+       "condition": "IsFront()",
+       "description": "若回合开始时位于前锋\n则自身的SP+1",
+       "master_label": "Passive.Turn_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_ThunderEnhanceRing04",
+      "name": "雷属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身雷属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_ThunderEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Thunder"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "雷属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身雷属性技能攻击力+10%",
+       "master_label": "Passive.Start_ThunderEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "MAikawaAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "MAikawaSkill01",
+      "name": "眩晕之刃",
+      "level": 2
+     },
+     {
+      "label": "MAikawaSkill05",
+      "name": "冷却",
+      "level": 4
+     },
+     {
+      "label": "MAikawaSkill03",
+      "name": "赤身抹杀",
+      "level": 6
+     },
+     {
+      "label": "MAikawaSkill06",
+      "name": "黄昏",
+      "level": 10
+     },
+     {
+      "label": "MAikawaSkill56",
+      "name": "最高潮！青春登台",
+      "level": 10
+     },
+     {
+      "label": "MAikawaSkill51Ev1",
+      "name": "极限冲击+",
+      "level": 6
+     }
+    ],
+    "selected_skill": {
+     "label": "MAikawaAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "MAikawaAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 1
+    }
+   }
+  },
+  {
+   "actor_id": 2435122781312,
+   "actor_position": 1,
+   "style_label": "RKayamori11",
+   "actor": "茅森 月歌",
+   "style_name": "Glorious Blades",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 545,
+     "dexterity": 510,
+     "toughness": 492,
+     "spirit": 537,
+     "wisdom": 598,
+     "luck": 458
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Turn_ElementGuard02",
+     "Passive.Start_ReduceSp03",
+     "Passive.Start_IceEnhanceRing04"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_ElementGuard02",
+      "name": "银冰之加护",
+      "condition": "",
+      "timing": "OnEnemyTurnStart",
+      "description": "敌方行动开始时 弱点为冰属性的敌人的攻击状态值降低50",
+      "parts": [
+       {
+        "label": "Passive.Turn_ElementGuard02",
+        "skill_type": "BorderRefPDownByAdmiral",
+        "target_type": "All",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 50,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsWeakElement(Ice)==1",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "EnemyTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "银冰之加护",
+       "condition": "",
+       "description": "敌方行动开始时 弱点为冰属性的敌人的攻击状态值降低50",
+       "master_label": "Passive.Turn_ElementGuard02",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_ReduceSp03",
+      "name": "冰天",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "全体友方冰属性风格消耗SP持续-1",
+      "parts": [
+       {
+        "label": "Passive.Start_ReduceSp03",
+        "skill_type": "ReduceSp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+         1.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsNatureElement(Ice)",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "冰天",
+       "condition": "",
+       "description": "全体友方冰属性风格消耗SP持续-1",
+       "master_label": "Passive.Start_ReduceSp03",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "RKayamoriCommandBuff",
+      "name": "指挥行动",
+      "level": 1
+     },
+     {
+      "label": "RKayamoriSkill58",
+      "name": "胜利之弧",
+      "level": 3
+     },
+     {
+      "label": "RKayamoriSkill10",
+      "name": "先导的领袖魅力",
+      "level": 1
+     },
+     {
+      "label": "RKayamoriSkill09",
+      "name": "月芒",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillHealSp01",
+      "name": "点数援助",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillDefenseUp01",
+      "name": "保护",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillMorale01",
+      "name": "加油助威",
+      "level": 1
+     }
+    ],
+    "selected_skill": {
+     "label": "RKayamoriCommandBuff",
+     "name": "指挥行动",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "RKayamoriCommandBuff",
+       "Power": 0.15000000596046448,
+       "MaxPower": 0.15000000596046448,
+       "RefParamDiffForMax": 0,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 0.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 0,
+       "RefParamDexterity": 0,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 1,
+       "RefParamLuck": 0,
+       "skill_type_raw": 127
+      }
+     ],
+     "hit_count": 1
+    }
+   },
+   "hp": 1817,
+   "hp_max": 1817,
+   "expected_hp": 1817,
+   "dp": 5361,
+   "dp_max": 5361,
+   "expected_dp": 5361,
+   "statuses": [
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.SkillLimitCountUp",
+     "name": "技能次数增加",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_SkillCountUp1_Ice",
+     "source_name": "Passive.Start_SkillCountUp1_Ice",
+     "element_type": 2,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.MemorySpirit",
+     "name": "MemorySpirit",
+     "value": "",
+     "values": {},
+     "source": "RKayamoriMasterlyPassiveSkill01",
+     "source_name": "交织而成的记忆",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {
+      "elements": [],
+      "effect": {
+       "ir": false,
+       "category": "None",
+       "limitType": "None",
+       "exitCond": "Eternal",
+       "exitVal": [
+        0,
+        0
+       ]
+      },
+      "target_condition": "",
+      "condition": "",
+      "hit_condition": ""
+     },
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "茅森 月歌",
+   "inputs": {
+    "stats": {
+     "power": 545,
+     "dexterity": 510,
+     "toughness": 492,
+     "spirit": 537,
+     "wisdom": 598,
+     "luck": 458
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Turn_ElementGuard02",
+     "Passive.Start_ReduceSp03",
+     "Passive.Start_IceEnhanceRing04"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_ElementGuard02",
+      "name": "银冰之加护",
+      "condition": "",
+      "timing": "OnEnemyTurnStart",
+      "description": "敌方行动开始时 弱点为冰属性的敌人的攻击状态值降低50",
+      "parts": [
+       {
+        "label": "Passive.Turn_ElementGuard02",
+        "skill_type": "BorderRefPDownByAdmiral",
+        "target_type": "All",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 50,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsWeakElement(Ice)==1",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "EnemyTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "银冰之加护",
+       "condition": "",
+       "description": "敌方行动开始时 弱点为冰属性的敌人的攻击状态值降低50",
+       "master_label": "Passive.Turn_ElementGuard02",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_ReduceSp03",
+      "name": "冰天",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "全体友方冰属性风格消耗SP持续-1",
+      "parts": [
+       {
+        "label": "Passive.Start_ReduceSp03",
+        "skill_type": "ReduceSp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+         1.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "IsNatureElement(Ice)",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "冰天",
+       "condition": "",
+       "description": "全体友方冰属性风格消耗SP持续-1",
+       "master_label": "Passive.Start_ReduceSp03",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "RKayamoriCommandBuff",
+      "name": "指挥行动",
+      "level": 1
+     },
+     {
+      "label": "RKayamoriSkill58",
+      "name": "胜利之弧",
+      "level": 3
+     },
+     {
+      "label": "RKayamoriSkill10",
+      "name": "先导的领袖魅力",
+      "level": 1
+     },
+     {
+      "label": "RKayamoriSkill09",
+      "name": "月芒",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillHealSp01",
+      "name": "点数援助",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillDefenseUp01",
+      "name": "保护",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillMorale01",
+      "name": "加油助威",
+      "level": 1
+     }
+    ],
+    "selected_skill": {
+     "label": "RKayamoriCommandBuff",
+     "name": "指挥行动",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "RKayamoriCommandBuff",
+       "Power": 0.15000000596046448,
+       "MaxPower": 0.15000000596046448,
+       "RefParamDiffForMax": 0,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 0.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 0,
+       "RefParamDexterity": 0,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 1,
+       "RefParamLuck": 0,
+       "skill_type_raw": 127
+      }
+     ],
+     "hit_count": 1
+    }
+   }
+  },
+  {
+   "actor_id": 2435122780512,
+   "actor_position": 2,
+   "style_label": "KAsakura08",
+   "actor": "朝仓 可怜",
+   "style_name": "Twinkle Eclosion",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 760,
+     "dexterity": 651,
+     "toughness": 669,
+     "spirit": 642,
+     "wisdom": 645,
+     "luck": 617
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 7,
+    "expected_sp": 7,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.BreakTurn_ReduceSp01",
+     "Passive.Turn_HealSp01",
+     "Passive.Kill_HealSp01"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.BreakTurn_ReduceSp01",
+      "name": "最佳位置",
+      "condition": "CountBC(IsDead()==0 && IsPlayer()==0&&BreakDownTurn()>0)>0",
+      "timing": "OnEveryTurnIncludeSpecial",
+      "description": "若存在处于倒地回合的敌人 则自身消耗SP-2",
+      "parts": [
+       {
+        "label": "Passive.BreakTurn_ReduceSp01",
+        "skill_type": "ReduceSp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         2.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "最佳位置",
+       "condition": "CountBC(IsDead()==0 && IsPlayer()==0&&BreakDownTurn()>0)>0",
+       "description": "若存在处于倒地回合的敌人 则自身消耗SP-2",
+       "master_label": "Passive.BreakTurn_ReduceSp01",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_HealSp01",
+      "name": "闪光",
+      "condition": "IsFront()",
+      "timing": "未确认",
+      "description": "若回合开始时位于前锋\n则自身的SP+1",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "闪光",
+       "condition": "IsFront()",
+       "description": "若回合开始时位于前锋\n则自身的SP+1",
+       "master_label": "Passive.Turn_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Kill_HealSp01",
+      "name": "清算",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "自身攻击击败敌人时\n每击败1个敌人全体友方SP+2",
+      "parts": [
+       {
+        "label": "Passive.Kill_HealSp01",
+        "skill_type": "AdditionalHitOnKillCount",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         null,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "sv": "Passive.Kill_HealSp01_2"
+       },
+       {
+        "label": "Passive.Kill_HealSp01_2",
+        "skill_type": "HealSp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+         2.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "None",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "ref": true
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "清算",
+       "condition": "",
+       "description": "自身攻击击败敌人时\n每击败1个敌人全体友方SP+2",
+       "master_label": "Passive.Kill_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "KAsakuraAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "KAsakuraSkill55",
+      "name": "血腥燃烧",
+      "level": 10
+     },
+     {
+      "label": "KAsakuraSkill51Ev1",
+      "name": "血腥之舞+",
+      "level": 15
+     },
+     {
+      "label": "KAsakuraSkill08",
+      "name": "红尖晶石",
+      "level": 5
+     },
+     {
+      "label": "KAsakuraSkill07",
+      "name": "得意洋洋",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillCharge01",
+      "name": "充能注入",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillHealSp01",
+      "name": "点数援助",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillOverDrivePointUp01",
+      "name": "驱动增益",
+      "level": 1
+     }
+    ],
+    "selected_skill": {
+     "label": "SkillOverwrite.Karerin.KAsakuraAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": null,
+     "parts": [],
+     "base_label": "KAsakuraAttackNormal",
+     "name_source": "selected_base_skill"
+    }
+   },
+   "hp": 1984,
+   "hp_max": 1984,
+   "expected_hp": 1984,
+   "dp": 6636,
+   "dp_max": 6636,
+   "expected_dp": 6636,
+   "statuses": [
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.AdditionalHitOnKillCount",
+     "name": "AdditionalHitOnKillCount",
+     "value": "",
+     "values": {},
+     "source": "Passive.Kill_HealSp01",
+     "source_name": "Passive.Kill_HealSp01",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.SkillLimitCountUp",
+     "name": "技能次数增加",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_SkillCountUp1_Fire",
+     "source_name": "Passive.Start_SkillCountUp1_Fire",
+     "element_type": 1,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "朝仓 可怜",
+   "inputs": {
+    "stats": {
+     "power": 760,
+     "dexterity": 651,
+     "toughness": 669,
+     "spirit": 642,
+     "wisdom": 645,
+     "luck": 617
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 7,
+    "expected_sp": 7,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.BreakTurn_ReduceSp01",
+     "Passive.Turn_HealSp01",
+     "Passive.Kill_HealSp01"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.BreakTurn_ReduceSp01",
+      "name": "最佳位置",
+      "condition": "CountBC(IsDead()==0 && IsPlayer()==0&&BreakDownTurn()>0)>0",
+      "timing": "OnEveryTurnIncludeSpecial",
+      "description": "若存在处于倒地回合的敌人 则自身消耗SP-2",
+      "parts": [
+       {
+        "label": "Passive.BreakTurn_ReduceSp01",
+        "skill_type": "ReduceSp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         2.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "最佳位置",
+       "condition": "CountBC(IsDead()==0 && IsPlayer()==0&&BreakDownTurn()>0)>0",
+       "description": "若存在处于倒地回合的敌人 则自身消耗SP-2",
+       "master_label": "Passive.BreakTurn_ReduceSp01",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Turn_HealSp01",
+      "name": "闪光",
+      "condition": "IsFront()",
+      "timing": "未确认",
+      "description": "若回合开始时位于前锋\n则自身的SP+1",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "条件待核对",
+      "runtime": {
+       "name": "闪光",
+       "condition": "IsFront()",
+       "description": "若回合开始时位于前锋\n则自身的SP+1",
+       "master_label": "Passive.Turn_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Kill_HealSp01",
+      "name": "清算",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "自身攻击击败敌人时\n每击败1个敌人全体友方SP+2",
+      "parts": [
+       {
+        "label": "Passive.Kill_HealSp01",
+        "skill_type": "AdditionalHitOnKillCount",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         null,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "sv": "Passive.Kill_HealSp01_2"
+       },
+       {
+        "label": "Passive.Kill_HealSp01_2",
+        "skill_type": "HealSp",
+        "target_type": "AllyAll",
+        "type": null,
+        "elements": [],
+        "power": [
+         2.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "None",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "ref": true
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "清算",
+       "condition": "",
+       "description": "自身攻击击败敌人时\n每击败1个敌人全体友方SP+2",
+       "master_label": "Passive.Kill_HealSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "KAsakuraAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "KAsakuraSkill55",
+      "name": "血腥燃烧",
+      "level": 10
+     },
+     {
+      "label": "KAsakuraSkill51Ev1",
+      "name": "血腥之舞+",
+      "level": 15
+     },
+     {
+      "label": "KAsakuraSkill08",
+      "name": "红尖晶石",
+      "level": 5
+     },
+     {
+      "label": "KAsakuraSkill07",
+      "name": "得意洋洋",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillCharge01",
+      "name": "充能注入",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillHealSp01",
+      "name": "点数援助",
+      "level": 1
+     },
+     {
+      "label": "AccessorySkillOverDrivePointUp01",
+      "name": "驱动增益",
+      "level": 1
+     }
+    ],
+    "selected_skill": {
+     "label": "SkillOverwrite.Karerin.KAsakuraAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": null,
+     "parts": [],
+     "base_label": "KAsakuraAttackNormal",
+     "name_source": "selected_base_skill"
+    }
+   }
+  },
+  {
+   "actor_id": 2435122779712,
+   "actor_position": 3,
+   "style_label": "TTojo08",
+   "actor": "东城 司",
+   "style_name": "哀情挽歌",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 451,
+     "dexterity": 438,
+     "toughness": 421,
+     "spirit": 470,
+     "wisdom": 543,
+     "luck": 391
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_SpUpSp01",
+     "Passive.Start_IceEnhanceRing04",
+     "Passive.Start_OverDrivePointUpByHitEarring03"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_SpUpSp01",
+      "name": "惹人怜爱",
+      "condition": "",
+      "timing": "未确认",
+      "description": "自身以外的友方的主动技能使自身SP提升时\n额外使自身SP+3（可突破上限至SP30）",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "惹人怜爱",
+       "condition": "",
+       "description": "自身以外的友方的主动技能使自身SP提升时\n额外使自身SP+3（可突破上限至SP30）",
+       "master_label": "Passive.Start_SpUpSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+      "name": "增加超频条提升量",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "超频条提升量最多+15%（连击数越多效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+        "skill_type": "OverDrivePointUpByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         1.0,
+         10.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "增加超频条提升量",
+       "condition": "IsFront()",
+       "description": "超频条提升量最多+15%（连击数越多效果越大）",
+       "master_label": "Passive.Start_OverDrivePointUpByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "TTojoAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "TTojoSkill01",
+      "name": "强化",
+      "level": 1
+     },
+     {
+      "label": "TTojoSkill03",
+      "name": "饱和强化",
+      "level": 6
+     },
+     {
+      "label": "TTojoSkill05",
+      "name": "神圣强化",
+      "level": 4
+     },
+     {
+      "label": "TTojoSkill55",
+      "name": "幻影时刻",
+      "level": 6
+     },
+     {
+      "label": "TTojoSkill51Ev1",
+      "name": "生命无常+",
+      "level": 6
+     }
+    ],
+    "selected_skill": {
+     "label": "TTojoAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "TTojoAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   },
+   "hp": 1641,
+   "hp_max": 1641,
+   "expected_hp": 1641,
+   "dp": 5049,
+   "dp_max": 5049,
+   "expected_dp": 5049,
+   "statuses": [
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.AdditionalHitOnHealedSpWithoutSelfHeal",
+     "name": "AdditionalHitOnHealedSpWithoutSelfHeal",
+     "value": "",
+     "values": {},
+     "source": "Passive.Start_SpUpSp01",
+     "source_name": "Passive.Start_SpUpSp01",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.SkillLimitCountUp",
+     "name": "技能次数增加",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_SkillCountUp1_Ice",
+     "source_name": "Passive.Start_SkillCountUp1_Ice",
+     "element_type": 2,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "东城 司",
+   "inputs": {
+    "stats": {
+     "power": 451,
+     "dexterity": 438,
+     "toughness": 421,
+     "spirit": 470,
+     "wisdom": 543,
+     "luck": 391
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_SpUpSp01",
+     "Passive.Start_IceEnhanceRing04",
+     "Passive.Start_OverDrivePointUpByHitEarring03"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_SpUpSp01",
+      "name": "惹人怜爱",
+      "condition": "",
+      "timing": "未确认",
+      "description": "自身以外的友方的主动技能使自身SP提升时\n额外使自身SP+3（可突破上限至SP30）",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "惹人怜爱",
+       "condition": "",
+       "description": "自身以外的友方的主动技能使自身SP提升时\n额外使自身SP+3（可突破上限至SP30）",
+       "master_label": "Passive.Start_SpUpSp01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+      "name": "增加超频条提升量",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "超频条提升量最多+15%（连击数越多效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_OverDrivePointUpByHitEarring03",
+        "skill_type": "OverDrivePointUpByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         1.0,
+         10.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "增加超频条提升量",
+       "condition": "IsFront()",
+       "description": "超频条提升量最多+15%（连击数越多效果越大）",
+       "master_label": "Passive.Start_OverDrivePointUpByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "TTojoAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "TTojoSkill01",
+      "name": "强化",
+      "level": 1
+     },
+     {
+      "label": "TTojoSkill03",
+      "name": "饱和强化",
+      "level": 6
+     },
+     {
+      "label": "TTojoSkill05",
+      "name": "神圣强化",
+      "level": 4
+     },
+     {
+      "label": "TTojoSkill55",
+      "name": "幻影时刻",
+      "level": 6
+     },
+     {
+      "label": "TTojoSkill51Ev1",
+      "name": "生命无常+",
+      "level": 6
+     }
+    ],
+    "selected_skill": {
+     "label": "TTojoAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "TTojoAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   }
+  },
+  {
+   "actor_id": 2435122778912,
+   "actor_position": 4,
+   "style_label": "SMinase07",
+   "actor": "水濑 李",
+   "style_name": "捣蛋黑猫",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 475,
+     "dexterity": 580,
+     "toughness": 494,
+     "spirit": 471,
+     "wisdom": 496,
+     "luck": 461
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_DoubleActionExtraSkill01",
+     "Passive.Start_IceEnhanceRing04",
+     "Passive.Start_DPAttackUpRangeByHitEarring03"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_DoubleActionExtraSkill01",
+      "name": "万圣节狂热",
+      "condition": "",
+      "timing": "OnBattleStart",
+      "description": "战斗开始时\n赋予自身EX技能连续发动（1次）",
+      "parts": [
+       {
+        "label": "Passive.Start_DoubleActionExtraSkill01",
+        "skill_type": "DoubleActionExtraSkill",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Count",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "万圣节狂热",
+       "condition": "",
+       "description": "战斗开始时\n赋予自身EX技能连续发动（1次）",
+       "master_label": "Passive.Start_DoubleActionExtraSkill01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+      "name": "对DP技能攻击力提升",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "对DP技能攻击力最多+15%（连击数越少效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         10.0,
+         1.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "对DP技能攻击力提升",
+       "condition": "IsFront()",
+       "description": "对DP技能攻击力最多+15%（连击数越少效果越大）",
+       "master_label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "SMinaseAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "SMinaseSkill01",
+      "name": "残影",
+      "level": 5
+     },
+     {
+      "label": "SMinaseSkill03",
+      "name": "沉吟巨鲨",
+      "level": 4
+     },
+     {
+      "label": "SMinaseSkill54",
+      "name": "万圣喵夜狂热！",
+      "level": 3
+     }
+    ],
+    "selected_skill": {
+     "label": "SMinaseAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "SMinaseAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   },
+   "hp": 1867,
+   "hp_max": 1867,
+   "expected_hp": 1867,
+   "dp": 5277,
+   "dp_max": 5277,
+   "expected_dp": 5277,
+   "statuses": [
+    {
+     "label": "SpecialStatus.DoubleActionExtraSkill",
+     "name": "DoubleActionExtraSkill",
+     "value": "",
+     "values": {},
+     "source": "Passive.Start_DoubleActionExtraSkill01",
+     "source_name": "Passive.Start_DoubleActionExtraSkill01",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 1,
+     "duration": "剩余计数 1（消耗规则待核实）",
+     "duration_kind": "count",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.SkillLimitCountUp",
+     "name": "技能次数增加",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_SkillCountUp1_Light",
+     "source_name": "Passive.Start_SkillCountUp1_Light",
+     "element_type": 4,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "水濑 李",
+   "inputs": {
+    "stats": {
+     "power": 475,
+     "dexterity": 580,
+     "toughness": 494,
+     "spirit": 471,
+     "wisdom": 496,
+     "luck": 461
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_DoubleActionExtraSkill01",
+     "Passive.Start_IceEnhanceRing04",
+     "Passive.Start_DPAttackUpRangeByHitEarring03"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_DoubleActionExtraSkill01",
+      "name": "万圣节狂热",
+      "condition": "",
+      "timing": "OnBattleStart",
+      "description": "战斗开始时\n赋予自身EX技能连续发动（1次）",
+      "parts": [
+       {
+        "label": "Passive.Start_DoubleActionExtraSkill01",
+        "skill_type": "DoubleActionExtraSkill",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.0,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Count",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "万圣节狂热",
+       "condition": "",
+       "description": "战斗开始时\n赋予自身EX技能连续发动（1次）",
+       "master_label": "Passive.Start_DoubleActionExtraSkill01",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing04",
+      "name": "冰属性攻击+10％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+10%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing04",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.1,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+10％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+10%",
+       "master_label": "Passive.Start_IceEnhanceRing04",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+      "name": "对DP技能攻击力提升",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "对DP技能攻击力最多+15%（连击数越少效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         10.0,
+         1.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 0.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "对DP技能攻击力提升",
+       "condition": "IsFront()",
+       "description": "对DP技能攻击力最多+15%（连击数越少效果越大）",
+       "master_label": "Passive.Start_DPAttackUpRangeByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "SMinaseAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "SMinaseSkill01",
+      "name": "残影",
+      "level": 5
+     },
+     {
+      "label": "SMinaseSkill03",
+      "name": "沉吟巨鲨",
+      "level": 4
+     },
+     {
+      "label": "SMinaseSkill54",
+      "name": "万圣喵夜狂热！",
+      "level": 3
+     }
+    ],
+    "selected_skill": {
+     "label": "SMinaseAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "SMinaseAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   }
+  },
+  {
+   "actor_id": 2435001560192,
+   "actor_position": 5,
+   "style_label": "MTenne04",
+   "actor": "天音 巫呼",
+   "style_name": "山胁大人的手下：喵喵法师",
+   "mode_count": 0,
+   "another_form": false,
+   "combat_inputs": {
+    "stats": {
+     "power": 465,
+     "dexterity": 462,
+     "toughness": 423,
+     "spirit": 464,
+     "wisdom": 540,
+     "luck": 453
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_IceEnhanceRing03",
+     "Passive.Start_HPAttackUpRangeByHitEarring03",
+     "Passive.DamageCut_GatebossFire03_75Per"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing03",
+      "name": "冰属性攻击+8％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+8%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing03",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.08,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+8％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+8%",
+       "master_label": "Passive.Start_IceEnhanceRing03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+      "name": "对HP技能攻击力提升",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "对HP技能攻击力最多+15%（连击数越少效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         10.0,
+         1.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "对HP技能攻击力提升",
+       "condition": "IsFront()",
+       "description": "对HP技能攻击力最多+15%（连击数越少效果越大）",
+       "master_label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.DamageCut_GatebossFire03_75Per",
+      "name": "大幅减少特定伤害",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "大幅减少来自阿蒙之门R的伤害",
+      "parts": [
+       {
+        "label": "Passive.DamageCut_GatebossFire03_75Per",
+        "skill_type": "DefenseUpFromEnemyGroup",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.75,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         "BigotryGateAmonFire01",
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "sv": "BigotryGateAmonFire01"
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "大幅减少特定伤害",
+       "condition": "",
+       "description": "大幅减少来自阿蒙之门R的伤害",
+       "master_label": "Passive.DamageCut_GatebossFire03_75Per",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "MTenneAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "MTenneSkill52",
+      "name": "猫咪大魔法",
+      "level": 4
+     },
+     {
+      "label": "MTenneSkill02",
+      "name": "巫师射击",
+      "level": 2
+     },
+     {
+      "label": "MTenneSkill04",
+      "name": "零度冲击",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "MTenneAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "MTenneAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   },
+   "hp": 1756,
+   "hp_max": 1756,
+   "expected_hp": 1756,
+   "dp": 4852,
+   "dp_max": 4852,
+   "expected_dp": 4852,
+   "statuses": [
+    {
+     "label": "SpecialStatus.ReduceSp",
+     "name": "SP 消耗减少",
+     "value": "1",
+     "values": {
+      "numValue": 1
+     },
+     "source": "Passive.Start_ReduceSp03",
+     "source_name": "Passive.Start_ReduceSp03",
+     "element_type": null,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    },
+    {
+     "label": "SpecialStatus.DefenseUpFromEnemyGroup",
+     "name": "DefenseUpFromEnemyGroup",
+     "value": "",
+     "values": {
+      "amountOnDpDamageInt": -7500,
+      "amountOnHpDamageInt": -7500
+     },
+     "source": "Passive.DamageCut_GatebossFire03_75Per",
+     "source_name": "Passive.DamageCut_GatebossFire03_75Per",
+     "element_type": 0,
+     "element_key": null,
+     "element_name": null,
+     "source_effect": {},
+     "buff_limit_type": 0,
+     "remaining": 0,
+     "duration": "永久",
+     "duration_kind": "permanent",
+     "hidden": false,
+     "pending_add": false,
+     "pending_remove": false
+    }
+   ],
+   "statuses_available": true,
+   "name": "天音 巫呼",
+   "inputs": {
+    "stats": {
+     "power": 465,
+     "dexterity": 462,
+     "toughness": 423,
+     "spirit": 464,
+     "wisdom": 540,
+     "luck": 453
+    },
+    "token": 0,
+    "reinforced_mode_turn": 0,
+    "current_sp": 6,
+    "expected_sp": 6,
+    "sp_to_consume": 0,
+    "passive_labels": [
+     "Passive.Overdrive_DamageUp",
+     "Passive.Start_IceEnhanceRing03",
+     "Passive.Start_HPAttackUpRangeByHitEarring03",
+     "Passive.DamageCut_GatebossFire03_75Per"
+    ],
+    "passive_audit": [
+     {
+      "label": "Passive.Overdrive_DamageUp",
+      "name": "[Overdrive]",
+      "condition": "",
+      "timing": "未确认",
+      "description": "超频状态时 伤害提升",
+      "parts": [],
+      "catalog_found": false,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "[Overdrive]",
+       "condition": "",
+       "description": "超频状态时 伤害提升",
+       "master_label": "Passive.Overdrive_DamageUp",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_IceEnhanceRing03",
+      "name": "冰属性攻击+8％",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "自身冰属性技能攻击力+8%",
+      "parts": [
+       {
+        "label": "Passive.Start_IceEnhanceRing03",
+        "skill_type": "AttackUp",
+        "target_type": "Self",
+        "type": null,
+        "elements": [
+         "Ice"
+        ],
+        "power": [
+         0.08,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "冰属性攻击+8％",
+       "condition": "IsFront()",
+       "description": "自身冰属性技能攻击力+8%",
+       "master_label": "Passive.Start_IceEnhanceRing03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+      "name": "对HP技能攻击力提升",
+      "condition": "IsFront()",
+      "timing": "OnPlayerTurnStart",
+      "description": "对HP技能攻击力最多+15%（连击数越少效果越大）",
+      "parts": [
+       {
+        "label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+        "skill_type": "AttackUpRangeByHit",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.05,
+         0.15
+        ],
+        "value": [
+         10.0,
+         1.0
+        ],
+        "strval": [
+         -1,
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 0.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "PlayerTurnEnd",
+         "exitVal": [
+          1,
+          0
+         ]
+        }
+       }
+      ],
+      "catalog_found": true,
+      "classification": "已支持装备条件",
+      "runtime": {
+       "name": "对HP技能攻击力提升",
+       "condition": "IsFront()",
+       "description": "对HP技能攻击力最多+15%（连击数越少效果越大）",
+       "master_label": "Passive.Start_HPAttackUpRangeByHitEarring03",
+       "used_count": 0,
+       "limit_count": 0
+      }
+     },
+     {
+      "label": "Passive.DamageCut_GatebossFire03_75Per",
+      "name": "大幅减少特定伤害",
+      "condition": "",
+      "timing": "OnFirstBattleStart",
+      "description": "大幅减少来自阿蒙之门R的伤害",
+      "parts": [
+       {
+        "label": "Passive.DamageCut_GatebossFire03_75Per",
+        "skill_type": "DefenseUpFromEnemyGroup",
+        "target_type": "Self",
+        "type": null,
+        "elements": [],
+        "power": [
+         0.75,
+         0.0
+        ],
+        "value": [
+         0.0,
+         0.0
+        ],
+        "strval": [
+         "BigotryGateAmonFire01",
+         -1
+        ],
+        "cond": "",
+        "sstl": null,
+        "dv": 0,
+        "multipliers": {
+         "dp": 1.0,
+         "hp": 1.0,
+         "dr": 0.0
+        },
+        "diff_for_max": 0,
+        "parameters": {
+         "str": 0,
+         "wis": 0,
+         "dex": 0,
+         "spr": 0,
+         "luk": 0,
+         "con": 0
+        },
+        "growth": [],
+        "hits": [],
+        "hit_condition": "",
+        "target_condition": "",
+        "effect": {
+         "ir": false,
+         "category": "None",
+         "limitType": "None",
+         "exitCond": "Eternal",
+         "exitVal": [
+          0,
+          0
+         ]
+        },
+        "sv": "BigotryGateAmonFire01"
+       }
+      ],
+      "catalog_found": true,
+      "classification": "效果/时机待核对",
+      "runtime": {
+       "name": "大幅减少特定伤害",
+       "condition": "",
+       "description": "大幅减少来自阿蒙之门R的伤害",
+       "master_label": "Passive.DamageCut_GatebossFire03_75Per",
+       "used_count": 1,
+       "limit_count": 0
+      }
+     }
+    ],
+    "equipped_skills": [
+     {
+      "label": "MTenneAttackNormal",
+      "name": "通常攻击",
+      "level": 1
+     },
+     {
+      "label": "MTenneSkill52",
+      "name": "猫咪大魔法",
+      "level": 4
+     },
+     {
+      "label": "MTenneSkill02",
+      "name": "巫师射击",
+      "level": 2
+     },
+     {
+      "label": "MTenneSkill04",
+      "name": "零度冲击",
+      "level": 5
+     }
+    ],
+    "selected_skill": {
+     "label": "MTenneAttackNormal",
+     "name": "通常攻击",
+     "level": 1,
+     "base_sp_cost": 0,
+     "parts": [
+      {
+       "Label": "MTenneAttackNormal",
+       "Power": 237.5,
+       "MaxPower": 475.0,
+       "RefParamDiffForMax": 100,
+       "VsDpRate": 1.0,
+       "VsHpRate": 1.0,
+       "DamageRateRate": 1.0,
+       "Value1": 0.0,
+       "Value2": 0.0,
+       "StrValue1": "",
+       "StrValue2": "",
+       "Condition": "",
+       "TargetCondition": "",
+       "HitCondition": "",
+       "MaxPower2": 0.0,
+       "RefParamDiffForMax2": 0,
+       "RefParamPower": 1,
+       "RefParamDexterity": 1,
+       "RefParamToughness": 0,
+       "RefParamSpirit": 0,
+       "RefParamWisdom": 0,
+       "RefParamLuck": 0,
+       "skill_type_raw": 1
+      }
+     ],
+     "hit_count": 3
+    }
+   }
+  }
+ ],
+ "enemies": [
+  {
+   "address": 2428107182752,
+   "hp": 354293,
+   "dp": 531440,
+   "name": "BigotryGateAmonFire01",
+   "enemy_label": "BigotryGateAmonFire01_04",
+   "enemy_id": 13402204,
+   "names": [
+    {
+     "kind": "cn",
+     "name": "阿蒙之门R ：等级4"
+    },
+    {
+     "kind": "en",
+     "name": "Amon R: Lv. 4"
+    },
+    {
+     "kind": "internal",
+     "name": "BigotryGateAmonFire01"
+    }
+   ],
+   "base_resistances": {
+    "fire": 0,
+    "ice": -250,
+    "thunder": 0,
+    "light": 0,
+    "dark": 0,
+    "slash": 0,
+    "stab": 0,
+    "strike": 0,
+    "nonelement": 0,
+    "ignore_penetration": false,
+    "absorb_element_list": [
+     "Fire",
+     "Light"
+    ]
+   },
+   "action_rules": "行动规则（资料参考）\n序号是规则顺序，不等同于战斗 Turn；条件和随机分支会改变实际行动。\n\nDP 阶段\n0 · Flame Field Expansion  [先制；权重 100]\n1 · Disaster Shot  [权重 100]\n2 · 单体攻击  [权重 100]\n3 · Strong Impulse  [权重 100]\n4 · Lasting Power → 单体攻击  [权重 100]\n5 · Disaster Shot  [权重 100]\n6 · Strong Impulse  [权重 100]\n7 · Planar Collapse  [权重 100]\n8 · Disaster Shot  [权重 100]\n9 · Lasting Power → Strong Impulse  [权重 100]\n10 · 单体攻击  [权重 100]\n\nHP 阶段\n1 · Planar Collapse  [权重 100]\n2 · Lasting Power → Strong Impulse  [权重 100]\n3 · 单体攻击  [权重 100]\n4 · Disaster Shot  [权重 100]\n5 · Lasting Power → Strong Impulse  [权重 100]\n6 · Planar Collapse  [权重 100]\n7 · 单体攻击  [权重 100]\n\nDP 第 2 层\n1 · Planar Collapse  [权重 100]\n2 · Lasting Power → Disaster Shot  [权重 100]\n3 · Strong Impulse  [权重 100]\n4 · 单体攻击  [权重 100]\n5 · Planar Collapse  [权重 100]\n6 · Lasting Power → 单体攻击  [权重 100]\n7 · Disaster Shot  [权重 100]\n8 · Strong Impulse  [权重 100]\n\nDP 第 3 层\n1 · Lasting Power → Strong Impulse  [权重 100]\n2 · 单体攻击  [权重 100]\n3 · Strong Impulse  [权重 100]\n4 · Planar Collapse  [权重 100]\n5 · Lasting Power → Disaster Shot  [权重 100]\n6 · Strong Impulse  [权重 100]\n7 · Disaster Shot  [权重 100]\n8 · Planar Collapse  [权重 100]\n\n技能效果（资料记录）\n\n单体攻击 [BigotryGateAmon_AttackSingle01_Fire]\n单体 · 攻击 · 突 · 火\n命中次数：3\nAttackSkill 原始威力参数：[1150.0, 13800.0]（非实际伤害）\n\nDisaster Shot [BigotryGateAmon_AttackSingle02_Fire]\n单体 · 攻击 · 突 · 火；单体 · 厄运\n命中次数：1\nAttackSkill 原始威力参数：[1445.0, 17340.0]（非实际伤害）\nMisfortune 原始威力参数：[2.0, 3.0]（非实际伤害）\n\nStrong Impulse [BigotryGateAmon_AttackAll01_Fire]\n全体 · 攻击 · 突 · 火；全体 · 精神降低\n命中次数：1\nAttackSkill 原始威力参数：[1290.0, 15480.0]（非实际伤害）\nSpiritDownRate 原始威力参数：[0.5, 0.0]（非实际伤害）\n\nPlanar Collapse [BigotryGateAmon_AttackAll02_Fire]\n全体 · 攻击 · 突 · 火；全体 · 混乱\n命中次数：5\nAttackSkill 原始威力参数：[2075.0, 24900.0]（非实际伤害）\nConfusionRandom 原始威力参数：[1.0, 0.0]（非实际伤害）\n\nLasting Power [BigotryGateAmon_AttackUp]\n自身 · 攻击提升\nAttackUp 原始威力参数：[0.4, 0.0]（非实际伤害）\n\nFlame Field Expansion [BigotryGateAmon_Buff_Fire]\nField · Zone · 火\nZone 原始威力参数：[1.5, 0.0]（非实际伤害）",
+   "enemy_progress": {
+    "dp": 531440,
+    "dp_pattern": "BigotryGateAmonFire_DP1",
+    "hp_pattern": "BigotryGateAmonFire_break",
+    "dp_order": 0,
+    "hp_order": 0,
+    "down": 0,
+    "charged": false,
+    "overridden": false,
+    "dp_extra": true,
+    "dp_index": 0,
+    "dp_active_pattern": "BigotryGateAmonFire_DP1",
+    "hp_extra": false,
+    "enemy_count": 1,
+    "played_counts": {},
+    "enemy_pending": false,
+    "enemy_executing": false,
+    "observed_played_counts": {},
+    "played_complete": true,
+    "played_source": "observed",
+    "recent_break": false,
+    "last_actions": [],
+    "dp_max": 531440,
+    "dp_rate": 1.0,
+    "hp_max": 354293,
+    "hp_rate": 1.0,
+    "charge_step": 0,
+    "damage_rate": 100.0,
+    "destruction_coefficient": 4,
+    "destruction_max": 300,
+    "shield": {
+     "total": 3,
+     "index": 0,
+     "broken": 0,
+     "remaining": 3,
+     "turn": 1,
+     "breaks_this_turn": 0,
+     "locked": false,
+     "limit_per_turn": 1,
+     "next_dp": 531440,
+     "source": "runtime_index_and_observation",
+     "capacity_source": "catalog",
+     "complete": true
+    }
+   },
+   "forecast": {
+    "text": "规则预告：Disaster Shot",
+    "phase": "dp",
+    "pattern": "BigotryGateAmonFire_DP1",
+    "order": 1
+   },
+   "combat_inputs": {
+    "stats": {},
+    "_borderRefParam": 450,
+    "_defenseRefParam": 420,
+    "token": 0
+   },
+   "statuses": [],
+   "statuses_available": true,
+   "active": true,
+   "dp_reference": 531440,
+   "dp_change": 0,
+   "dp_rises": 0,
+   "hp_reference": 354293,
+   "hp_change": 0,
+   "hp_rises": 0,
+   "inputs": {
+    "stats": {},
+    "_borderRefParam": 450,
+    "_defenseRefParam": 420,
+    "token": 0
+   }
+  }
+ ],
+ "field_state": {
+  "available": true,
+  "statuses": [
+   {
+    "label": "SpecialStatus.Zone",
+    "name": "火属性场地",
+    "value": "+50%（系数 1.5）",
+    "values": {
+     "rateValueInt": 15000
+    },
+    "source": "BigotryGateAmon_Buff_Fire",
+    "source_name": "Flame Field Expansion",
+    "element_type": 1,
+    "element_key": "Fire",
+    "element_name": "火",
+    "source_effect": {
+     "elements": [
+      "Fire"
+     ],
+     "effect": {
+      "ir": false,
+      "category": "None",
+      "limitType": "None",
+      "exitCond": "Eternal",
+      "exitVal": [
+       0,
+       0
+      ]
+     },
+     "target_condition": "",
+     "condition": "",
+     "hit_condition": ""
+    },
+    "buff_limit_type": 0,
+    "remaining": 0,
+    "duration": "永久",
+    "duration_kind": "permanent",
+    "hidden": false,
+    "pending_add": false,
+    "pending_remove": false
+   }
+  ]
+ },
+ "element_gauge": {
+  "value": 9000,
+  "maximum": 10000,
+  "element": 2,
+  "name": "冰",
+  "full": false
+ },
+ "od_state": {
+  "available": true,
+  "points": 0,
+  "percent": 0.0,
+  "active": false,
+  "level": 0,
+  "last_activated_level": 0,
+  "consumed_points": 0
+ },
+ "schema_version": 1
+}
