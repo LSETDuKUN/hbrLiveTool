@@ -177,3 +177,10 @@ def snapshot(team_key, payload, enemy, skill_choices=None, statuses=None, field=
                 enemies=[enemy] if enemy else [], field_state=field or {'statuses': []},
                 element_gauge=dict(full=False), od_state=dict(available=True, active=od_level > 0,
                                                               level=od_level or None)))
+
+
+def __getattr__(name):
+    if name in ('OfflineSession', 'sanitize_team_payload'):
+        from hbr_live_core import offline_session
+        return getattr(offline_session, name)
+    raise AttributeError(name)

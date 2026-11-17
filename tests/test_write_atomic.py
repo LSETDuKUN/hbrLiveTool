@@ -22,6 +22,24 @@ class WriteAtomicTest(unittest.TestCase):
                     write_atomic(path, b'data')
             self.assertEqual(list(Path(root).iterdir()), [])
 
+    def test_retries_once_on_windows_permission_error(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'a.json'
+            real_replace = Path.replace
+            calls = []
+
+            def flaky_replace(self_path, target):
+                calls.append(target)
+                if len(calls) == 1:
+                    raise PermissionError('transient lock')
+                return real_replace(self_path, target)
+
+            with mock.patch.object(Path, 'replace', autospec=True, side_effect=flaky_replace):
+                write_atomic(path, b'data')
+            self.assertEqual(len(calls), 2)
+            self.assertEqual(path.read_bytes(), b'data')
+            self.assertEqual(list(Path(root).iterdir()), [path])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -25,7 +25,13 @@ def write_atomic(path, data):
     temporary = path.with_name(f"{path.name}.{threading.get_ident()}.part")
     try:
         temporary.write_bytes(data)
-        temporary.replace(path)
+        try:
+            temporary.replace(path)
+        except PermissionError:
+            # Windows can briefly lock the target when concurrent workers finish
+            # writing the same content-addressed blob at the same time.
+            time.sleep(0.02)
+            temporary.replace(path)
     finally:
         if temporary.exists():
             temporary.unlink()

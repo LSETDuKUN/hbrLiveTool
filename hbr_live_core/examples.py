@@ -50,6 +50,7 @@ def offline_snapshot():
 
 
 def _trim(snapshot, keep=4):
+    snapshot['run_id'] = 'example-live'
     for player in snapshot['players']:
         player['statuses'] = player.get('statuses', [])[:keep]
         inputs = player.get('combat_inputs', {})

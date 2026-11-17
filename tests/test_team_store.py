@@ -109,6 +109,24 @@ class SkillDetailTests(unittest.TestCase):
         refs=skill_references(dict(selected_skill=dict(label='skill',name='同名',level=7,parts=[dict(Power=123)])))
         self.assertEqual(refs,[dict(label='skill',name='同名',level=7)])
 
+    def test_schema_migration_and_unsupported_version_rejection(self):
+        import json
+        from hbr_live_app.team_store import migrate_payload
+        legacy = dict(members=[])
+        self.assertEqual(migrate_payload(legacy)['schema'], 1)
+        with tempfile.TemporaryDirectory() as folder:
+            store = TeamStore(Path(folder) / 'teams.sqlite3')
+            with store.connect() as db:
+                db.execute(
+                    'INSERT INTO teams(name,updated,payload) VALUES (?,?,?)',
+                    ('legacy', '2026-11-17T00:00:00', json.dumps(legacy)),
+                )
+            rows = store.rows()
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0][2]['schema'], 1)
+        with self.assertRaises(ValueError):
+            migrate_payload(dict(schema=99, members=[]))
+
     def test_bracelet_effects_have_own_slot(self):
         from hbr_live_app.team_views import effect_group,equipment_slot
         for label in ('Passive.Start_AttackUpOnlyNormalBracelet03','Passive.Start_AdditionalThunderOnlyNormalBracelet'):

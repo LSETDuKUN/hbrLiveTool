@@ -25,12 +25,10 @@ FONT = theme.ui(13)
 class App:
     def __init__(self, root=None):
         self.root = root or tk.Tk()
-        self.model = BattleModel()
-        self.queue = queue.Queue()
-        self.stop_event = threading.Event()
-        self.paused = threading.Event()
-        self.thread = None
-        self.connected = False
+        from .team_store import TeamStore
+        from hbr_live_core.live_session import LiveSession
+        self.team_store = TeamStore(ROOT / 'data' / 'team_builds.sqlite3')
+        self.session = LiveSession(ROOT / 'sessions', self.team_store)
         self.closing = False
         self.library = None
         self.enemy_keys = []
@@ -41,13 +39,8 @@ class App:
         self.damage_timer = None
         self.damage_display = (None, 0)
         self.log_lines = []
-        self.last_packet = None
-        self.last_sample = None
-        self.session_path = None
         self._player_need = -1
         self._enemy_need = -1
-        from .team_store import TeamStore
-        self.team_store = TeamStore(ROOT / 'data' / 'team_builds.sqlite3')
         self.settings = self._load_settings()
         theme.use(self.settings.get('theme', theme.NAME))
         self.compact = tk.BooleanVar(value=bool(self.settings.get('compact', False)))
@@ -88,15 +81,81 @@ class App:
             window.destroy()
         self.offline_window = OfflineDamageWindow(self.root, self.team_store, team_key, draft)
 
+    # ---- LiveSession state aliases ----------------------------------------
+    @property
+    def model(self):
+        return self.session.model
+
+    @model.setter
+    def model(self, value):
+        self.session.model = value
+
+    @property
+    def queue(self):
+        return self.session.queue
+
+    @property
+    def stop_event(self):
+        return self.session.stop_event
+
+    @property
+    def paused(self):
+        return self.session.paused
+
+    @property
+    def thread(self):
+        return self.session.thread
+
+    @thread.setter
+    def thread(self, value):
+        self.session.thread = value
+
+    @property
+    def connected(self):
+        return self.session.connected
+
+    @connected.setter
+    def connected(self, value):
+        self.session.connected = bool(value)
+
+    @property
+    def last_packet(self):
+        return self.session.last_packet
+
+    @last_packet.setter
+    def last_packet(self, value):
+        self.session.last_packet = value
+
+    @property
+    def last_events(self):
+        return self.session.last_events
+
+    @last_events.setter
+    def last_events(self, value):
+        self.session.last_events = value
+
+    @property
+    def last_sample(self):
+        return self.session.last_sample
+
+    @last_sample.setter
+    def last_sample(self, value):
+        self.session.last_sample = value
+
+    @property
+    def session_path(self):
+        return self.session.session_path
+
+    @session_path.setter
+    def session_path(self, value):
+        self.session.session_path = value
+
     def open_damage_calculator(self):
         from .damage_window import DamageWindow
         window = getattr(self, 'damage_window', None)
         if window is not None and window.winfo_exists():
             window.deiconify();window.lift();return
-        def snapshot():
-            from hbr_live_core.snapshot import live_snapshot
-            return live_snapshot(self.model, self.connected)
-        self.damage_window = DamageWindow(self.root, snapshot)
+        self.damage_window = DamageWindow(self.root, self.session.latest_snapshot)
 
     def _restore_geometry(self):
         default = (500, 860) if self.compact.get() else (1180, 900)
@@ -512,103 +571,76 @@ class App:
         self.render_details()
 
     def start_or_stop(self):
-        if self.thread and self.thread.is_alive():
-            self.stop_event.set()
+        if self.session.is_running():
+            self.session.stop()
             self.set_status('正在停止并保存记录…')
             return
-        # Previous worker has exited; discard its queued snapshots before reconnecting.
-        while True:
-            try:self.queue.get_nowait()
-            except queue.Empty:break
-        self.stop_event.clear()
-        self.paused.clear()
-        self.connected = False
         self.pause_button.configure(text='暂停', bg=theme.CARD_HI)
         self.start_button.configure(text='取消连接', bg=theme.mix(theme.CARD_HI, theme.ROSE, .45))
         self.set_status('正在连接，请暂不行动…')
-        from .source import run
-        self.thread = threading.Thread(target=run,
-            args=(self.stop_event, self.paused, self.queue.put, ROOT / 'sessions'), daemon=True)
-        self.thread.start()
+        self.session.start()
 
     def start(self):
-        if not self.thread or not self.thread.is_alive():
+        if not self.session.is_running():
             self.start_or_stop()
 
     def toggle_pause(self):
         if not self.connected:
             self.set_status('连接成功后可暂停。', theme.DIM)
             return
-        if self.paused.is_set():
-            self.paused.clear()
+        if not self.session.pause():
             self.pause_button.configure(text='暂停', bg=theme.CARD_HI)
             self.set_status('正在读取 · 可以行动', theme.CYAN)
         else:
-            self.paused.set()
             self.pause_button.configure(text='继续', bg=theme.mix(theme.CARD_HI, theme.GOLD, .45))
             self.set_status('已暂停 · 思考期间请勿行动；继续后沿用本场记录。', theme.GOLD)
 
     def pump(self):
-        try:
-            # Bound each pass so long bursts cannot starve Tk input.
-            for _ in range(200):
-                kind, data = self.queue.get_nowait()
-                if kind == 'connected':
-                    self.model = BattleModel()
-                    self.model.run_id = data['run_id']
-                    self.update_damage()
-                    self.session_path = data['path']
-                    self.tree.delete(*self.tree.get_children())
-                    self.history_rows = {}
-                    self.enemy_keys = []
-                    for card in self.enemy_cards.values():
-                        card.destroy()
-                    self.enemy_cards.clear()
-                    for panel in self.enemy_status_panels.values():
-                        panel.destroy()
-                    self.enemy_status_panels.clear()
-                    self.player_panel.reset()
-                    self.field_label.configure(text='场地 · 等待采样')
-                    self.last_sample = None
-                    self.connected = True
-                    self.start_button.configure(text='停止', bg=theme.mix(theme.CARD_HI, theme.ROSE, .6))
-                    self.set_status('内存已连接 · 可以行动', theme.CYAN)
-                elif kind == 'snapshot':
-                    self.model.update(data)
-                    try:
-                        captured = self.team_store.observe(self.model.run_id, self.model.players, self.model.turn_context)
-                        if captured:
-                            self.set_status('已采集配队 · 设置 → 配队档案，可保存或丢弃', theme.CYAN)
-                            archive = getattr(self, 'team_window', None)
-                            if archive is not None and archive.winfo_exists(): archive.refresh()
-                    except (OSError, sqlite3.Error) as exc:
-                        self.set_status(f'配队采集失败：{exc}', theme.ROSE)
-                    window=getattr(self,'damage_window',None)
-                    if window is not None and window.winfo_exists():window.observe_live()
-                    self.last_packet = data
-                    self.last_events = data.get('events', [])
-                    self.render(data.get('events', []))
-                elif kind == 'heartbeat':
-                    self.last_sample = data
-                    self.footer.configure(text=f'最近采样 {time.strftime("%H:%M:%S", time.localtime(data))}  ·  本场记录自动保存')
-                elif kind == 'stopped':
-                    self.connected = False
-                    for card in self.enemy_cards.values():
-                        card.set_monitoring(False)
-                    self.start_button.configure(text='连接新战斗', bg=theme.mix(theme.CARD_HI, theme.MINT, .4))
-                    self.pause_button.configure(text='暂停', bg=theme.CARD_HI)
-                elif kind == 'battle_end':
-                    run_id = data['run_id']
-                    if run_id not in self.prompted_runs:
-                        self.prompted_runs.add(run_id)
-                        saved = self.model.export()
-                        self.root.after_idle(lambda saved=saved: self.offer_axis(saved))
-                elif kind == 'error':
-                    self.set_status(data, '#ffadb7')
-                elif kind == 'status':
-                    self.set_status(data)
-        except queue.Empty:
-            pass
+        for kind, data in self.session.events(200):
+            if kind == 'connected':
+                self.update_damage()
+                self.tree.delete(*self.tree.get_children())
+                self.history_rows = {}
+                self.enemy_keys = []
+                for card in self.enemy_cards.values():
+                    card.destroy()
+                self.enemy_cards.clear()
+                for panel in self.enemy_status_panels.values():
+                    panel.destroy()
+                self.enemy_status_panels.clear()
+                self.player_panel.reset()
+                self.field_label.configure(text='场地 · 等待采样')
+                self.start_button.configure(text='停止', bg=theme.mix(theme.CARD_HI, theme.ROSE, .6))
+                self.set_status('内存已连接 · 可以行动', theme.CYAN)
+            elif kind == 'snapshot':
+                if data.get('team_captured'):
+                    self.set_status('已采集配队 · 设置 → 配队档案，可保存或丢弃', theme.CYAN)
+                    archive = getattr(self, 'team_window', None)
+                    if archive is not None and archive.winfo_exists():
+                        archive.refresh()
+                elif data.get('team_error'):
+                    self.set_status(f"配队采集失败：{data['team_error']}", theme.ROSE)
+                window = getattr(self, 'damage_window', None)
+                if window is not None and window.winfo_exists():
+                    window.observe_live()
+                self.render(data.get('events', []))
+            elif kind == 'heartbeat':
+                self.footer.configure(text=f'最近采样 {time.strftime("%H:%M:%S", time.localtime(data))}  ·  本场记录自动保存')
+            elif kind == 'stopped':
+                for card in self.enemy_cards.values():
+                    card.set_monitoring(False)
+                self.start_button.configure(text='连接新战斗', bg=theme.mix(theme.CARD_HI, theme.MINT, .4))
+                self.pause_button.configure(text='暂停', bg=theme.CARD_HI)
+            elif kind == 'battle_end':
+                run_id = data['run_id']
+                if run_id not in self.prompted_runs:
+                    self.prompted_runs.add(run_id)
+                    saved = self.session.export()
+                    self.root.after_idle(lambda saved=saved: self.offer_axis(saved))
+            elif kind == 'error':
+                self.set_status(data, '#ffadb7')
+            elif kind == 'status':
+                self.set_status(data)
         fresh = self.connected and not self.paused.is_set() and self.last_sample is not None and time.time()-self.last_sample < 3
         for card in self.enemy_cards.values():
             card.set_monitoring(fresh)

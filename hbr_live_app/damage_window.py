@@ -14,6 +14,7 @@ from .equipment_editor import EquipmentEditor
 from .effect_editor import EffectEditor
 from .passive_audit import audit_text
 from .damage_autofill import autofill, WEIGHTS, style_elements
+from hbr_live_core import damage_service
 
 GROUPS = (
     ('基础伤害', theme.DIM, (('base','基础伤害（可空）'),)),
@@ -155,11 +156,8 @@ class DamageWindow(tk.Toplevel):
 
     # ---- shared boss stat / skill forms -------------------------------------
     def apply_enemy_stat(self, event=None):
-        text = self.enemy_stat.get().strip().replace(',', '')
         try:
-            value = float(text) if text else None
-            if value is not None and (value < 0 or value != value):
-                raise ValueError
+            value = damage_service.parse_enemy_stat(self.enemy_stat.get())
         except ValueError:
             self.enemy_stat_title.configure(text='敌方属性 · 无效', fg=theme.ROSE)
             return
@@ -192,38 +190,18 @@ class DamageWindow(tk.Toplevel):
 
     def shared_enemy(self, enemy):
         """Apply the shared boss stat to one enemy snapshot (or mirror the read value)."""
-        inputs = enemy.get('combat_inputs', enemy.get('inputs', {}))
+        resolved, live = damage_service.apply_shared_enemy(enemy, self.enemy_stat_override)
         if self.enemy_stat_override is None:
-            live = inputs.get('_defenseRefParam')
             self.enemy_stat.set('' if live is None else f'{live:g}')
-            return enemy
-        inputs = dict(inputs, _defenseRefParam=self.enemy_stat_override)
-        return dict(enemy, combat_inputs=inputs, inputs=inputs)
+        return resolved
 
     def resolve_forms(self, data, actor_id):
         """Concrete form for switch skills: manual for the selected actor, auto otherwise."""
-        from .skill_forms import forms, with_form
-        players, notes = [], []
-        for player in data.get('players', []):
-            choice = None
-            if player.get('actor_id') == actor_id:
-                selected = player.get('combat_inputs', player.get('inputs', {})).get('selected_skill') or {}
-                options = forms(selected.get('label'))
-                key = (actor_id, selected.get('label'))
-                labels = ['自动判断形态'] + [f'形态 {i + 1} · {name}' for i, (_, name, _) in enumerate(options)]
-                if not options:
-                    labels = ['无切换形态']
-                if key != self.form_key or self.form_choice.get() not in labels:
-                    self.form_choice.set(labels[0])
-                self.form_key = key
-                self.form_box.configure(values=labels)
-                current = labels.index(self.form_choice.get())
-                choice = current - 1 if options and current > 0 else None
-            resolved, note = with_form(player, choice)
-            if note and player.get('actor_id') == actor_id:
-                notes.append(note)
-            players.append(resolved)
-        return dict(data, players=players), notes
+        info = damage_service.resolve_skill_forms(data, actor_id, self.form_choice.get(), self.form_key)
+        self.form_choice.set(info['selected_label'])
+        self.form_key = info['form_key']
+        self.form_box.configure(values=info['labels'])
+        return info['data'], info['notes']
 
 
     def build_pages(self):
@@ -640,377 +618,280 @@ class DamageWindow(tk.Toplevel):
         if getattr(self,'preview_needs_fill',False) and (data.get('turn_context') or {}).get('selecting'):
             self.fill()
 
+    def _current_prepared(self):
+        return dict(
+            pending_context=getattr(self, 'pending_context', None),
+            pending_base=getattr(self, 'pending_base', {}),
+            pending_effects=list(getattr(self, 'pending_effects', [])),
+            dismissed_effects=set(getattr(self, 'dismissed_effects', set())),
+            pending_delta=dict(getattr(self, 'pending_delta', {})),
+            pending_chain_weights=list(getattr(self, 'pending_chain_weights',
+                                               getattr(self, 'pending_base', {}).get('chain_weights', []))),
+            values={k: v.get() for k, v in self.values.items()},
+            hit_weights_str=self.hit_weights.get(),
+            filled_chain=getattr(self, 'filled_chain', None),
+            chain_expression=self.chain_expression.get(),
+            skill_title=self.skill_title.cget('text'),
+        )
+
     def fill(self):
         # Preserve selected identities even if list ordering changes in a new snapshot.
-        old=self.loaded_snapshot
-        pi,ei=self.player_box.current(),self.enemy_box.current()
-        if pi<0 or ei<0:return
-        player=old['players'][pi];enemy=old['enemies'][ei]
-        data=self.snapshot()
+        old = self.loaded_snapshot
+        pi, ei = self.player_box.current(), self.enemy_box.current()
+        if pi < 0 or ei < 0:
+            return
+        player, enemy = old['players'][pi], old['enemies'][ei]
+        data = self.snapshot()
         if not data.get('connected'):
-            self.fill_notes='未连接战斗，未覆盖表单';self.refresh();return
+            self.fill_notes = '未连接战斗，未覆盖表单'
+            self.refresh()
+            return
         self.sync_preview_epoch(data)
-        data,form_notes=self.resolve_forms(data,player.get('actor_id'))
-        if self.enemy_stat_override is not None:
-            data=dict(data,enemies=[self.shared_enemy(e) for e in data.get('enemies',[])])
-        player=next((p for p in data.get('players',[]) if p.get('actor_id')==player.get('actor_id')),None)
-        enemy=next((e for e in data.get('enemies',[]) if e.get('address')==enemy.get('address')),None)
-        if player is None or enemy is None:
-            self.fill_notes='所选角色/敌人已变化，请刷新列表';self.refresh();return
-        identity=data.get('run_id') or tuple(p.get('actor_id') for p in data.get('players',[]))
-        if getattr(self,'sequence_battle',identity)!=identity:
-            self.sequence.clear();self.sequence_panel.update_sequence(self.sequence)
-        self.sequence_battle=identity
-        try:enemy=self.sequence.overlay(enemy)
-        except ValueError as exc:
-            self.sequence_panel.message.configure(text=str(exc));return
-        enemy=self.shared_enemy(enemy)
-        inputs=player.get('combat_inputs',player.get('inputs',{}))
-        gauge=data.get('element_gauge') or {}
-        turn=inputs.get('reinforced_mode_turn')
-        automatic=dict(transcend=gauge.get('full') is True,
-                       high_boost=any(s.get('label')=='SpecialStatus.HighBoost' and s.get('effective') is not False
-                                      and not s.get('pending_add') and not s.get('pending_remove')
-                                      for s in player.get('statuses',[])),
-                       ghost=isinstance(turn,int) and turn>0,
-                       gidou='Passive.Condition_AttackUp11' in inputs.get('passive_labels',[]))
-        modes={k:(automatic[k] if v.get()=='自动' else v.get()=='启用') for k,v in self.mode_choices.items()}
-        # Let autofill apply its complete status/expiry/condition filtering in auto mode.
-        if self.mode_choices['high_boost'].get()=='自动':modes.pop('high_boost')
-        modes.update(ghost=automatic['ghost'],gidou=automatic['gidou'])
-        modes['enemies']=data.get('enemies',[])
-        od=data.get('od_state') or {}
-        modes.update(od_active=od.get('active') if od.get('available') else None,od_level=od.get('level'))
-        modes['lightning_style']='Thunder' in style_elements(player.get('style_label',''))
-        selected_element={'火':1,'冰':2,'雷':3,'光':4,'暗':5}.get(self.transcend_element.get(),gauge.get('element'))
-        if modes.get('transcend'):
-            modes['super_break_element']={1:'Fire',2:'Ice',3:'Thunder',4:'Light',5:'Dark'}.get(selected_element)
-        # Thunder's stat bonuses are verified separately. Do not apply them to
-        # another element merely because its gauge is full.
-        modes['transcend']=bool(modes.get('transcend') and selected_element==3)
-        filled=autofill(player,enemy,data.get('field_state'),modes=modes,party=data.get('players',[]))
-        from .effect_pending import with_pending,PREVIEW_KEYS
-        identity=data.get('run_id') or tuple(p.get('actor_id') for p in data.get('players',[]))
-        if getattr(self,'pending_battle',identity)!=identity:self.pending_effects=[];self.dismissed_effects=set()
-        self.pending_battle=identity
-        self.pending_delta={}
-        from .orb_defaults import enabled
-        self.damage_orb_enabled.set(enabled(player,'damage'))
-        self.pending_context=(player,enemy,data.get('field_state'),modes,data.get('players',[]))
-        self.pending_base=filled
-        from .effect_pending import skill_rows
-        from .damage_autofill import catalog_skill
-        from hbr_data.skill_tree import effects
-        from hbr_data.battle_conditions import context_for
-        selected=player.get('combat_inputs',player.get('inputs',{})).get('selected_skill',{})
-        skill=catalog_skill(selected.get('label')) if selected.get('label') else {}
-        if (data.get('turn_context') or {}).get('selecting') is not False and any(str(p.get('skill_type','')).startswith('Attack') and p.get('skill_type') not in ('AttackUp','AttackUpIncludeNormal') for p in effects(skill,context_for(player,enemy,modes),include_unknown=False)):
-            rows,skipped=skill_rows(player,enemy,data.get('players',[]),data.get('enemies',[]),modes,self.pending_effects)
-            rows=[r for r in rows if (r['item'].get('caster'),r['item']['part'].get('label')) not in self.dismissed_effects]
-            self.pending_effects.extend(rows)
-            filled['skipped'].extend(skipped)
-        if self.pending_effects:
-            p,e=with_pending(player,enemy,self.pending_effects)
-            filled=autofill(p,e,data.get('field_state'),modes=modes,party=data.get('players',[]))
-            self.pending_delta={k:filled['values'][k]-self.pending_base['values'][k] for k in PREVIEW_KEYS}
-        self.effect_editor.pending_list.delete(0,'end')
-        self.effect_editor.load_party(data.get('players',[]),player,enemy,modes)
+        options = dict(
+            transcend=self.mode_choices['transcend'].get(),
+            high_boost=self.mode_choices['high_boost'].get(),
+            transcend_element=self.transcend_element.get(),
+            form_choice=self.form_choice.get(),
+            enemy_stat=self.enemy_stat_override,
+            damage_metric=self.damage_metric.get(),
+        )
+        prepared = damage_service.prepare(
+            data,
+            player.get('actor_id'),
+            enemy.get('address'),
+            options=options,
+            sequence=self.sequence,
+            sequence_battle=getattr(self, 'sequence_battle', None),
+            pending_effects=self.pending_effects,
+            dismissed_effects=self.dismissed_effects,
+            pending_battle=getattr(self, 'pending_battle', None),
+            form_key=self.form_key,
+            autofill_fn=autofill,
+        )
+        form_info = prepared.get('form_info')
+        if form_info:
+            self.form_choice.set(form_info['selected_label'])
+            self.form_key = form_info['form_key']
+            self.form_box.configure(values=form_info['labels'])
+        if not prepared.get('ok'):
+            reason = prepared.get('reason')
+            if reason in ('disconnected', 'missing_target'):
+                self.fill_notes = prepared.get('fill_notes', '')
+                self.refresh()
+            elif reason == 'sequence_conflict':
+                if prepared.get('sequence_reset'):
+                    self.sequence_panel.update_sequence(self.sequence)
+                self.sequence_battle = prepared.get('sequence_battle')
+                self.sequence_panel.message.configure(text=prepared.get('sequence_error', ''))
+            return
+        if self.enemy_stat_override is None:
+            live = prepared.get('live_enemy_stat')
+            self.enemy_stat.set('' if live is None else f'{live:g}')
+        if prepared.get('sequence_reset'):
+            self.sequence_panel.update_sequence(self.sequence)
+        self.sequence_battle = prepared['sequence_battle']
+        self.pending_battle = prepared['pending_battle']
+        self.pending_effects = prepared['pending_effects']
+        self.dismissed_effects = prepared['dismissed_effects']
+        self.pending_delta = prepared['pending_delta']
+        self.pending_context = prepared['pending_context']
+        self.pending_base = prepared['pending_base']
+        self.damage_orb_enabled.set(prepared['damage_orb_enabled'])
+        self.effect_editor.pending_list.delete(0, 'end')
+        self.effect_editor.load_party(prepared['party'], prepared['player'], prepared['enemy'], prepared['modes'])
         self.render_pending()
-        filled['notes'][:0]=form_notes
-        filled['notes'].append('模式判断：'+str({k:v for k,v in modes.items() if k!='enemies'})+'；自动依据雷量表、风格资料、强化剩余回合及运行时天赋列表，可手动纠正。')
-        if not gauge:filled['skipped'].append('元素量表未读取：超越可手动启用，仍需确认是雷属性风格')
-        for k,var in self.values.items():
-            v=filled['values'][k];var.set('' if v is None else str(v) if k=='destruction' else f'{v:g}')
-        for k,var in self.flags.items():var.set(filled['values'][k])
-        self.pool.set('auto')
-        self.shield_state=enemy.get('enemy_progress',{}).get('shield')
-        self.auto_pool_blocked=bool(enemy.get('enemy_progress',{}).get('dp_extra')) and not (
-            self.shield_state and self.shield_state.get('limit_per_turn')==1)
-        from .shield_layers import shield_text
-        if self.shield_state:filled['notes'].append(shield_text(self.shield_state)+'；下一层 DP 容量来自本地资料')
-        for k,var in self.params.items():
-            v=filled['params'].get(k);var.set('' if v is None else str(v) if k in ('enemy_dp','enemy_hp') else f'{v:g}')
-        self.hit_weights.set(', '.join(f'{w:.8g}' for w in filled.get('hit_weights',[])))
-        self.hit_source.configure(text=filled.get('hit_note','权重未确认'))
-        self.use_destruction.set(filled.get('destruction_ready',False))
-        self.hp_adjustments=filled.get('hp_adjustments',{})
-        self.use_dp_scaling.set(filled.get('dp_scaling',False))
-        self.sp_scaling=filled.get('sp_scaling',False)
-        self.sp_dr_scaling.set(False)
-        if self.sp_scaling:self.sp_panel.pack(fill='x',pady=8,before=self.skill_title)
-        else:self.sp_panel.pack_forget()
-        if filled.get('dp_scaling'):self.dp_panel.pack(fill='x',pady=8,before=self.skill_title)
-        else:self.dp_panel.pack_forget()
-        self.equipment_editor.load(filled.get('equipment_details',[]),filled.get('equipment_owned',[]))
-        self.equipment_text.configure(state='normal');self.equipment_text.delete('1.0','end')
-        self.equipment_text.insert('end','饰品贡献已计入相应乘区，不需要再次相加。\n按运行时已装备被动匹配；实际状态优先于预填。\n\n'+'\n\n'.join(filled.get('equipment_notes') or ['未读到可确认的饰品效果']))
+        for k, var in self.values.items():
+            var.set(prepared['values'][k])
+        for k, var in self.flags.items():
+            var.set(prepared['flags'][k])
+        self.pool.set(prepared['pool'])
+        self.shield_state = prepared['shield_state']
+        self.auto_pool_blocked = prepared['auto_pool_blocked']
+        for k, var in self.params.items():
+            var.set(prepared['params'].get(k, ''))
+        self.hit_weights.set(prepared['hit_weights_str'])
+        self.hit_source.configure(text=prepared['hit_note'])
+        self.use_destruction.set(prepared['use_destruction'])
+        self.hp_adjustments = prepared['hp_adjustments']
+        self.use_dp_scaling.set(prepared['use_dp_scaling'])
+        self.sp_scaling = prepared['sp_scaling']
+        self.sp_dr_scaling.set(prepared['sp_dr_scaling'])
+        if self.sp_scaling:
+            self.sp_panel.pack(fill='x', pady=8, before=self.skill_title)
+        else:
+            self.sp_panel.pack_forget()
+        if prepared['use_dp_scaling']:
+            self.dp_panel.pack(fill='x', pady=8, before=self.skill_title)
+        else:
+            self.dp_panel.pack_forget()
+        self.equipment_editor.load(prepared['equipment_details'], prepared['equipment_owned'])
+        self.equipment_text.configure(state='normal')
+        self.equipment_text.delete('1.0', 'end')
+        self.equipment_text.insert('end', prepared['equipment_text'])
         self.equipment_text.configure(state='disabled')
-        self.filled_chain=filled['values']['chain']
-        self.pending_chain_weights=filled.get('chain_weights',[])
-        self.show_chain(filled)
-        self.use_skill.set(True);self.skill_title.configure(text=filled['skill'])
-        self.fill_notes='自动填充来源与假设：\n'+'\n'.join(filled['notes'])+'\n\n未自动计入 / 待核对：\n'+'\n'.join(filled['skipped'])
-        self.preview_needs_fill=False
-        self.refresh();self.compute()
+        self.filled_chain = prepared['filled_chain']
+        self.pending_chain_weights = prepared['pending_chain_weights']
+        self.show_chain(prepared['filled'])
+        self.use_skill.set(prepared['use_skill'])
+        self.skill_title.configure(text=prepared['skill_title'])
+        self.fill_notes = prepared['fill_notes']
+        self.preview_needs_fill = False
+        self.refresh()
+        self.compute()
 
     def pre_cast_support(self):
-        if not hasattr(self,'pending_context'):return
-        from .effect_pending import skill_rows
-        player,enemy,fields,modes,party=self.pending_context
-        index=self.effect_editor.caster_box.current()
-        if 0<=index<len(party):player=party[index]
-        from .damage_autofill import style_elements
-        modes=dict(modes,lightning_style='Thunder' in style_elements(player.get('style_label','')))
-        rows,skipped=skill_rows(player,enemy,party,modes.get('enemies') or [enemy],modes,self.pending_effects)
-        self.pending_effects.extend(rows)
+        if not hasattr(self, 'pending_context'):
+            return
+        updated, _, _, message = damage_service.pre_cast_support(
+            self._current_prepared(),
+            caster_index=self.effect_editor.caster_box.current(),
+        )
+        self.pending_effects = updated['pending_effects']
         self.fill()
-        self.effect_editor.result.configure(text=f'已预发动 {len(rows)} 项效果；按对象保存。'+ '\n'.join(skipped))
+        self.effect_editor.result.configure(text=message)
 
-    def update_pending(self,action,payload):
-        from .effect_pending import targeted_row,with_pending,PREVIEW_KEYS
+    def update_pending(self, action, payload):
         self.sync_preview_epoch(self.snapshot())
-        if not hasattr(self,'pending_context'):raise ValueError('请先自动填充伤害角色和敌人')
-        player,enemy,fields,modes,party=self.pending_context
-        rows=list(self.pending_effects)
-        if action=='add':
-            item,amount=payload
-            if item.get('passive') and any(r['item'].get('source')==item.get('source') and r['item'].get('caster')==item.get('caster') and r['item']['part'].get('label')==item['part'].get('label') for r in rows):
-                raise ValueError('该来源被动已预添加；请删除后再修改，避免重复计入')
-            recipient=next((p for p in party if p.get('actor_id')==item.get('recipient_id')),player)
-            row=targeted_row(item,amount,party or [player],modes.get('enemies') or [enemy],recipient,enemy)
-            if item.get('part',{}).get('_branch_path') and any(r['item'].get('source')==item.get('source') and
-                    r['item']['part'].get('_branch_path')!=item['part']['_branch_path'] for r in rows):
-                raise ValueError('同一技能已有另一个条件分支，请先删除再切换场景')
-            rows.append(row)
-        else:
-            removed=rows.pop(payload)
-            self.dismissed_effects.add((removed['item'].get('caster'),removed['item']['part'].get('label')))
-        p,e=with_pending(player,enemy,rows)
-        computed=autofill(p,e,fields,modes=modes,party=party)
-        keys=PREVIEW_KEYS
-        delta={k:computed['values'][k]-self.pending_base['values'][k] for k in keys}
-        # Reconcile only the preview contribution; preserve unrelated manual edits.
-        updates={k:float(self.values[k].get())-self.pending_delta.get(k,0)+delta[k] for k in keys}
-        for k,v in updates.items():self.values[k].set(f'{v:.10g}')
-        self.hp_adjustments=computed.get('hp_adjustments',{})
-        beads=computed.get('chain_weights',[])
-        chain_changed=(delta['chain']!=self.pending_delta.get('chain',0) or
-                       beads!=getattr(self,'pending_chain_weights',self.pending_base.get('chain_weights',[])))
-        self.pending_chain_weights=beads
-        self.pending_effects=rows;self.pending_delta=delta
-        if chain_changed:
-            count=int(computed.get('params',{}).get('main_hits') or 0)
-            raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
-            current=[float(w) for w in raw.split(',') if w.strip()]
-            new=computed.get('hit_weights',[])
-            weights=current[:count]+beads if count and len(current)>=count else new
-            self.hit_weights.set(', '.join(f'{w:.8g}' for w in weights))
-            self.filled_chain=computed['values']['chain']
-            self.show_chain(dict(computed,hit_weights=weights))
+        if not hasattr(self, 'pending_context'):
+            raise ValueError('请先自动填充伤害角色和敌人')
+        updated = damage_service.apply_pending(
+            self._current_prepared(),
+            action,
+            payload,
+            current_values={k: v.get() for k, v in self.values.items()},
+            current_hit_weights=self.hit_weights.get(),
+            autofill_fn=autofill,
+        )
+        for k, v in updated['updates'].items():
+            self.values[k].set(f'{v:.10g}')
+        self.hp_adjustments = updated['hp_adjustments']
+        self.pending_chain_weights = updated['pending_chain_weights']
+        self.pending_effects = updated['pending_effects']
+        self.dismissed_effects = updated['dismissed_effects']
+        self.pending_delta = updated['pending_delta']
+        if updated['chain_changed']:
+            self.hit_weights.set(updated['hit_weights_str'])
+            self.filled_chain = updated['filled_chain']
+            self.chain_expression.set(updated['chain_expression'])
+            self.chain_dirty = False
         self.render_pending()
-        self.effect_editor.result.configure(text='已按施加对象保存，并重新筛选覆盖；切换角色自动填充后仍保留。当前乘区净变化：'+', '.join(f'{k} {v:+.3f}%' for k,v in delta.items() if v))
+        self.effect_editor.result.configure(text=updated['pending_status_text'])
         self.compute()
 
     def render_pending(self):
-        self.effect_editor.pending_list.delete(0,'end')
-        for row in self.pending_effects:
-            amount=f'{row["amount"]:g}%'
-            if row['state']['label']=='SpecialStatus.Funnel':amount=f'{row["state"]["values"]["numValue"]} 颗 × '+amount
-            self.effect_editor.pending_list.insert('end','、'.join(row.get('target_names',[]))+' ← '+row['item']['title']+' '+amount)
+        self.effect_editor.pending_list.delete(0, 'end')
+        for line in damage_service.format_pending_rows(self.pending_effects):
+            self.effect_editor.pending_list.insert('end', line)
 
-    def sequence_action(self,action):
+    def sequence_action(self, action):
         try:
             self.sync_preview_epoch(self.snapshot())
-            if action=='add':
-                if not hasattr(self,'pending_context'):raise ValueError('请先自动填充角色与敌人，并使用自动跨 DP/HP')
-                player,enemy,*_=self.pending_context
-                for box,key,identity in [(self.player_box,'players',player.get('actor_id')),(self.enemy_box,'enemies',enemy.get('address'))]:
-                    selected=self.loaded_snapshot.get(key,[])
-                    index=box.current()
-                    field='actor_id' if key=='players' else 'address'
-                    if index<0 or index>=len(selected) or selected[index].get(field)!=identity:raise ValueError('切换角色或敌人后请先自动填充')
+            if action == 'add':
+                if not hasattr(self, 'pending_context'):
+                    raise ValueError('请先自动填充角色与敌人，并使用自动跨 DP/HP')
+                player, enemy, *_ = self.pending_context
+                for box, key, identity in [
+                    (self.player_box, 'players', player.get('actor_id')),
+                    (self.enemy_box, 'enemies', enemy.get('address')),
+                ]:
+                    selected = self.loaded_snapshot.get(key, [])
+                    index = box.current()
+                    field = 'actor_id' if key == 'players' else 'address'
+                    if index < 0 or index >= len(selected) or selected[index].get(field) != identity:
+                        raise ValueError('切换角色或敌人后请先自动填充')
                 self.compute()
-                if self.sequence_candidate is None:raise ValueError('需成功完成自动跨 DP/HP 逐段试算，才可预添加结果')
-                self.sequence.append(player.get('actor_id'),player.get('actor') or player.get('name') or '角色',
-                    self.skill_title.cget('text'),enemy.get('address'),self.sequence_candidate)
-                message='本步已冻结。选择下一位角色并自动填充，将继承上述终值；概率图只表示当前技能，不代表整轮联合分布。'
+                out = damage_service.sequence_add(
+                    self.sequence,
+                    self._current_prepared(),
+                    dict(sequence_candidate=self.sequence_candidate),
+                    skill_title=self.skill_title.cget('text'),
+                )
+                message = out['message']
             else:
-                if action=='undo':self.sequence.undo()
+                if action == 'undo':
+                    out = damage_service.sequence_undo(self.sequence)
                 else:
-                    self.sequence.clear();self.pending_effects=[];self.dismissed_effects=set();self.pending_delta={}
+                    out = damage_service.sequence_clear(self.sequence)
+                    self.pending_effects = []
+                    self.dismissed_effects = set()
+                    self.pending_delta = {}
                 self.fill()
-                message='已撤销并重新填充当前角色。' if action=='undo' else '已清空伤害步骤及预添加效果，恢复当前实战快照。'
+                message = out['message']
             self.sequence_panel.update_sequence(self.sequence)
             self.sequence_panel.message.configure(text=message)
-        except (ValueError,TypeError,OverflowError) as exc:self.sequence_panel.message.configure(text=str(exc))
+        except (ValueError, TypeError, OverflowError) as exc:
+            self.sequence_panel.message.configure(text=str(exc))
 
-    def show_chain(self,filled):
-        from .funnels import describe
-        count=filled.get('params',{}).get('main_hits') or 0
-        self.chain_expression.set(describe(filled.get('chain_weights',filled.get('hit_weights',[])[int(count):])))
-        self.chain_dirty=False
+    def show_chain(self, filled):
+        self.chain_expression.set(damage_service.format_chain_expression(filled))
+        self.chain_dirty = False
 
     def compute(self):
-        self.sequence_candidate=None
-        if getattr(self,'preview_needs_fill',False):return
-        candidate=None
-        try:
-            if self.chain_dirty:
-                from .funnels import parse
-                beads=parse(self.chain_expression.get())
-                self.values['chain'].set(f'{sum(beads)*100:g}')
-                raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
-                weights=[float(w) for w in raw.split(',') if w.strip()]
-                count=int(float(self.params['main_hits'].get() or 0))
-                if count>0 and len(weights)>=count:
-                    self.hit_weights.set(', '.join(str(w) for w in weights[:count]+beads))
-                self.chain_dirty=False
-            self.destruction_report.configure(state='normal');self.destruction_report.delete('1.0','end')
-            self.destruction_report.configure(state='disabled')
-            auto=self.pool.get()=='auto'
-            cross=auto
-            if auto and getattr(self,'auto_pool_blocked',False):raise ValueError('当前为多层盾，自动跨池尚未支持；可选择单池核对')
-            if cross or self.use_destruction.get():
-                labels={'enemy_dp':'剩余 DP','skill_dr':'技能破坏倍率','main_hits':'本体 Hit 数',
-                        'enemy_dr':'敌人有效破坏系数','max_dr':'本技能破坏率上限',
-                        'destruction_bonus':'破坏率获取提升'}
-                if not cross:labels.pop('enemy_dp')
-                missing=[label for key,label in labels.items() if not self.params[key].get().strip()]
-                if not self.hit_weights.get().strip():missing.append('各 Hit 伤害权重（计算明细内）')
-                self.calculation_status.configure(text='待补齐：'+'、'.join(missing) if missing else '逐段参数已齐全；连续预演继承上一人的终值。')
-                if missing:raise ValueError('请自动填充或补齐：'+'、'.join(missing))
-            self.equipment_editor.apply({**self.values,**self.params})
-            if self.use_dp_scaling.get():
-                factor=dp_factor(*(float(self.params[k].get()) for k in ('own_dp','own_dp_max','dp_zero_factor','dp_full_factor')))
-                self.values['health_factor'].set(f'{factor:.10g}')
-            values={k:float(v.get()) for k,v in self.values.items() if k!='base'}
-            base=self.values['base'].get().strip()
-            if self.use_skill.get():
-                skill_params={k:v.get() for k,v in self.params.items()}
-                skill_params['sp_scaling']=self.sp_scaling
-                if not self.damage_orb_enabled.get():skill_params['orb']='0'
-                computed,weighted=skill_base(skill_params,self.flags['critical'].get())
-                base=str(computed);self.values['base'].set(f'{computed:.8g}')
-            values.update(base=float(base) if base else None,target_pool=('dp' if float(self.params['enemy_dp'].get())>0 else 'hp') if auto else self.pool.get(),
-                          **{k:v.get() for k,v in self.flags.items()})
-            inputs=DamageInputs(**values)
-            if not cross and inputs.target_pool=='hp' and getattr(self,'hp_adjustments',{}):
-                from dataclasses import replace
-                inputs=replace(inputs,**{k:getattr(inputs,k)+v for k,v in self.hp_adjustments.items()})
-            result=calculate(inputs);detail=None
-            if cross or self.use_destruction.get():
-                raw=self.hit_weights.get().replace('，',',').replace(' ', ',')
-                weights=[float(w) for w in raw.split(',') if w.strip()]
-                count=float(self.params['main_hits'].get())
-                if not math.isfinite(count) or not count.is_integer():raise ValueError('本体 Hit 数必须为整数')
-                args=[float(self.params[k].get()) for k in ('skill_dr','enemy_dr','destruction_bonus','max_dr')]
-                if self.sp_scaling and self.sp_dr_scaling.get():
-                    from .sp_scaling import sp_factor
-                    args[0]*=sp_factor(self.params['sp_consumed'].get(),self.params['sp_cap'].get())
-                if cross:
-                    hp=self.params['enemy_hp'].get().strip()
-                    candidate=dict(inputs=inputs,weights=weights,main_hits=int(count),skill_dr=args[0],enemy_coefficient=args[1],
-                        bonus=args[2],maximum=args[3],enemy_dp=float(self.params['enemy_dp'].get()),enemy_hp=float(hp) if hp else None,
-                        hp_adjustments=getattr(self,'hp_adjustments',{}),shield=getattr(self,'shield_state',None))
-                    detail=simulate_pools(**candidate)
-                    result.update(damage=detail['damage'],minimum=None,maximum=None,multiplier=None,
-                                  note='逐段跨池基准情景；破盾溢出丢弃，不计入 HP。支持已确认的阿蒙锁盾；其他多层盾、动态增减益及伤害衰减未模拟。')
-                else:
-                    result,detail=apply_to_result(result,inputs,weights,int(count),*args)
-                lines=[f"破坏率：{inputs.destruction:g}% → {detail['final']:g}%"]
-                lines.append(f"理论增量 {detail['theoretical_increment']:.3f} 个百分点（不计上限终值 {detail['theoretical_final']:.3f}%）\n实际增量 {detail['actual_increment']:.3f} 个百分点 · 被上限截去 {detail['clipped']:.3f} 个百分点")
-                if detail.get('segmented'):
-                    lines.append(f"DP 扣除 {detail['dp_damage']:,.2f} · HP 扣除 {detail['hp_damage']:,.2f} · 丢弃破盾溢出 {detail['overflow']:,.2f}")
-                for row in detail['rows']:
-                    if detail.get('segmented'):
-                        suffix=f" · {row['pool'].upper()} 原伤害 {row['raw_damage']:,.2f} / 扣除 {row['applied_damage']:,.2f} / 丢弃溢出 {row['overflow']:,.2f}"
-                    else:
-                        share=(result['damage']*row['damage_weight']/detail['weighted']) if result['damage'] is not None else None
-                        suffix=f" · 基准伤害 {share:,.2f}" if share is not None else ''
-                    lines.append(f"{row['hit']:>2} {row['kind']} · 破坏率 {row['before']:.3f}% → {row['after']:.3f}% · 理论 +{row['theoretical_increment']:.3f} / 实际 +{row['increment']:.3f} 个百分点"+suffix)
-                self.destruction_report.configure(state='normal');self.destruction_report.insert('end','\n'.join(lines));self.destruction_report.configure(state='disabled')
-            if values['absorbed']:
-                self.plot_data=None;self.draw_plot();self.prob_summary.configure(text='吸收情景不输出伤害概率曲线')
-            elif detail and detail.get('segmented'):
-                from .pool_probability import pool_distribution
-                data=pool_distribution(detail)
-                applied_data=data
-                if self.damage_metric.get()=='raw':
-                    from .raw_probability import raw_distribution
-                    data=raw_distribution(detail)
-                self.plot_data=data;self.plot_damage=1
-                branches='；'.join(('未破盾' if b['hit'] is None else '起始已破盾' if b['hit']==0 else f"第 {b['hit']} 段破盾")+f" {b['probability']:.3%}" for b in applied_data['branches'])
-                if data.get('raw'):
-                    method='固定逐段系数卷积（与单池模型一致）' if data['method']=='convolution' else '破盾 / 击杀分支条件卷积（数值网格近似）'
-                    summary=f"打出伤害：{method}，含破盾及锁盾溢出；击杀后仍计算后续段与破坏率增长。\n真实分支可能产生折点或多峰；极小尾部概率仍受网格精度限制。\n实际扣除均值 {applied_data['mean']:,.2f}\n"+branches
-                else:
-                    summary=f"破盾分支数值卷积 · 实际扣除均值 {data['mean']:,.4g} · 中央 90%：{data['low']:,.4g} – {data['high']:,.4g}\n"+branches
-                if applied_data['kill_probability'] is not None:
-                    summary+=f"\n当前模型击杀概率 {applied_data['kill_probability']:.3%}（按实际扣除判断）"
-                if data['atoms']:summary+='\n集中概率：'+'；'.join(f'{x:,.4g} 伤害 {p:.3%}' for x,p in data['atoms'])
-                self.prob_summary.configure(text=summary);self.draw_plot()
-            else:
-                self.update_probability(result['damage'],detail['weights'] if detail else None)
-                if self.damage_metric.get()=='applied':
-                    self.prob_summary.configure(text=self.prob_summary.cget('text')+'\n当前为单池参考计算，仅显示打出伤害；实际扣除量需启用自动跨 DP/HP。')
-            text='弱点条件：'+('满足' if result['weak'] else '不满足（不计心眼／脆弱）')+'\n'
-            if detail and detail.get('segmented'):text+='跨池各段分别采用 DP/HP 特攻，下面单池乘区仅供参考。\n'
-            text+='  ×  '.join(f'{NAMES[k]} {v:.4g}' for k,v in result['factors'].items())+'\n\n'
-            if self.use_skill.get():text+=f'敌方属性下降采用最高值：{enemy_attribute_reduction({k:v.get() for k,v in self.params.items()},self.flags["critical"].get()):g} 点\n'
-            if result['multiplier'] is not None:text+=f"总倍率：{result['multiplier']:.6g}\n"
-            od_gain=self.params['od_gain_bonus'].get().strip()
-            if od_gain:
-                gain=float(od_gain)
-                if not math.isfinite(gain) or gain<0:raise ValueError('OD 获取增幅必须为有限非负数')
-                text+=f'OD 饰品获取倍率：×{1+gain/100:g}（例如原获取 20% → {20*(1+gain/100):g}%；不影响伤害）\n'
-            if result['damage'] is not None:
-                if detail and detail.get('segmented'):
-                    text+=f"无浮动基准打出伤害（含溢出）：{detail['raw_damage']:,.2f}\n实际扣除 DP＋HP：{result['damage']:,.2f}\n"
-                else:
-                    text+=f"未衰减试算伤害：{result['damage']:,.2f}\n"
-                if result['minimum'] is not None:
-                    text+=f"0.9–1.1 浮动边界：{result['minimum']:,.2f} – {result['maximum']:,.2f}\n"
-                    text+='这是理论边界，不表示总伤害在区间内均匀分布；多 Hit 独立浮动通常更集中。\n'
-                else:text+='此处为无浮动基准；随机伤害均值、区间和各破盾段概率见浮动概率曲线。\n'
-            if detail:text+=f"破坏率递推终值：{detail['final']:g}%（逐段明细见下方折叠区）\n"
-            else:text+='逐段递推未启用：沿用固定破坏率，可启用主页面明细中的单池逐段比较。\n'
-            text+=result['note']+'\n充能暂按参考计算器并入加攻。Token 与血量条件需填技能适用的实际增幅。'
-            self.sequence_candidate=candidate
-        except (ValueError, OverflowError) as exc:
-            text='无法计算：'+str(exc)
-            self.plot_data=None;self.draw_plot();self.prob_summary.configure(text=text)
-        if self.plot_data:
-            data=self.plot_data;scale=self.plot_damage if self.plot_damage is not None else 1
-            mean=data['mean'] if data.get('absolute') else self.plot_damage
-            title='平均打出伤害' if data.get('raw') else '平均实际扣除' if data.get('absolute') else '平均打出伤害'
-            self.summary.configure(text=(f'{title}  {mean:,.2f}' if mean is not None else '平均伤害  待填写基础伤害')+
-                f"\n伤害浮动区间（中央 90%）  {data['low']*scale:,.2f} – {data['high']*scale:,.2f}")
-            if detail:
-                extra=f"\n破坏率（无浮动基准）：{inputs.destruction:g}% → {detail['final']:g}% · 已逐段计算"
-                if detail.get('segmented') and detail.get('remaining_hp')==0:
-                    extra+='；预测击杀后仍计后续伤害与破坏率增长'
-                self.summary.configure(text=self.summary.cget('text')+extra)
-        else:self.summary.configure(text='暂无法生成完整结果：'+self.prob_summary.cget('text'))
-        self.result.configure(state='normal');self.result.delete('1.0','end')
-        self.result.insert('end',text)
+        self.sequence_candidate = None
+        if getattr(self, 'preview_needs_fill', False):
+            return
+
+        def apply_equipment(values_str, params_str, updated_values, updated_params):
+            self.equipment_editor.apply({**self.values, **self.params})
+            for k, v in self.values.items():
+                values_str[k] = v.get()
+            for k, v in self.params.items():
+                params_str[k] = v.get()
+
+        overrides = dict(
+            values={k: v.get() for k, v in self.values.items()},
+            params={k: v.get() for k, v in self.params.items()},
+            flags={k: v.get() for k, v in self.flags.items()},
+            pool=self.pool.get(),
+            damage_metric=self.damage_metric.get(),
+            use_skill=self.use_skill.get(),
+            damage_orb_enabled=self.damage_orb_enabled.get(),
+            use_destruction=self.use_destruction.get(),
+            use_dp_scaling=self.use_dp_scaling.get(),
+            sp_scaling=self.sp_scaling,
+            sp_dr_scaling=self.sp_dr_scaling.get(),
+            hit_weights=self.hit_weights.get(),
+            chain_expression=self.chain_expression.get(),
+            chain_dirty=self.chain_dirty,
+            filled_chain=getattr(self, 'filled_chain', None),
+            hp_adjustments=getattr(self, 'hp_adjustments', {}),
+            shield_state=getattr(self, 'shield_state', None),
+            auto_pool_blocked=getattr(self, 'auto_pool_blocked', False),
+            equipment_apply=apply_equipment,
+        )
+        res = damage_service.compute(None, overrides)
+        for k, v in res['updated_values'].items():
+            if k == 'hit_weights':
+                self.hit_weights.set(v)
+            elif k in self.values:
+                self.values[k].set(v)
+        self.chain_dirty = res['chain_dirty']
+        self.destruction_report.configure(state='normal')
+        self.destruction_report.delete('1.0', 'end')
+        if res['destruction_report']:
+            self.destruction_report.insert('end', res['destruction_report'])
+        self.destruction_report.configure(state='disabled')
+        if res['calculation_status'] is not None:
+            self.calculation_status.configure(text=res['calculation_status'])
+        self.plot_data = res['plot_data']
+        self.plot_damage = res['plot_damage']
+        self.prob_summary.configure(text=res['prob_summary'])
+        self.draw_plot()
+        self.summary.configure(text=res['summary_text'])
+        self.result.configure(state='normal')
+        self.result.delete('1.0', 'end')
+        self.result.insert('end', res['detail_text'])
         self.result.configure(state='disabled')
+        self.sequence_candidate = res['sequence_candidate']
 
     def refresh(self):
-        from .damage_inputs import STATS
-        data=self.snapshot()
-        self.audit.configure(state='normal');self.audit.delete('1.0','end')
-        self.audit.insert('end',audit_text(data.get('players',[])));self.audit.configure(state='disabled')
-        lines=[self.fill_notes,'\n已连接战斗' if data.get('connected') else '\n未连接：如有数据，属于保留快照']
-        for player in data.get('players',[]):
-            inputs=player.get('inputs',player.get('combat_inputs',{}));skill=inputs.get('selected_skill',{})
-            lines.append('\n'+str(player.get('name') or '角色')+' · '+str(skill.get('name') or '预选未读到'))
-            lines.append(' / '.join(f'{STATS[k]} {v}' for k,v in inputs.get('stats',{}).items()))
-            lines.append('Token：'+str(inputs.get('token','未读到')))
-        for enemy in data.get('enemies',[]):
-            inputs=enemy.get('inputs',enemy.get('combat_inputs',{}))
-            lines.append('\n'+str(enemy.get('name') or '敌人')+
-                         ' · 边界参考 '+str(inputs.get('_borderRefParam','未读到'))+
-                         ' / 防御参考 '+str(inputs.get('_defenseRefParam','未读到')))
-        lines.append('\n以下为技能威力、偏向权重及条件原始参数（未自动代入）：\n')
-        self.raw.configure(state='normal');self.raw.delete('1.0','end')
-        self.raw.insert('end','\n'.join(lines)+json.dumps(data,ensure_ascii=False,indent=2));self.raw.configure(state='disabled')
+        data = self.snapshot()
+        audit, raw_header = damage_service.format_raw_inspection(data, self.fill_notes)
+        self.audit.configure(state='normal')
+        self.audit.delete('1.0', 'end')
+        self.audit.insert('end', audit)
+        self.audit.configure(state='disabled')
+        self.raw.configure(state='normal')
+        self.raw.delete('1.0', 'end')
+        self.raw.insert('end', raw_header + json.dumps(data, ensure_ascii=False, indent=2))
+        self.raw.configure(state='disabled')

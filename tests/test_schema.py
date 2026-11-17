@@ -159,8 +159,12 @@ class ContractDocumentationTest(unittest.TestCase):
         self.assertIn(f'schema_version = {schema.SCHEMA_VERSION}', doc)
 
     def test_core_never_imports_tkinter(self):
-        code = ('import sys, hbr_live_core, hbr_live_core.schema, hbr_live_core.snapshot;'
-                'print("tkinter" in sys.modules)')
+        code = (
+            'import sys, hbr_live_core, hbr_live_core.schema, hbr_live_core.snapshot, '
+            'hbr_live_core.damage_service, hbr_live_core.offline_session, '
+            'hbr_live_core.live_session, hbr_live_core.http_api; '
+            'print("tkinter" in sys.modules)'
+        )
         out = subprocess.run([sys.executable, '-B', '-c', code], cwd=ROOT, capture_output=True, text=True,
                              check=True).stdout.strip()
         self.assertEqual(out, 'False')

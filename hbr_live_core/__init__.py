@@ -8,5 +8,20 @@ Rules for this package (see docs/roadmap-ui-split-2026-11.md):
   docs/snapshot-contract.md.
 """
 from .schema import SCHEMA_VERSION, SchemaError, check, validate
+from . import damage_service
+from .live_session import LiveSession
+from .offline_session import OfflineSession, sanitize_team_payload
+from .http_api import LocalApi, create_server
 
-__all__ = ['SCHEMA_VERSION', 'SchemaError', 'check', 'validate']
+__all__ = [
+    'SCHEMA_VERSION',
+    'SchemaError',
+    'check',
+    'validate',
+    'damage_service',
+    'LiveSession',
+    'OfflineSession',
+    'sanitize_team_payload',
+    'LocalApi',
+    'create_server',
+]

@@ -7,6 +7,23 @@ from datetime import datetime
 from pathlib import Path
 
 STATS = ('power', 'dexterity', 'toughness', 'spirit', 'wisdom', 'luck')
+SCHEMA_VERSION = 1
+
+
+def migrate_payload(payload):
+    """Validate and migrate a saved/draft team payload to SCHEMA_VERSION."""
+    if not isinstance(payload, dict):
+        raise ValueError('配队档案格式无效')
+    version = payload.get('schema')
+    if version is None:
+        version = 1
+    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+        raise ValueError(f'无效的配队档案版本：{version!r}')
+    if version > SCHEMA_VERSION:
+        raise ValueError(f'不支持的配队档案版本：schema={version}（当前支持 {SCHEMA_VERSION}）')
+    if payload.get('schema') != SCHEMA_VERSION:
+        payload = dict(payload, schema=SCHEMA_VERSION)
+    return payload
 
 
 def skill_references(inputs):
@@ -63,19 +80,20 @@ class TeamStore:
     def rows(self, drafts=False):
         with self.connect() as db:
             if drafts:
-                return [(r, r, json.loads(p)) for r, p in db.execute('SELECT run_id,payload FROM drafts ORDER BY rowid DESC')]
-            return [(i, n, json.loads(p)) for i, n, p in db.execute('SELECT id,name,payload FROM teams ORDER BY updated DESC,id DESC')]
+                return [(r, r, migrate_payload(json.loads(p))) for r, p in db.execute('SELECT run_id,payload FROM drafts ORDER BY rowid DESC')]
+            return [(i, n, migrate_payload(json.loads(p))) for i, n, p in db.execute('SELECT id,name,payload FROM teams ORDER BY updated DESC,id DESC')]
 
     def save(self, run_id, name, target=None):
         if not name.strip(): raise ValueError('请输入配队名称')
         with self.connect() as db:
             row = db.execute('SELECT payload FROM drafts WHERE run_id=?', (run_id,)).fetchone()
             if not row: raise ValueError('待确认记录已不存在')
+            migrated = json.dumps(migrate_payload(json.loads(row[0])), ensure_ascii=False)
             now = datetime.now().isoformat(timespec='seconds')
             if target is None:
-                db.execute('INSERT INTO teams(name,updated,payload) VALUES (?,?,?)', (name.strip(), now, row[0]))
+                db.execute('INSERT INTO teams(name,updated,payload) VALUES (?,?,?)', (name.strip(), now, migrated))
             else:
-                if not db.execute('UPDATE teams SET name=?,updated=?,payload=? WHERE id=?', (name.strip(), now, row[0], target)).rowcount:
+                if not db.execute('UPDATE teams SET name=?,updated=?,payload=? WHERE id=?', (name.strip(), now, migrated, target)).rowcount:
                     raise ValueError('目标配队已不存在')
             db.execute('DELETE FROM drafts WHERE run_id=?', (run_id,))
 

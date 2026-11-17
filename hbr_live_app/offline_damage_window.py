@@ -1,10 +1,12 @@
 """Damage calculator fed by a saved team and a user-entered enemy (no battle)."""
 import tkinter as tk
+from tkinter import filedialog
 
 from . import theme
 from .components import RoundedButton, RoundedCard, RoundedEntry, RoundedSelect, Segment, ToggleChip
 from .damage_window import DamageWindow, scroll_page
 from . import offline_battle as ob
+from hbr_live_core.offline_session import OfflineSession
 
 SETUP = '配队与敌人'
 OD_LEVELS = [('0', '无 OD'), ('1', 'OD1'), ('2', 'OD2'), ('3', 'OD3')]
@@ -204,6 +206,10 @@ class OfflineDamageWindow(DamageWindow):
         bar.pack(fill='x', pady=10, padx=4)
         RoundedButton(bar, '应用并计算 ›', self.apply_setup, theme.PINK_FILL, theme.on_fill,
                       theme.ui(13, 'bold'), height=38).pack(side='left')
+        RoundedButton(bar, '保存试算方案', self.save_plan_dialog, theme.CARD_HI, theme.FG,
+                      theme.ui(11), height=34).pack(side='left', padx=(10, 4))
+        RoundedButton(bar, '读取试算方案', self.load_plan_dialog, theme.CARD_HI, theme.FG,
+                      theme.ui(11), height=34).pack(side='left', padx=4)
         self.setup_message = tk.Label(bar, text='', bg=theme.BG, fg=theme.MUTED, font=theme.ui(11),
                                       anchor='w', justify='left')
         self.setup_message.pack(side='left', padx=14, fill='x', expand=True)
@@ -388,3 +394,126 @@ class OfflineDamageWindow(DamageWindow):
         else:
             self.refresh(); self.compute()
         self.setup_message.configure(text=message, fg=theme.MINT if '已应用' in message else theme.GOLD)
+
+    # ---- shareable calculation plan (B3) -----------------------------------
+    def build_session(self):
+        team = self.current_team()
+        if team is None:
+            raise ValueError('请先选择配队')
+        if not self.read_enemy():
+            raise ValueError(self.setup_message.cget('text') or '敌人参数无效')
+        draft, key, name, payload = team
+        v = self.enemy_vars
+        rates = {k: self.number(var, ob.ELEMENT_NAMES[k] + '相性', optional=True)
+                 for k, var in self.rate_vars.items()}
+        enemy_cfg = dict(
+            name=v['name'].get().strip() or '自定义敌人',
+            dp=self.number(v['dp'], 'DP', integer=True),
+            hp=self.number(v['hp'], 'HP', integer=True),
+            defense=self.enemy_stat_override,
+            damage_rate=self.number(v['damage_rate'], '当前破坏率'),
+            destruction_coefficient=self.number(v['coefficient'], '破坏系数', optional=True),
+            destruction_max=self.number(v['maximum'], '破坏率上限', optional=True),
+            rates=rates,
+            down=1 if self.enemy_down.get() else 0,
+        )
+        element = next((k for k, n in ob.ELEMENTS if n == self.field_element.get()), '')
+        bonus = self.number(self.field_bonus, '场地加成', optional=True)
+        return OfflineSession(
+            payload,
+            title=name,
+            key=('d' if draft else 's') + str(key),
+            skill_choices=self.skill_choices,
+            enemy=enemy_cfg,
+            enemy_stat=self.enemy_stat_override,
+            field=dict(element=element, bonus=bonus),
+            od_level=int(self.od_level.get() or 0),
+            manual_statuses=self.manual_statuses,
+            selected_actor_index=max(0, self.player_box.current()),
+            mode_options={
+                'transcend': self.mode_choices['transcend'].get(),
+                'high_boost': self.mode_choices['high_boost'].get(),
+                'transcend_element': self.transcend_element.get(),
+            },
+        )
+
+    def load_session(self, session):
+        if isinstance(session, dict):
+            session = OfflineSession.from_dict(session)
+        title = session.title or '导入试算方案'
+        self.teams = [(d, k, n, p) for d, k, n, p in self.teams if k != 'plan']
+        self.teams.insert(0, (False, 'plan', title, session.team))
+        self.team_box.configure(values=self.team_labels())
+        self.team_box.current(0)
+
+        cfg = session.enemy_config
+        self.enemy_vars['name'].set(cfg['name'])
+        self.enemy_vars['dp'].set(f"{cfg['dp']:g}" if isinstance(cfg['dp'], float) else str(cfg['dp']))
+        self.enemy_vars['hp'].set(f"{cfg['hp']:g}" if isinstance(cfg['hp'], float) else str(cfg['hp']))
+        self.enemy_vars['damage_rate'].set(f"{cfg['damage_rate']:g}")
+        self.enemy_vars['coefficient'].set('' if cfg['destruction_coefficient'] is None else f"{cfg['destruction_coefficient']:g}")
+        self.enemy_vars['maximum'].set('' if cfg['destruction_max'] is None else f"{cfg['destruction_max']:g}")
+        self.enemy_down.set(bool(cfg['down']))
+        for k, var in self.rate_vars.items():
+            rate = (cfg.get('rates') or {}).get(k)
+            var.set('100' if rate is None else f'{rate:g}')
+
+        field_el = session.field_config.get('element') or ''
+        self.field_element.set(ob.ELEMENT_NAMES.get(field_el, '无场地') if field_el else '无场地')
+        bonus = session.field_config.get('bonus')
+        self.field_bonus.set('' if bonus is None else f'{bonus:g}')
+        self.od_level.set(str(session.od_level))
+
+        self.enemy_stat_override = session.enemy_stat
+        self.enemy_stat.set('' if session.enemy_stat is None else f'{session.enemy_stat:g}')
+        self.push_enemy_stat()
+
+        for k in ('transcend', 'high_boost'):
+            if k in session.mode_options and session.mode_options[k] in ('自动', '启用', '禁用'):
+                self.mode_choices[k].set(session.mode_options[k])
+        if session.mode_options.get('transcend_element') in ('自动属性', '火', '冰', '雷', '光', '暗'):
+            self.transcend_element.set(session.mode_options['transcend_element'])
+
+        self.skill_choices = dict(session.skill_choices)
+        self.manual_statuses = list(session.manual_statuses)
+        self.status_serial = len(self.manual_statuses)
+        self.render_members()
+        self.render_statuses()
+        self.read_enemy(quiet=True)
+        self.reload_choices()
+        if 0 <= session.selected_actor_index < len(session.team.get('members', [])):
+            self.player_box.current(session.selected_actor_index)
+        self.apply_setup()
+
+    def save_plan_dialog(self):
+        try:
+            session = self.build_session()
+            default_name = (session.title or 'offline-plan').replace('/', '_') + '.json'
+            path = filedialog.asksaveasfilename(
+                parent=self,
+                title='保存试算方案',
+                initialfile=default_name,
+                defaultextension='.json',
+                filetypes=[('试算方案 JSON', '*.json')],
+            )
+            if not path:
+                return
+            session.save(path)
+            self.setup_message.configure(text=f'已保存试算方案：{path}（不含本地路径与个人对局 ID）', fg=theme.MINT)
+        except (ValueError, OSError) as exc:
+            self.setup_message.configure(text=f'保存失败：{exc}', fg=theme.ROSE)
+
+    def load_plan_dialog(self):
+        path = filedialog.askopenfilename(
+            parent=self,
+            title='读取试算方案',
+            filetypes=[('试算方案 JSON', '*.json')],
+        )
+        if not path:
+            return
+        try:
+            session = OfflineSession.load(path)
+            self.load_session(session)
+            self.setup_message.configure(text=f'已读取试算方案：{session.title or path}', fg=theme.MINT)
+        except (ValueError, OSError) as exc:
+            self.setup_message.configure(text=f'读取失败：{exc}', fg=theme.ROSE)
