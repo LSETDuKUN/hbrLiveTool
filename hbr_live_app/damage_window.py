@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from . import theme
-from .components import (RoundedButton, RoundedCard, RoundedEntry, RoundedSelect, Segment,
+from .components import (Fold, RoundedButton, RoundedCard, RoundedEntry, RoundedSelect, Segment,
                          TabBar, ToggleChip)
 from .damage_math import DamageInputs, calculate, skill_base, enemy_attribute_reduction
 from .damage_probability import distribution
@@ -245,23 +245,10 @@ class DamageWindow(tk.Toplevel):
         label.bind('<Configure>', lambda e: label.configure(wraplength=max(240, e.width - 8)))
         return label
 
-    def fold(self,parent,title, prominent=False):
-        shell=tk.Frame(parent,bg=theme.BG);shell.pack(fill='x',pady=5)
-        body=tk.Frame(shell,bg=theme.BG)
-        opened=tk.BooleanVar(self,value=False)
-        def toggle():
-            opened.set(not opened.get())
-            button.configure(text=caption(opened.get()))
-            if opened.get():body.pack(fill='x')
-            else:body.pack_forget()
-        def caption(expanded):
-            if prominent:return ('收起' if expanded else '展开')+'　'+title
-            return ('▾ ' if expanded else '▸ ')+title
-        button=tk.Button(shell,text=caption(False),command=toggle,bg=theme.CARD_HI if prominent else theme.SURFACE,
-                         fg=theme.CYAN if prominent else theme.DIM,cursor='hand2',pady=5 if prominent else 1,
-                         relief='flat',anchor='w',font=theme.ui(11,'bold' if prominent else 'normal'))
-        button.pack(fill='x')
-        return body
+    def fold(self, parent, title, prominent=False):
+        shell = Fold(parent, title, prominent=prominent, opened=False, bg=theme.BG)
+        shell.pack(fill='x', pady=5)
+        return shell.body
 
     # ---- pages -------------------------------------------------------------
     def build_form_page(self, frame, form):

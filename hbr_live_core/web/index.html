@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBR Live · 星屑战斗手帐（网页工作台）</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="sparkle">✦</span>
+      <div>
+        <h1>HBR Live · 星屑战斗手帐</h1>
+        <p class="subtitle">伤害试算 · 配队养成档案 · 星屑资料室（本地回环 127.0.0.1）</p>
+      </div>
+    </div>
+
+    <nav class="main-nav" aria-label="主导航">
+      <button class="nav-tab active" data-view="calc" type="button">✦ 伤害试算（三栏）</button>
+      <button class="nav-tab" data-view="teams" type="button">❖ 配队档案</button>
+      <button class="nav-tab" data-view="library" type="button">◈ 星屑资料室</button>
+    </nav>
+
+    <div class="topbar-actions">
+      <span id="connection-badge" class="status-pill">未连接实战</span>
+      <select id="theme-select" class="input-select compact" aria-label="界面主题">
+        <option value="dark">夜幕星空（暗色）</option>
+        <option value="warm">星屑手帐（暖色）</option>
+        <option value="light">日光纸页（亮色）</option>
+      </select>
+      <button id="btn-top-compute" class="btn btn-primary" type="button">重新计算</button>
+    </div>
+  </header>
+
+  <!-- ==================== VIEW 1: 3-COLUMN DAMAGE CALCULATOR ==================== -->
+  <main id="view-calc" class="view active">
+    <div class="three-col-grid">
+      <!-- COLUMN 1: SETTINGS (Live / Offline / Boss Stat / Pending Effects) -->
+      <section class="col col-settings" aria-label="试算设置">
+        <div class="card">
+          <div class="card-header">
+            <h2>① 试算来源与模式</h2>
+            <div class="segmented" id="source-mode-seg">
+              <button type="button" class="seg-btn active" data-mode="live">实战快照</button>
+              <button type="button" class="seg-btn" data-mode="offline">离线配队</button>
+            </div>
+          </div>
+
+          <!-- LIVE CONTROLS -->
+          <div id="live-settings-panel">
+            <div class="form-row">
+              <label for="live-player-select">伤害角色</label>
+              <select id="live-player-select" class="input-select"></select>
+            </div>
+            <div class="form-row">
+              <label for="live-enemy-select">目标敌人</label>
+              <select id="live-enemy-select" class="input-select"></select>
+            </div>
+            <div class="btn-row">
+              <button id="btn-refresh-snapshot" class="btn btn-secondary" type="button">刷新快照</button>
+              <button id="btn-autofill" class="btn btn-accent" type="button">自动填充</button>
+              <button id="btn-next-actor" class="btn btn-secondary" type="button">下一位前排</button>
+            </div>
+          </div>
+
+          <!-- OFFLINE CONTROLS -->
+          <div id="offline-settings-panel" class="hidden">
+            <div class="form-row">
+              <label for="offline-team-select">选择配队档案</label>
+              <select id="offline-team-select" class="input-select"></select>
+            </div>
+            <div class="btn-row">
+              <button id="btn-offline-reload-teams" class="btn btn-secondary btn-sm" type="button">刷新档案</button>
+              <button id="btn-export-plan" class="btn btn-secondary btn-sm" type="button">导出试算方案 (.json)</button>
+              <label class="btn btn-secondary btn-sm file-btn">
+                导入试算方案
+                <input id="input-import-plan" type="file" accept=".json,application/json" hidden />
+              </label>
+            </div>
+
+            <details class="fold" open>
+              <summary>队员技能与形态选择</summary>
+              <div id="offline-members-skills" class="fold-body"></div>
+            </details>
+
+            <details class="fold" open>
+              <summary>自定义敌人参数与相性</summary>
+              <div class="fold-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label>敌人名称</label>
+                    <input id="off-enemy-name" type="text" class="input-text" value="自定义敌人" />
+                  </div>
+                  <div class="field">
+                    <label>当前破坏率 %</label>
+                    <input id="off-enemy-dr-rate" type="number" class="input-text" value="100" step="any" />
+                  </div>
+                  <div class="field">
+                    <label>剩余 DP（0 为打 HP）</label>
+                    <input id="off-enemy-dp" type="number" class="input-text" value="0" step="1" />
+                  </div>
+                  <div class="field">
+                    <label>剩余 HP</label>
+                    <input id="off-enemy-hp" type="number" class="input-text" value="1000000" step="1" />
+                  </div>
+                  <div class="field">
+                    <label>有效破坏系数</label>
+                    <input id="off-enemy-coef" type="number" class="input-text" value="4" step="any" placeholder="必填以算逐段" />
+                  </div>
+                  <div class="field">
+                    <label>破坏率上限 %</label>
+                    <input id="off-enemy-max" type="number" class="input-text" value="300" step="any" placeholder="例如 300" />
+                  </div>
+                </div>
+                <label class="checkbox-label mt-6">
+                  <input id="off-enemy-down" type="checkbox" />
+                  <span>敌人倒地中</span>
+                </label>
+
+                <p class="hint mt-8">相性伤害倍率 %（弱点 150 / 普通 100 / 抗性 50 / 吸收填负数）：</p>
+                <div class="grid-4" id="off-enemy-rates">
+                  <div class="field"><label>斩</label><input data-rate="Slash" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>突</label><input data-rate="Stab" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>打</label><input data-rate="Strike" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>火</label><input data-rate="Fire" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>冰</label><input data-rate="Ice" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>雷</label><input data-rate="Thunder" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>光</label><input data-rate="Light" type="number" class="input-text" value="100" /></div>
+                  <div class="field"><label>暗</label><input data-rate="Dark" type="number" class="input-text" value="100" /></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="fold">
+              <summary>场地与 OD 等级</summary>
+              <div class="fold-body grid-3">
+                <div class="field">
+                  <label>场地属性</label>
+                  <select id="off-field-element" class="input-select">
+                    <option value="">无场地</option>
+                    <option value="Fire">火</option>
+                    <option value="Ice">冰</option>
+                    <option value="Thunder">雷</option>
+                    <option value="Light">光</option>
+                    <option value="Dark">暗</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>场地加成 %</label>
+                  <input id="off-field-bonus" type="number" class="input-text" value="" placeholder="例如 50" min="0" />
+                </div>
+                <div class="field">
+                  <label>OD 等级</label>
+                  <select id="off-od-level" class="input-select">
+                    <option value="0">无 OD</option>
+                    <option value="1">OD 1 (+10%)</option>
+                    <option value="2">OD 2 (+20%)</option>
+                    <option value="3">OD 3 (+30%)</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+
+            <details class="fold">
+              <summary>手动添加 Buff / Debuff（按游戏覆盖规则筛选）</summary>
+              <div class="fold-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label>效果类型</label>
+                    <select id="off-status-kind" class="input-select">
+                      <option value="AttackUp" data-side="player">攻击力提升 %</option>
+                      <option value="MindEye" data-side="player">心眼 %</option>
+                      <option value="CriticalDamageUp" data-side="player">暴击伤害提升 %</option>
+                      <option value="CriticalRateUp" data-side="player">暴击率提升 %</option>
+                      <option value="DamageRateUp" data-side="player">破坏率提升 %</option>
+                      <option value="BuffCharge" data-side="player">充能 %</option>
+                      <option value="Funnel" data-side="player">连击（每颗 %）</option>
+                      <option value="Morale" data-side="player">士气（层数）</option>
+                      <option value="DefenseDown" data-side="enemy">防御力下降 %</option>
+                      <option value="Fragile" data-side="enemy">脆弱 %</option>
+                      <option value="ResistDown" data-side="enemy">属性抗性下降 / 弱点加深 %</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>施加对象</label>
+                    <select id="off-status-target" class="input-select"></select>
+                  </div>
+                  <div class="field">
+                    <label>属性（可选，抗性下降必填）</label>
+                    <select id="off-status-element" class="input-select">
+                      <option value="">无属性</option>
+                      <option value="Fire">火</option>
+                      <option value="Ice">冰</option>
+                      <option value="Thunder">雷</option>
+                      <option value="Light">光</option>
+                      <option value="Dark">暗</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>数值 / 层数</label>
+                    <input id="off-status-value" type="number" class="input-text" placeholder="例如 50" step="any" />
+                  </div>
+                  <div class="field">
+                    <label>颗数（仅连击）</label>
+                    <input id="off-status-count" type="number" class="input-text" placeholder="1-100" step="1" />
+                  </div>
+                  <div class="field flex-end">
+                    <label class="checkbox-label">
+                      <input id="off-status-perm" type="checkbox" />
+                      <span>常驻（不参与取高两层）</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="btn-row mt-6">
+                  <button id="btn-off-add-status" class="btn btn-accent btn-sm" type="button">+ 添加状态</button>
+                  <button id="btn-off-clear-status" class="btn btn-secondary btn-sm" type="button">清空手动状态</button>
+                </div>
+                <ul id="off-status-list" class="tag-list mt-6"></ul>
+              </div>
+            </details>
+
+            <div class="btn-row mt-8">
+              <button id="btn-apply-offline" class="btn btn-primary full-width" type="button">应用离线设置并自动填充 ›</button>
+            </div>
+            <p id="offline-setup-msg" class="hint mt-4"></p>
+          </div>
+        </div>
+
+        <!-- SHARED BOSS STAT & SWITCH FORM & COMBAT MODES -->
+        <div class="card">
+          <div class="card-header">
+            <h2>② 全局敌方属性 · 技能形态 · 模式</h2>
+            <span id="enemy-stat-badge" class="badge">敌方属性 · 读取</span>
+          </div>
+          <div class="form-row">
+            <label for="shared-enemy-stat">敌方属性（防御参考）</label>
+            <div class="inline-group">
+              <input id="shared-enemy-stat" type="number" class="input-text" placeholder="伤害与减益共用" step="any" />
+              <button id="btn-reset-enemy-stat" class="btn btn-secondary btn-sm" type="button">恢复读取</button>
+            </div>
+          </div>
+          <p class="hint">伤害属性差与减益效果量共用此值；修改后自动重填。</p>
+
+          <div class="form-row mt-8">
+            <label for="skill-form-select">技能切换形态</label>
+            <select id="skill-form-select" class="input-select">
+              <option value="无切换形态">无切换形态</option>
+            </select>
+          </div>
+
+          <div class="grid-3 mt-8">
+            <div class="field">
+              <label>元素超越</label>
+              <select id="mode-transcend" class="input-select">
+                <option value="自动">自动</option>
+                <option value="启用">启用</option>
+                <option value="禁用">禁用</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>超越属性</label>
+              <select id="mode-transcend-el" class="input-select">
+                <option value="自动属性">自动属性</option>
+                <option value="火">火</option>
+                <option value="冰">冰</option>
+                <option value="雷">雷</option>
+                <option value="光">光</option>
+                <option value="暗">暗</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>高阶增幅</label>
+              <select id="mode-high-boost" class="input-select">
+                <option value="自动">自动</option>
+                <option value="启用">启用</option>
+                <option value="禁用">禁用</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUFF / DEBUFF SKILL PRE-ADDITION -->
+        <div class="card">
+          <div class="card-header">
+            <h2>③ 角色技能 Buff / Debuff 预发动</h2>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="pending-caster-select">施加者</label>
+              <select id="pending-caster-select" class="input-select"></select>
+            </div>
+            <div class="field">
+              <label for="pending-recipient-select">单体受益者</label>
+              <select id="pending-recipient-select" class="input-select"></select>
+            </div>
+          </div>
+          <div class="btn-row mt-6">
+            <button id="btn-precast-support" class="btn btn-accent btn-sm" type="button">预发动所选角色全部确认效果</button>
+          </div>
+          <div class="form-row mt-8">
+            <label for="pending-proposal-select">单条技能/被动效果试算</label>
+            <select id="pending-proposal-select" class="input-select"></select>
+          </div>
+          <div class="grid-2 mt-4">
+            <div class="field">
+              <label>预计效果量 %</label>
+              <input id="pending-effect-amount" type="number" class="input-text" step="any" />
+            </div>
+            <div class="field" id="pending-funnel-field">
+              <label>连击珠颗数</label>
+              <input id="pending-funnel-count" type="number" class="input-text" value="3" step="1" />
+            </div>
+          </div>
+          <div class="btn-row mt-6">
+            <button id="btn-add-pending" class="btn btn-primary btn-sm" type="button">+ 预添加此效果</button>
+          </div>
+          <p id="pending-status-msg" class="hint mt-4"></p>
+          <ul id="pending-effects-list" class="tag-list mt-6"></ul>
+        </div>
+      </section>
+
+      <!-- COLUMN 2: MULTIPLIERS & SECONDARY DRAWERS -->
+      <section class="col col-multipliers" aria-label="乘区与参数">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>乘区明细与修正</h2>
+              <p id="current-skill-title" class="skill-banner">尚未自动填充</p>
+            </div>
+            <div class="inline-group">
+              <span id="modified-count-badge" class="badge badge-gold hidden">0 项已手改</span>
+              <button id="btn-reset-all-overrides" class="btn btn-secondary btn-sm hidden" type="button">↺ 一键恢复自动值</button>
+            </div>
+          </div>
+
+          <!-- TARGET POOL & CRITICAL FLAGS -->
+          <div class="pool-flags-bar">
+            <div class="inline-group">
+              <span class="label-inline">目标判定</span>
+              <div class="segmented" id="pool-seg">
+                <button type="button" class="seg-btn active" data-pool="auto">自动跨 DP/HP</button>
+                <button type="button" class="seg-btn" data-pool="dp">仅 DP</button>
+                <button type="button" class="seg-btn" data-pool="hp">仅 HP</button>
+              </div>
+            </div>
+            <div class="inline-group">
+              <label class="chip-toggle"><input type="checkbox" id="flag-critical" checked /><span>暴击</span></label>
+              <label class="chip-toggle"><input type="checkbox" id="flag-penetration_critical" /><span>贯通暴击</span></label>
+              <label class="chip-toggle"><input type="checkbox" id="flag-absorbed" /><span>吸收</span></label>
+            </div>
+          </div>
+
+          <!-- 8 MULTIPLIER GROUPS -->
+          <div id="multiplier-groups-container" class="multiplier-groups"></div>
+        </div>
+
+        <!-- SECONDARY DRAWERS: DESTRUCTION / SKILL PARAMS / EQUIPMENT / AUDIT -->
+        <div class="card">
+          <div class="subtabs" id="drawer-tabs">
+            <button type="button" class="subtab active" data-drawer="destruction">逐段破坏率 &amp; DP/HP</button>
+            <button type="button" class="subtab" data-drawer="skill">技能与六维参数</button>
+            <button type="button" class="subtab" data-drawer="equipment">饰品效果</button>
+            <button type="button" class="subtab" data-drawer="audit">被动审查 &amp; 原始快照</button>
+          </div>
+
+          <!-- Drawer 1: Destruction & DP/HP -->
+          <div id="drawer-destruction" class="drawer-pane active">
+            <p id="calc-status-banner" class="hint">自动跨 DP/HP 始终逐段计算；结算每段伤害后增加破坏率。</p>
+            <div class="grid-3 mt-6">
+              <div class="field"><label>剩余 DP</label><input data-param="enemy_dp" type="number" class="input-text" step="any" /></div>
+              <div class="field"><label>剩余 HP（可空）</label><input data-param="enemy_hp" type="number" class="input-text" step="any" /></div>
+              <div class="field"><label>技能破坏倍率</label><input data-param="skill_dr" type="number" class="input-text" step="any" /></div>
+              <div class="field"><label>本体 Hit 数</label><input data-param="main_hits" type="number" class="input-text" step="1" /></div>
+              <div class="field"><label>敌人有效破坏系数</label><input data-param="enemy_dr" type="number" class="input-text" step="any" /></div>
+              <div class="field"><label>本技能破坏率上限 %</label><input data-param="max_dr" type="number" class="input-text" step="any" /></div>
+              <div class="field"><label>破坏率获取提升 %</label><input data-param="destruction_bonus" type="number" class="input-text" step="any" /></div>
+            </div>
+            <div class="form-row mt-8">
+              <label for="input-hit-weights">各 Hit 相对伤害权重（含连击追击，逗号分隔）</label>
+              <input id="input-hit-weights" type="text" class="input-text" placeholder="例如 0.3, 0.3, 0.4" />
+            </div>
+            <p id="hit-source-note" class="hint mt-4">尚无权重，不假定为单 Hit</p>
+            <label class="checkbox-label mt-6">
+              <input id="toggle-use-destruction" type="checkbox" />
+              <span>单池（仅 DP / 仅 HP）比较时也计算逐段破坏率</span>
+            </label>
+          </div>
+
+          <!-- Drawer 2: Skill & 6-Stat Parameters -->
+          <div id="drawer-skill" class="drawer-pane hidden">
+            <div class="inline-group mb-8">
+              <label class="chip-toggle"><input id="toggle-use-skill" type="checkbox" /><span>用技能参数生成基础伤害</span></label>
+              <label class="chip-toggle"><input id="toggle-damage-orb" type="checkbox" /><span>启用伤害宝珠</span></label>
+              <label class="chip-toggle"><input id="toggle-dp-scaling" type="checkbox" /><span>按自身 DP 缩放独立倍率</span></label>
+              <label class="chip-toggle"><input id="toggle-sp-dr-scaling" type="checkbox" /><span>全 SP 技能破坏倍率也按 SP 缩放</span></label>
+            </div>
+            <div id="skill-params-grid" class="grid-3"></div>
+          </div>
+
+          <!-- Drawer 3: Equipment -->
+          <div id="drawer-equipment" class="drawer-pane hidden">
+            <pre id="equipment-notes-box" class="code-box">未读到可确认的饰品效果</pre>
+          </div>
+
+          <!-- Drawer 4: Passive Audit & Raw Snapshot -->
+          <div id="drawer-audit" class="drawer-pane hidden">
+            <h3>填充来源与待核对项</h3>
+            <pre id="fill-notes-box" class="code-box">尚未自动填充</pre>
+            <h3 class="mt-8">运行时已加载天赋与被动审查</h3>
+            <pre id="audit-text-box" class="code-box"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMN 3: PERSISTENT RESULTS -->
+      <section class="col col-results" aria-label="计算结果（常驻）">
+        <div class="card result-hero-card">
+          <div class="card-header">
+            <h2>试算结果（常驻）</h2>
+            <div class="segmented" id="metric-seg">
+              <button type="button" class="seg-btn active" data-metric="raw">打出伤害（含溢出）</button>
+              <button type="button" class="seg-btn" data-metric="applied">实际扣除 DP＋HP</button>
+            </div>
+          </div>
+
+          <div class="hero-stats">
+            <div class="hero-main">
+              <span class="hero-label" id="hero-mean-label">平均打出伤害</span>
+              <div class="hero-value" id="hero-mean-value">—</div>
+              <div class="hero-sub" id="hero-interval-value">中央 90% 浮动区间：—</div>
+            </div>
+            <div class="hero-side-grid">
+              <div class="stat-tile">
+                <span class="tile-label">无浮动基准伤害</span>
+                <strong class="tile-val" id="tile-base-damage">—</strong>
+              </div>
+              <div class="stat-tile">
+                <span class="tile-label">破坏率（起点 → 终点）</span>
+                <strong class="tile-val gold" id="tile-destruction">—</strong>
+              </div>
+              <div class="stat-tile">
+                <span class="tile-label">模型内击杀概率</span>
+                <strong class="tile-val mint" id="tile-kill-prob">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div id="calc-error-banner" class="error-banner hidden"></div>
+
+          <!-- PROBABILITY DISTRIBUTION CANVAS -->
+          <div class="plot-container">
+            <canvas id="prob-canvas" width="540" height="270"></canvas>
+            <p id="plot-hover-hint" class="hint">横轴：伤害 / 倍率；纵轴：概率密度（粉线为均值，紫虚线为中央 90% 区间，金线为集中概率点质量）</p>
+          </div>
+          <pre id="prob-summary-box" class="summary-pre"></pre>
+        </div>
+
+        <!-- 3-STEP DAMAGE SEQUENCE -->
+        <div class="card">
+          <div class="card-header">
+            <h2>连续伤害预演（同敌人最多 3 人）</h2>
+            <div class="btn-row">
+              <button id="btn-seq-add" class="btn btn-accent btn-sm" type="button">+ 预添加当前结果</button>
+              <button id="btn-seq-undo" class="btn btn-secondary btn-sm" type="button">撤销末步</button>
+              <button id="btn-seq-clear" class="btn btn-secondary btn-sm" type="button">清空预演</button>
+            </div>
+          </div>
+          <p id="seq-message" class="hint">自动填充第一人后点击「预添加当前结果」，下一人将继承剩余 DP / HP 与破坏率终值。</p>
+          <div id="seq-steps-list" class="seq-steps"></div>
+        </div>
+
+        <!-- PER-HIT BREAKDOWN & MULTIPLIER DETAIL -->
+        <div class="card">
+          <details class="fold" open>
+            <summary>跨 DP/HP 逐段 Hit 明细与破坏率递推</summary>
+            <pre id="destruction-report-box" class="code-box fold-body">尚无逐段明细</pre>
+          </details>
+          <details class="fold">
+            <summary>完整乘区计算明细与备注</summary>
+            <pre id="detail-text-box" class="code-box fold-body"></pre>
+          </details>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================== VIEW 2: TEAM BUILD ARCHIVE (F3) ==================== -->
+  <main id="view-teams" class="view hidden">
+    <div class="archive-layout">
+      <aside class="archive-sidebar card">
+        <div class="card-header">
+          <h2>配队列表</h2>
+          <button id="btn-teams-refresh" class="btn btn-secondary btn-sm" type="button">刷新</button>
+        </div>
+        <div class="grid-2">
+          <input id="team-search-input" type="text" class="input-text" placeholder="搜索配队或角色/风格…" />
+          <select id="team-search-scope" class="input-select">
+            <option value="team">按配队名</option>
+            <option value="member">按角色 / 风格</option>
+          </select>
+        </div>
+
+        <h3 class="section-sub mt-12">待确认战斗采样</h3>
+        <ul id="archive-drafts-list" class="archive-list"></ul>
+
+        <h3 class="section-sub mt-12">已保存配队档案</h3>
+        <ul id="archive-teams-list" class="archive-list"></ul>
+      </aside>
+
+      <section class="archive-content">
+        <div class="card" id="archive-team-header">
+          <div class="card-header">
+            <div>
+              <h2 id="archive-team-title">请选择左侧配队或待确认记录</h2>
+              <p id="archive-team-meta" class="hint">连接战斗首次读齐六人六维时自动生成待确认记录，不会自动覆盖既有配队。</p>
+            </div>
+            <div class="btn-row">
+              <button id="btn-use-team-in-calc" class="btn btn-primary" type="button" disabled>✦ 用此配队试算</button>
+              <button id="btn-delete-team" class="btn btn-danger" type="button" disabled>删除此记录</button>
+            </div>
+          </div>
+
+          <!-- Draft save bar -->
+          <div id="draft-save-bar" class="draft-bar hidden">
+            <input id="draft-save-name" type="text" class="input-text" placeholder="输入配队名称保存…" />
+            <select id="draft-overwrite-target" class="input-select">
+              <option value="">另存为新配队</option>
+            </select>
+            <button id="btn-save-draft" class="btn btn-accent" type="button">保存配队</button>
+          </div>
+        </div>
+
+        <div id="archive-members-grid" class="members-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================== VIEW 3: REFERENCE LIBRARY (F5) ==================== -->
+  <main id="view-library" class="view hidden">
+    <div class="archive-layout">
+      <aside class="archive-sidebar card">
+        <div class="card-header">
+          <h2>星屑资料检索</h2>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>地区</label>
+            <select id="lib-region" class="input-select">
+              <option value="cn">国服 (CN)</option>
+              <option value="jp">日服 (JP)</option>
+              <option value="en">国际服 (EN)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>分类</label>
+            <select id="lib-dataset" class="input-select">
+              <option value="styles">风格 (styles)</option>
+              <option value="characters">角色 (characters)</option>
+              <option value="skills">技能 (skills)</option>
+              <option value="enemies">敌人 (enemies)</option>
+            </select>
+          </div>
+        </div>
+        <div class="inline-group mt-8">
+          <input id="lib-query" type="text" class="input-text" placeholder="名称、标识或 ID…" />
+          <button id="btn-lib-search" class="btn btn-primary btn-sm" type="button">检索</button>
+        </div>
+        <p id="lib-status" class="hint mt-4"></p>
+        <ul id="lib-results-list" class="archive-list mt-8"></ul>
+      </aside>
+
+      <section class="archive-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 id="lib-detail-title">资料详情</h2>
+          </div>
+          <div id="lib-detail-body" class="lib-detail-body">
+            <p class="hint">从左侧列表选择条目查看风格技能、天赋共鸣、敌人抗性与行动表。</p>
+          </div>
+        </div>
+
+        <div class="card mt-12">
+          <div class="card-header">
+            <h2>只读 SQL 查询台</h2>
+            <button id="btn-run-sql" class="btn btn-accent btn-sm" type="button">执行查询</button>
+          </div>
+          <textarea id="lib-sql-input" class="input-textarea" rows="3">SELECT region, style_label, orb_type, orb_name FROM style_orbs WHERE region='cn' LIMIT 30;</textarea>
+          <div id="lib-sql-output" class="sql-table-wrap mt-8"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- SKILL DETAIL MODAL -->
+  <div id="skill-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="card-header">
+        <h2 id="skill-modal-title">技能详情</h2>
+        <button id="btn-close-skill-modal" class="btn btn-secondary btn-sm" type="button">关闭 ✕</button>
+      </div>
+      <div id="skill-modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

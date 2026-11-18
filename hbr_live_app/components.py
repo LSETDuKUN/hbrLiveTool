@@ -47,6 +47,19 @@ class RoundedCard(tk.Canvas):
     config = configure
 
     def _layout(self, event=None):
+        sig = (
+            self.winfo_width(),
+            self.winfo_height(),
+            self.content.winfo_reqheight(),
+            self.background,
+            self.outline,
+            self.accent,
+            self.highlight,
+            theme.NAME,
+        )
+        if sig == getattr(self, '_paint_sig', None) and self.find_withtag('shell'):
+            return
+        self._paint_sig = sig
         self.draw()
 
     def draw(self):
@@ -650,3 +663,206 @@ class ResourceMeter(tk.Canvas):
         self.create_text(pad, 94, text='最近变化', anchor='w', fill=theme.MUTED, font=self.caption_font)
         self.create_text(right, 94, text=f'参考 {self.maximum:,}', anchor='e',
                          fill=theme.MUTED, font=self.caption_font)
+
+
+# ---- Roadmap F1 unified design system components ---------------------------
+class Fold(tk.Frame):
+    """Collapsible bar and content frame (replaces ad-hoc tk.Button fold bars)."""
+
+    def __init__(self, master, title, prominent=False, opened=False, bg=None, **kwargs):
+        bg = bg or theme.BG
+        super().__init__(master, bg=bg, **kwargs)
+        self.title = title
+        self.prominent = prominent
+        self.opened = tk.BooleanVar(self, value=bool(opened))
+        self.body = tk.Frame(self, bg=bg)
+        self.button = tk.Button(
+            self,
+            text=self._caption(self.opened.get()),
+            command=self.toggle,
+            bg=theme.CARD_HI if prominent else theme.SURFACE,
+            fg=theme.CYAN if prominent else theme.DIM,
+            cursor='hand2',
+            pady=5 if prominent else 1,
+            relief='flat',
+            anchor='w',
+            font=theme.ui(theme.FONT_SM, 'bold' if prominent else 'normal'),
+        )
+        self.button.pack(fill='x')
+        if self.opened.get():
+            self.body.pack(fill='x')
+
+    def _caption(self, expanded):
+        if self.prominent:
+            return ('收起' if expanded else '展开') + '　' + self.title
+        return ('▾ ' if expanded else '▸ ') + self.title
+
+    def toggle(self):
+        self.set_open(not self.opened.get())
+
+    def set_open(self, value):
+        self.opened.set(bool(value))
+        self.button.configure(text=self._caption(self.opened.get()))
+        if self.opened.get():
+            self.body.pack(fill='x')
+        else:
+            self.body.pack_forget()
+
+
+class Section(RoundedCard):
+    """Card section with title, optional hint description, and optional fold."""
+
+    def __init__(self, master, title, hint='', accent=None, collapsible=False,
+                 opened=True, background=None, **kwargs):
+        bg = background or theme.CARD
+        accent = accent or theme.SEMANTIC_DAMAGE
+        super().__init__(master, background=bg, outline=theme.LINE, accent=accent,
+                         pad=(theme.SPACE_LG, theme.SPACE_MD), **kwargs)
+        self.title_text = title
+        self.collapsible = collapsible
+        self.opened = tk.BooleanVar(self, value=bool(opened))
+        self.header = tk.Frame(self.content, bg=bg)
+        self.header.pack(fill='x', pady=(0, theme.SPACE_SM))
+        self.title_label = tk.Label(
+            self.header, text=title, bg=bg, fg=accent,
+            font=theme.ui(theme.FONT_MD, 'bold'),
+        )
+        self.title_label.pack(side='left')
+        if hint:
+            self.hint_label = tk.Label(
+                self.header, text=hint, bg=bg, fg=theme.MUTED,
+                font=theme.ui(theme.FONT_XS),
+            )
+            self.hint_label.pack(side='left', padx=theme.SPACE_SM)
+        if collapsible:
+            self.toggle_btn = tk.Button(
+                self.header,
+                text='收起' if opened else '展开',
+                command=self.toggle,
+                bg=theme.CARD_HI,
+                fg=theme.DIM,
+                relief='flat',
+                cursor='hand2',
+                font=theme.ui(theme.FONT_XS),
+                padx=theme.SPACE_SM,
+            )
+            self.toggle_btn.pack(side='right')
+        self.body = tk.Frame(self.content, bg=bg)
+        if self.opened.get():
+            self.body.pack(fill='x')
+
+    def toggle(self):
+        self.opened.set(not self.opened.get())
+        if hasattr(self, 'toggle_btn'):
+            self.toggle_btn.configure(text='收起' if self.opened.get() else '展开')
+        if self.opened.get():
+            self.body.pack(fill='x')
+        else:
+            self.body.pack_forget()
+        self.draw()
+
+
+class Field(tk.Frame):
+    """Unified form field: label + rounded input + optional unit + error hint."""
+
+    def __init__(self, master, label, textvariable=None, unit='', width=120,
+                 placeholder='', bg=None, **kwargs):
+        bg = bg or master.cget('bg')
+        super().__init__(master, bg=bg, **kwargs)
+        self.variable = textvariable if textvariable is not None else tk.StringVar()
+        top = tk.Frame(self, bg=bg)
+        top.pack(fill='x')
+        self.label = tk.Label(top, text=label, bg=bg, fg=theme.DIM,
+                              font=theme.ui(theme.FONT_SM), anchor='w')
+        self.label.pack(side='left', fill='x', expand=True)
+        right = tk.Frame(top, bg=bg)
+        right.pack(side='right')
+        self.entry = RoundedEntry(right, textvariable=self.variable,
+                                  width=theme.px(width), placeholder=placeholder)
+        self.entry.pack(side='left')
+        if unit:
+            self.unit_label = tk.Label(right, text=unit, bg=bg, fg=theme.MUTED,
+                                       font=theme.ui(theme.FONT_XS))
+            self.unit_label.pack(side='left', padx=(theme.SPACE_XS, 0))
+        self.error_label = tk.Label(self, text='', bg=bg, fg=theme.SEMANTIC_DEBUFF,
+                                    font=theme.ui(theme.FONT_XS), anchor='w')
+
+    def get(self):
+        return self.variable.get()
+
+    def set(self, value):
+        self.variable.set(value)
+
+    def set_error(self, message=''):
+        self.error_label.configure(text=message or '')
+        if message:
+            self.error_label.pack(fill='x', pady=(2, 0))
+        else:
+            self.error_label.pack_forget()
+
+
+class FormGrid(tk.Frame):
+    """Auto-lay out a sequence of ``(key, label[, unit])`` field definitions."""
+
+    def __init__(self, master, definitions, columns=2, values=None,
+                 field_width=120, bg=None, **kwargs):
+        bg = bg or master.cget('bg')
+        super().__init__(master, bg=bg, **kwargs)
+        self.columns = max(1, int(columns))
+        self.fields = {}
+        self.variables = values if isinstance(values, dict) else {}
+        for col in range(self.columns):
+            self.columnconfigure(col, weight=1, uniform='formgrid')
+        for idx, spec in enumerate(definitions):
+            key, label = spec[0], spec[1]
+            unit = spec[2] if len(spec) > 2 else ''
+            var = self.variables.setdefault(key, tk.StringVar(self, value=''))
+            field = Field(self, label, textvariable=var, unit=unit,
+                          width=field_width, bg=bg)
+            field.grid(
+                row=idx // self.columns,
+                column=idx % self.columns,
+                sticky='ew',
+                padx=theme.SPACE_XS,
+                pady=theme.SPACE_XS,
+            )
+            self.fields[key] = field
+
+    def set_errors(self, errors=None):
+        errors = errors or {}
+        for key, field in self.fields.items():
+            field.set_error(errors.get(key, ''))
+
+
+class ResultStat(RoundedCard):
+    """Hero number display card with title, big numeric value, and caption."""
+
+    def __init__(self, master, title, value='—', caption='', accent=None,
+                 background=None, **kwargs):
+        bg = background or theme.CARD
+        accent = accent or theme.SEMANTIC_DAMAGE
+        super().__init__(master, background=bg, outline=theme.LINE, accent=accent,
+                         pad=(theme.SPACE_LG, theme.SPACE_MD), **kwargs)
+        self.title_label = tk.Label(
+            self.content, text=title, bg=bg, fg=accent,
+            font=theme.ui(theme.FONT_SM, 'bold'), anchor='w',
+        )
+        self.title_label.pack(fill='x')
+        self.value_label = tk.Label(
+            self.content, text=value, bg=bg, fg=theme.FG,
+            font=theme.num(theme.FONT_HERO, 'bold'), anchor='w',
+        )
+        self.value_label.pack(fill='x', pady=(2, 2))
+        self.caption_label = tk.Label(
+            self.content, text=caption, bg=bg, fg=theme.DIM,
+            font=theme.ui(theme.FONT_SM), anchor='w', justify='left',
+        )
+        self.caption_label.pack(fill='x')
+
+    def set_stat(self, value, caption=None, title=None):
+        if title is not None:
+            self.title_label.configure(text=title)
+        self.value_label.configure(text=value)
+        if caption is not None:
+            self.caption_label.configure(text=caption)
+        self.draw()

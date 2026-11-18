@@ -157,6 +157,16 @@ class App:
             window.deiconify();window.lift();return
         self.damage_window = DamageWindow(self.root, self.session.latest_snapshot)
 
+    def open_web_workbench(self, tab=None):
+        from hbr_live_core.http_api import WebServerController
+        controller = getattr(self, 'web_controller', None)
+        if controller is None:
+            controller = WebServerController(self.session.latest_snapshot, self.team_store)
+            self.web_controller = controller
+        url = controller.open_browser(tab=tab)
+        self.set_status(f'已打开网页工作台 · {url}', theme.CYAN)
+        return url
+
     def _restore_geometry(self):
         default = (500, 860) if self.compact.get() else (1180, 900)
         values = self.settings.get('bounds', [*default, 80, 60])
@@ -218,6 +228,7 @@ class App:
         self.menu.add_separator()
         self.menu.add_command(label='导出本场摘要…', command=self.export)
         self.menu.add_command(label='保存行动轴…', command=self.export_axis)
+        self.menu.add_command(label='网页工作台（试算 / 档案 / 资料室）…', command=self.open_web_workbench)
         self.menu.add_command(label='配队档案…', command=self.open_teams)
         self.menu.add_command(label='离线伤害试算（配队档案）…', command=self.open_offline_calculator)
         self.menu.add_command(label='打开记录文件夹', command=self.open_sessions)
@@ -314,6 +325,10 @@ class App:
                                            theme.mix(theme.CARD_HI, theme.PINK, .22), theme.FG,
                                            theme.ui(12), height=34)
         self.damage_button.pack(side='right', padx=8)
+        self.web_button = RoundedButton(bar, '网页工作台', self.open_web_workbench,
+                                        theme.mix(theme.CARD_HI, theme.CYAN, .22), theme.FG,
+                                        theme.ui(12), height=34)
+        self.web_button.pack(side='right')
 
     def build_field(self):
         card = RoundedCard(self.root, background=theme.mix(theme.SURFACE, theme.MINT, .10), outline=theme.mix(theme.LINE, theme.MINT, .3),
@@ -926,6 +941,9 @@ class App:
         if not self.closing:
             self.closing = True
             self.stop_event.set()
+            controller = getattr(self, 'web_controller', None)
+            if controller is not None:
+                controller.stop()
             settings = dict(compact=self.compact.get(), topmost=self.topmost.get(), opacity=self.opacity.get(),
                 theme=theme.NAME, bounds=[self.root.winfo_width(), self.root.winfo_height(), self.root.winfo_x(), self.root.winfo_y()])
             try:

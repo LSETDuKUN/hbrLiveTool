@@ -59,6 +59,13 @@ def use(name):
     for key, value in palette.items():
         globals()[key.upper()] = value
     globals()['on_fill'] = palette['on_fill']
+    # Semantic colour tokens (Roadmap F1): damage=pink, buff=cyan, debuff=rose,
+    # destruction=gold, neutral=dim.
+    globals()['SEMANTIC_DAMAGE'] = palette['pink']
+    globals()['SEMANTIC_BUFF'] = palette['cyan']
+    globals()['SEMANTIC_DEBUFF'] = palette['rose']
+    globals()['SEMANTIC_DESTRUCTION'] = palette['gold']
+    globals()['SEMANTIC_NEUTRAL'] = palette['dim']
     _resolved.clear()
     return NAME
 
@@ -140,11 +147,29 @@ def mono(size=11, weight='normal'):
     return (mono_family(), -px(size), weight)
 
 
-# ---- geometry --------------------------------------------------------------
+# ---- geometry & design tokens (Roadmap F1) ---------------------------------
+SPACE_XS = 4
+SPACE_SM = 8
+SPACE_MD = 12
+SPACE_LG = 16
+SPACE_XL = 24
+SPACING = (SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL)
+
+RADIUS_S = 10
+RADIUS_M = 14
+RADIUS_L = 22
 PAD = 18
-GAP = 12
-RADIUS = 22
-RADIUS_SM = 14
+GAP = SPACE_MD
+RADIUS = RADIUS_L
+RADIUS_SM = RADIUS_M
+
+FONT_XS = 10
+FONT_SM = 11
+FONT_MD = 12
+FONT_LG = 14
+FONT_XL = 16
+FONT_HERO = 28
+TYPE_SCALE = (FONT_XS, FONT_SM, FONT_MD, FONT_LG, FONT_XL, FONT_HERO)
 
 
 # ---- helpers ---------------------------------------------------------------
